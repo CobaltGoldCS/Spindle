@@ -23,7 +23,6 @@ class ReadActivity : AppCompatActivity() {
         readBook(colId, url)
 
         actionBar?.hide()
-        contentView.movementMethod = ScrollingMovementMethod()
 
     }
     private fun readBook(col_id : Int, url : String) : Boolean{
@@ -36,7 +35,7 @@ class ReadActivity : AppCompatActivity() {
         val prev    = currentReader["prev"   ].toString()
         val title   = currentReader["title"  ].toString()
         contentView.text = content
-        titleView.text   = title
+        setTitle(title)
 
         db.modify(col_id, url, null)
 
@@ -54,8 +53,8 @@ class ReadActivity : AppCompatActivity() {
             }
         }
 
-        // TODO: Handle when prev and next are null
-        contentView.scrollTo(0,0)
+        // TODO: Change background color of button when there is no url
+        contentScroll.scrollTo(0,0)
         return true
     }
     fun backButton(v : View){

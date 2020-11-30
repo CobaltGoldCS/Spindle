@@ -5,24 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/addTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Add / Change  a book"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textSize="36sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="HardcodedText" />
-
     <EditText
         android:id="@+id/textName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="200dp"
         android:layout_marginBottom="36dp"
         android:ems="10"
         android:hint="Title of Book"
@@ -32,7 +18,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addTitle"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="Autofill, HardcodedText" />
 
     <EditText
@@ -54,10 +40,9 @@
         android:id="@+id/AddButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/green_dark"
+        android:background="@color/button_Def"
         android:text="Add Book"
         android:textSize="18sp"
-        app:barrierMargin="0sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -68,10 +53,9 @@
         android:id="@+id/DelButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/green_dark"
+        android:background="@color/button_Def"
         android:text="Delete Book"
         android:textSize="18sp"
-        app:barrierMargin="0sp"
         app:iconPadding="0sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/AddButton"

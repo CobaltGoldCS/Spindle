@@ -15,6 +15,7 @@ class AddActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         db = DataBaseHandler(applicationContext)
+        title = "Add / Change a Book"
         val title = intent.getStringExtra("title")
         val url = intent.getStringExtra("url")
         // Gets Wrapper that contains bookList, then converts it back to a Mutable list of Books

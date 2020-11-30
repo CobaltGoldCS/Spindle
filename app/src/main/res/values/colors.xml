@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="green_dark">#09AA37</color>
+    <!--Light theme-->
+    <color name="white">#FFFFFF</color>
+    <color name="button_light">#618985</color>
+    <color name="button_lightVar">#C1292E</color>
+    <color name="light_second">#585191</color>
+    <color name="light_secondVar">#4F359B</color>
+    <!--Dark Theme-->
+    <color name="background_dark">#2D3142</color>
+    <color name="button_Def">#5DB7DE</color>
+    <color name="button_Var">#1F7498</color>
+    <color name="dark_second">#FF6B6B</color>
+    <color name="dark_secondVar">#FFE66D</color>
+    <!--Boring necessary colors-->
+
 </resources>
