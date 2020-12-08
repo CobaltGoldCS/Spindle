@@ -1,31 +1,33 @@
 package com.cobaltware.webscraper
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
-import android.view.View
-import android.widget.Button
+import android.view.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.reader_view.*
 
 import com.chaquo.python.Python
-import com.chaquo.python.android.AndroidPlatform
 
 class ReadActivity : AppCompatActivity() {
     lateinit var db : DataBaseHandler
     override fun onCreate(savedInstanceState : Bundle?){
         super.onCreate(savedInstanceState)
         db = DataBaseHandler(applicationContext)
+        // Customize and hide built in UI elements
+        supportActionBar!!.hide()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            window.insetsController?.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE
         setContentView(R.layout.reader_view)
+        scrolltitle.movementMethod = ScrollingMovementMethod()
         val values = intent.extras!!
         val url = values["url"].toString()
         val colId = values["col_id"].toString().toInt()
         readBook(colId, url)
-
-        actionBar?.hide()
-
     }
-    private fun readBook(col_id : Int, url : String) : Boolean{
+    private fun readBook(col_id : Int, url : String) : String{
         val inst = Python.getInstance()
         val webpack = inst.getModule("webdata")
         val currentReader = webpack.callAttr("UrlReading", url)
@@ -35,8 +37,7 @@ class ReadActivity : AppCompatActivity() {
         val prev    = currentReader["prev"   ].toString()
         val title   = currentReader["title"  ].toString()
         contentView.text = content
-        setTitle(title)
-
+        scrolltitle.text = title
         db.modify(col_id, url, null)
 
         nextButton.setOnClickListener { readBook(col_id, next) }
@@ -55,10 +56,10 @@ class ReadActivity : AppCompatActivity() {
 
         // TODO: Change background color of button when there is no url
         contentScroll.scrollTo(0,0)
-        return true
+        return title
     }
     fun backButton(v : View){
-        setResult(0, intent);
-        finish();
+        setResult(0, intent)
+        finish()
     }
 }

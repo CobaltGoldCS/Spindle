@@ -19,6 +19,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Hide webscraper header
+        supportActionBar?.hide()
         // Create database reference
         if (!Python.isStarted())
             Python.start(AndroidPlatform(applicationContext))
@@ -42,7 +44,6 @@ class MainActivity : AppCompatActivity() {
                 // On short click open story
                 onBookClick(data[0].toInt(), data[2])
             }
-
             override fun onItemLongClick(view: View?, position: Int) {
                 // on long click, open add menu
                 Log.i("DATABASE CONTAINS:", db.readData().joinToString("\n"))
@@ -52,8 +53,7 @@ class MainActivity : AppCompatActivity() {
                 // Open AddActivity
                 onAddMenuClick(data[1], data[2])
             }
-                }))
-
+        }))
 
     }
 

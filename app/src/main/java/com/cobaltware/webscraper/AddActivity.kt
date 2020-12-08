@@ -42,8 +42,8 @@ class AddActivity : AppCompatActivity() {
     private fun addBook(urlInput: String, titleInput: String, modify: Boolean){
         // Needed references to EditText input
         if (urlInput == "" || titleInput == "") {
-            setResult(0, intent);
-            this.finish();
+            setResult(0, intent)
+            this.finish()
             return
         }
         if (!modify) {
@@ -56,9 +56,9 @@ class AddActivity : AppCompatActivity() {
                 bookList.add(Book(id, titleInput, urlInput))
             }
         }
-        else{
-            // Modify line from database
-            val id = db.getId(urlInput, titleInput)
+        else{ // Modify database
+            val url = intent.getStringExtra("url")
+            val id = db.getId(url!!, titleInput)
             db.modify(id, urlInput, titleInput)
             bookList.removeIf { it.col_id == id }
             bookList.add(Book(id, titleInput, urlInput))
@@ -69,7 +69,7 @@ class AddActivity : AppCompatActivity() {
     private fun giveNClose(){
         // This is to make sure that it triggers onActivityResult in MainActivity
         intent.putExtra("newList", Wrapper(bookList))
-        setResult(1, intent);
-        this.finish();
+        setResult(1, intent)
+        this.finish()
     }
 }

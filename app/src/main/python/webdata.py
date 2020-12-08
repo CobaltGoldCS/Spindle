@@ -249,7 +249,7 @@ def wattpad(url: str) -> list:
     currentId = None
     # When next and previous are being run, they are ran in increments of 3 instead of one
     for chapterId in range(len(chaps)):
-        if chaps[chapterId]["TITLE"] == bookJson["title"]:
+        if chaps[chapterId]["ID"] == bookJson["id"]:
             # Get chapter ids from api
             currentChap = chaps[chapterId]
             if chapterId != 0:
@@ -257,7 +257,6 @@ def wattpad(url: str) -> list:
                 prevTitle = prevChap["TITLE"]
                 prevId = prevChap["ID"]
             else: prevTitle = None
-
             if len(chaps) - 1 != chapterId:
                 nextChap  = chaps[chapterId + 1]
                 nextTitle = nextChap["TITLE"]
