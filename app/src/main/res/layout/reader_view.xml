@@ -16,6 +16,8 @@
         android:textColor="#FFF"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:ellipsize="none"
         android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
@@ -27,7 +29,6 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scrollbars="vertical"
-        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -47,7 +48,8 @@
                 android:textSize="18sp"
                 app:layout_constraintBottom_toTopOf="@+id/contentView"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/contentScroll" />
+                app:layout_constraintTop_toTopOf="@+id/contentScroll"
+                tools:ignore="HardcodedText"/>
 
             <TextView
                 android:id="@+id/contentView"
@@ -58,7 +60,6 @@
                 android:isScrollContainer="false"
                 android:lineSpacingMultiplier="1.3"
                 android:scrollbars="vertical"
-                android:text="djkfjsdkfjsdkfjksjsdkfjskfkdufiwsufsifsjfisf"
                 android:textSize="24sp"
                 app:layout_constraintEnd_toStartOf="@id/nextButton"
                 app:layout_constraintStart_toEndOf="@id/prevButton" />
@@ -67,13 +68,14 @@
                 android:id="@+id/nextButton"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="80dp"
                 android:background="@color/button_Var"
                 android:text="Next"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/contentScroll" />
+                app:layout_constraintStart_toEndOf="@+id/contentScroll"
+                tools:ignore="HardcodedText"/>
         </LinearLayout>
     </ScrollView>
 
