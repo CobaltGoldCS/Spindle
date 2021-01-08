@@ -1,18 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bookHolder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center">
-
-    <TextView
-        android:id="@+id/bookTitle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/clickableArea"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/cardview_default_elevation"
-        android:layout_weight="100"
-        android:background="@drawable/border"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textSize="36sp" />
+        android:background="?android:attr/selectableItemBackground"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:layout_weight="100">
+        <TextView
+            android:id="@+id/bookTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/cardview_default_elevation"
+            android:ellipsize="none"
+            android:scrollHorizontally="true"
+            android:scrollbars="horizontal"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+
+    <Button
+        android:id="@+id/moreButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        app:icon="@drawable/ic_baseline_list_24"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp">
+
+    </Button>
 </LinearLayout>

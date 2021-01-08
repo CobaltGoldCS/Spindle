@@ -1,37 +1,53 @@
 package com.cobaltware.webscraper
 
-import android.content.Context
 import android.view.*
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.list_item.view.*
-class BookAdapter(var bookList : List<Book>) : RecyclerView.Adapter<BookAdapter.ExampleViewHolder>(){
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExampleViewHolder {
+open class BookAdapter(var bookList : List<Book>) : RecyclerView.Adapter<BookAdapter.ItemHolder>(){
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder
+    {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item,
         parent, false)
-        return ExampleViewHolder(itemView)
+        return ItemHolder(itemView)
     }
 
-    override fun onBindViewHolder(holder: ExampleViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ItemHolder, position: Int)
+    {
         val currentItem = bookList[position]
         holder.titleView.text = currentItem.title
+        // Hacky way to make the on click listeners of list items customizable from outside
+        holder.moreButton.setOnClickListener{
+            val id : Int = currentItem.col_id
+            addClickHandler(id)
+        }
+        holder.clickableArea.setOnClickListener {
+            val id : Int = currentItem.col_id
+            openClickHandler(id)
+        }
     }
-
     override fun getItemCount() = bookList.size
 
-    fun getItemsList() : ArrayList<Book>{
-        return ArrayList(bookList)
-    }
-    fun changeItems(newList : List<Book>){
-        bookList = newList
-    }
-    class ExampleViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView) {
+    fun getItemsList() : ArrayList<Book> = ArrayList(bookList)
+    // This allows for modification of the click behavior of the buttons
+    open fun addClickHandler (col_id : Int){}
+    open fun openClickHandler(col_id : Int){}
+
+    fun changeItems(newList : List<Book>){ bookList = newList }
+
+    class ItemHolder(itemView : View) : RecyclerView.ViewHolder(itemView)
+    {
+        // Important variables for functions
         val titleView : TextView = itemView.bookTitle
+        val moreButton : Button = itemView.moreButton
+        val clickableArea : View = itemView.clickableArea
     }
 
 }
 
 // Beefy custom Listener https://stackoverflow.com/questions/29424944/recyclerview-itemclicklistener-in-kotlin
+/* Deprecated
 class RecyclerItemClickListener(context: Context, recyclerView: RecyclerView, private val mListener: OnItemClickListener?) : RecyclerView.OnItemTouchListener {
 
     private val mGestureDetector: GestureDetector
@@ -72,3 +88,5 @@ class RecyclerItemClickListener(context: Context, recyclerView: RecyclerView, pr
     override fun onTouchEvent(view: RecyclerView, motionEvent: MotionEvent) {}
 
     override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}}
+
+ */

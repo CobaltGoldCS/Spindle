@@ -26,37 +26,35 @@ class UrlReading:
         prev, next: The urls that allow going to the previous and next chapters
         """
         domain = url.split("/")[2].replace("www.", "")
-        if domain in ["kisslightnovels.info", "readwebnovels.net", "boxnovel.com"]:
-            prev_lambda  = lambda tag: tag.get('class') == ['btn', 'prev_page']
-            next_lambda  = lambda tag: tag.get('class') == ['btn', 'next_page']
-            self.website = lambda webpage: generalWebsite(webpage, 'text-left', prev_lambda, next_lambda, titlespot = 4)
-
-        elif domain == "readnovelfull.com":
-            prev_lambda  = lambda tag: tag.get('id') == "prev_chap"
-            next_lambda  = lambda tag: tag.get('id') == "next_chap"
-            self.website = lambda webpage: generalWebsite(webpage, "chr-c", prev_lambda, next_lambda)
-
-        elif domain == "royalroad.com":
-            prev_lambda  = lambda tag: "Previous Chapter" in tag.text and tag.name == 'a'
-            next_lambda  = lambda tag: "Next Chapter" in tag.text and tag.name == 'a'
-            self.website = lambda webpage: generalWebsite(webpage, "chapter-content", prev_lambda, next_lambda, titlespot = 5)
-
-        elif domain == "scribblehub.com":
-            prev_lambda  = lambda tag: "Previous" == tag.text
-            next_lambda  = lambda tag: "Next" == tag.text
-            self.website = lambda webpage: generalWebsite(webpage, 'chp_raw', prev_lambda, next_lambda, titlespot = 4)
-
-        elif domain == "boxnovel.net":
-            next_lambda  = lambda tag: tag.get('class') == ['btn', 'next_page']
-            prev_lambda  = lambda tag: tag.get('class') == ['btn', 'prev_page']
-            self.website = lambda webpage: generalWebsite(webpage, 'text-content', prev_lambda, next_lambda, titlespot = 3)
-
-        elif domain == "fanfiction.net"    : self.website = lambda webpage: ffnet(webpage)
-        elif domain == "wattpad.com"       : self.website = lambda webpage: wattpad(webpage)
-        elif domain == 'webnovel.com'      : self.website = lambda webpage: webnovel(webpage)
-        elif domain == "readlightnovel.org": self.website = lambda webpage: rlnovels(webpage)
-
-        self.website(url)
+        websites = {"kisslightnovels.info"      : (lambda webpage: generalWebsite(webpage,'text-left',
+                                                    lambda tag: tag.get('class') == ['btn', 'prev_page'],
+                                                    lambda tag: tag.get('class') == ['btn', 'next_page'], titlespot = 4)),
+                            "readwebnovels.net" : (lambda webpage: generalWebsite(webpage,'text-left',
+                                                    lambda tag: tag.get('class') == ['btn', 'prev_page'],
+                                                    lambda tag: tag.get('class') == ['btn', 'next_page'], titlespot = 4)),
+                            "boxnovel.com"      : (lambda webpage: generalWebsite(webpage,'text-left',
+                                                    lambda tag: tag.get('class') == ['btn', 'prev_page'],
+                                                    lambda tag: tag.get('class') == ['btn', 'next_page'], titlespot = 4)),
+                            "readnovelfull.com" : (lambda webpage: generalWebsite(webpage, "chr-c",
+                                                    lambda tag: tag.get('id') == "prev_chap",
+                                                    lambda tag: tag.get('id') == "next_chap")),
+                            "royalroad.com"     : (lambda webpage: generalWebsite(webpage, "chapter-content",
+                                                    lambda tag: "Previous Chapter" in tag.text and tag.name == 'a',
+                                                    lambda tag: "Next Chapter" in tag.text and tag.name == 'a', titlespot = 5)),
+                            "scribblehub.com"   : (lambda webpage: generalWebsite(webpage, 'chp_raw',
+                                                    lambda tag: "Previous" == tag.text,
+                                                    lambda tag: "Next" == tag.text, titlespot = 4)),
+                            "boxnovel.net"      : (lambda webpage: generalWebsite(webpage, 'text-content',
+                                                    lambda tag: tag.get('class') == ['btn', 'prev_page'],
+                                                    lambda tag: tag.get('class') == ['btn', 'next_page'], titlespot = 3)),
+                            "readlightnovel.org": (lambda webpage: generalWebsite(webpage, "desc",
+                                                    lambda tag: tag.get('class') == ["prev", "prev-link"],
+                                                    lambda tag: tag.get('class') == ["next", "next-link"])),
+                            "fanfiction.net"    : (lambda webpage: ffnet   (webpage)),
+                            "wattpad.com"       : (lambda webpage: wattpad (webpage)),
+                            "webnovel.com"      : (lambda webpage: webnovel(webpage))
+                            }
+        self.website = websites[domain]
         self.current = url
 
     @ property
@@ -157,7 +155,7 @@ def generalWebsite(URL: str, storyClass: str, prevLambda: bool, nextLambda: bool
     storyTag = SOUP.find(class_ = storyClass)
     if not storyTag.name == 'div': content = storyTag.text
     else:
-        content = "\n".join([f"{element.text}" for element in SOUP.findAll("p", whitespace = False)])
+        content = "\n\t\t".join([f"{element.text}" for element in SOUP.findAll("p", whitespace = False)])
     #Buttons for next and previous chapters
     prevInfo = SOUP.find(prevLambda)
     if prevInfo != None:
@@ -188,7 +186,7 @@ def ffnet(url: str) -> list:
     title = url.split("/")[6].replace("-", " ").title()
     # Get text
     data = SESSION.get(url)
-    if data.status_code == 404: raise LookupError("No Page", "No page accessable by that url")
+    if data.status_code == 404: raise LookupError("No Page", "No page accessible by that url")
 
     soup = BeautifulSoup(data.text, 'html.parser')
     div = soup.findChildren('div', id = "storytext")
@@ -204,28 +202,6 @@ def ffnet(url: str) -> list:
 
     return content, title, prev_url, next_url
 
-# Already has built in error handling with generalWebsite
-def rlnovels(URL: str):
-    """Function for trimming fat of readlightnovel body
-
-    Args:
-        URL (str): Url of readlightnovel.com
-
-    Returns:
-        list: content, title, prev_url, next_url
-    """
-
-    prev_lambda = lambda tag: tag.get('class') == ["prev", "prev-link"]
-    next_lambda = lambda tag: tag.get('class') == ["next", "next-link"]
-
-    content, title, prev_url, next_url = generalWebsite(URL, "desc", prev_lambda, next_lambda)
-
-    SOUP = BeautifulSoup(content, 'html.parser')
-    content = "\n".join([f"{element.text}" for element in SOUP.findAll("p", whitespace = False)])
-
-    return content, title, prev_url, next_url
-
-
 import re
 import json
 
@@ -238,7 +214,7 @@ def wattpad(url: str) -> list:
     apiCallUrl = f"https://www.wattpad.com/apiv2/info?id={ID}"
     DATA = SESSION.get(apiCallUrl)
 
-    if   DATA.status_code == 404: raise LookupError ("No Page", "No page accessable by that url; or website not allowing access")
+    if   DATA.status_code == 404: raise LookupError ("No Page", "No page accessible by that url; or website not allowing access")
     elif DATA.status_code == 403: raise LookupError ("Forbidden", "Scraper not allowed access by ddos protection (probably)"    )
 
     bookJson = DATA.json()
@@ -276,7 +252,7 @@ def wattpad(url: str) -> list:
     title = currentChap["TITLE"]
 
     SOUP = BeautifulSoup(content, "html.parser")
-    content = "\n".join([f"{element.text}" for element in SOUP.findAll("p", whitespace = False)])
+    content = "\n\t\t".join([f"{element.text}" for element in SOUP.findAll("p", whitespace = False)])
 
     return content, title, prev_url, next_url
 
@@ -300,7 +276,7 @@ def webnovel(url: str) -> list:
     DATA = SESSION.get(apiCallUrl)
 
     if DATA.status_code == 404:
-        raise LookupError("No Page", "No page accessable by that url; or website not allowing access")
+        raise LookupError("No Page", "No page accessible by that url; or website not allowing access")
     elif DATA.status_code == 403:
         raise LookupError("Forbidden",     "Scraper not allowed access by ddos protection (probably)")
 
@@ -326,7 +302,7 @@ def webnovel(url: str) -> list:
     prev_url = f"https://www.webnovel.com/book/{bookTitle}_{bookId}/{prevChapterTitle}_{prevChapterId}" if prevChapterTitle != None else None
 
     content = [f"<p>{obj['content']}</p>" for obj in chapterInfo['contents']]
-    content = "".join(content).replace("â¦", "...") # Reformmating data to be more readable and accessable
+    content = "".join(content).replace("â¦", "...") # Reformatting data to be more readable and accessible
 
     SOUP = BeautifulSoup(content, "html.parser")
     content = "\n".join([f"{element.text}" for element in SOUP.findAll("p", whitespace = False)])

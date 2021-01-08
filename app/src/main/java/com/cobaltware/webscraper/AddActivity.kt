@@ -12,9 +12,11 @@ class AddActivity : AppCompatActivity() {
     lateinit var db : DataBaseHandler
     lateinit var bookList : MutableList<Book>
     lateinit var adapter : BookAdapter
-    override fun onCreate(savedInstanceState: Bundle?){
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         db = DataBaseHandler(applicationContext)
+        db.tableName = intent.getStringExtra("database_TableName")!!
         title = "Add / Change a Book"
         val title = intent.getStringExtra("title")
         val url = intent.getStringExtra("url")
@@ -27,9 +29,12 @@ class AddActivity : AppCompatActivity() {
             addBook(textUrl.text.toString(), textName.text.toString(), modify)
         }
         DelButton.setOnClickListener {
-            val id = db.getId(textUrl.text.toString(), textName.text.toString())
-            db.delete(id)
-            bookList.removeIf { it.title == textName.text.toString() }
+            if (textUrl.text.toString() != "" && textName.text.toString() != "")
+            {
+                val id = db.getId(textUrl.text.toString(), textName.text.toString())
+                db.delete(id)
+                bookList.removeIf { it.title == textName.text.toString() }
+            }
             // Switch back to other screen
             giveNClose()
         }
@@ -39,15 +44,17 @@ class AddActivity : AppCompatActivity() {
             textUrl.setText(url, TextView.BufferType.EDITABLE)
         // TODO: On Enter Hide Keyboard
     }
-    private fun addBook(urlInput: String, titleInput: String, modify: Boolean){
+    private fun addBook(urlInput: String, titleInput: String, modify: Boolean)
+    {
         // Needed references to EditText input
-        if (urlInput == "" || titleInput == "") {
+        if (urlInput == "" || titleInput == "")
+        {
             setResult(0, intent)
             this.finish()
             return
         }
-        if (!modify) {
-            // Write new line to database
+        if (!modify)
+        {   // Write new line to database
             if (!db.checkDuplicate(urlInput)) {
                 val insert: Boolean = db.writeLine(titleInput, urlInput)
                 if (!insert)
@@ -56,7 +63,8 @@ class AddActivity : AppCompatActivity() {
                 bookList.add(Book(id, titleInput, urlInput))
             }
         }
-        else{ // Modify database
+        else
+        {   // Modify database
             val url = intent.getStringExtra("url")
             val id = db.getId(url!!, titleInput)
             db.modify(id, urlInput, titleInput)
@@ -66,8 +74,8 @@ class AddActivity : AppCompatActivity() {
         // Update values and add them as new line to recycler
         giveNClose()
     }
-    private fun giveNClose(){
-        // This is to make sure that it triggers onActivityResult in MainActivity
+    private fun giveNClose()
+    {   // This is to make sure that it triggers onActivityResult in MainActivity
         intent.putExtra("newList", Wrapper(bookList))
         setResult(1, intent)
         this.finish()
