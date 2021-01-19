@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Light theme-->
-    <color name="white">#FFFFFF</color>
-    <color name="button_light">#618985</color>
-    <color name="button_lightVar">#C1292E</color>
-    <color name="light_second">#585191</color>
-    <color name="light_secondVar">#4F359B</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFF</color>
+    <color name="button_light">#3C6997</color>
+    <color name="button_lightVar">#094074</color>
+    <color name="light_second">#E63946</color>
+    <color name="light_secondVar">#E94957</color>
+    <color name="dim_gray">#666666</color>
     <!--Dark Theme-->
     <color name="background_dark">#2D3142</color>
     <color name="button_Def">#5DB7DE</color>

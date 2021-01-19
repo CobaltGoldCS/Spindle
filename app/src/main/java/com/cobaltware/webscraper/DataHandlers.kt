@@ -11,16 +11,18 @@ import android.util.Log
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 import android.os.Parcelable
+import kotlin.system.exitProcess
 
-class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context, "readerInfo", null,
+lateinit var DB : DataBaseHandler
+class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo", null,
         1)
 {
-    var tableName : String = "Books"
+    var tableName : String = "BOOKS"
 
-    override fun onCreate(db: SQLiteDatabase?) { db?.execSQL("CREATE TABLE IF NOT EXISTS BOOKS (COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME VARCHAR(256), URL VARCHAR(256))") }
+    override fun onCreate(db: SQLiteDatabase?) { this.createBookList("BOOKS") }
 
     override fun onUpgrade(fdb: SQLiteDatabase, oldVersion: Int, newVersion: Int){}
-    fun readData(): MutableList<List<String>>
+    fun readLines(): MutableList<List<String>>
     {
         val list: MutableList<List<String>> = ArrayList()
         val db = this.readableDatabase
@@ -31,8 +33,8 @@ class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context, "readerI
             {
                 val line : MutableList<String> = mutableListOf<String>()
                 line.add(result.getString(result.getColumnIndex("COL_ID")))
-                line.add(result.getString(result.getColumnIndex("NAME")))
-                line.add(result.getString(result.getColumnIndex("URL")))
+                line.add(result.getString(result.getColumnIndex("NAME"  )))
+                line.add(result.getString(result.getColumnIndex("URL"   )))
                 list.add(line)
             }
             while (result.moveToNext())
@@ -77,25 +79,30 @@ class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context, "readerI
         db.update(tableName, content, "COL_ID = ?", arrayOf(col_id.toString()))
         return true
     }
-    fun getId(url : String, title : String) : Int
+    fun getId(url : String?, title : String) : Int
     {   // Get col_id of Line
         val db = this.readableDatabase
         val query : String
         val args : String
-        if (url.isNotEmpty()){
-            query = "SELECT COL_ID FROM BOOKS WHERE URL = ?"
+        if (!url.isNullOrEmpty()){
+            query = "SELECT COL_ID FROM $tableName WHERE URL = ?"
             args = url
         }
         else{
-            query = "SELECT COL_ID FROM BOOKS WHERE NAME = ?"
+            query = "SELECT COL_ID FROM $tableName WHERE NAME = ?"
             args = title
         }
 
-        val result = db.rawQuery(query, arrayOf(args))
-        result.close()
-        Log.d("Not Empty?", result.moveToFirst().toString())
-        Log.d("Content", result.getColumnName(0))
-        return result.getInt(0)
+        val cursor = db.rawQuery(query, arrayOf(args))
+        val index = cursor.getColumnIndex("COL_ID")
+        Log.d("Empty?", (!cursor.moveToFirst()).toString())
+        if (cursor.moveToFirst() && cursor != null){
+            val id = cursor.getInt(index)
+            Log.d("Content", id.toString())
+            cursor.close()
+            return id
+        }
+        throw exitProcess(0)
     }
     fun delete(id : Int){
         val db = this.writableDatabase
@@ -104,14 +111,18 @@ class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context, "readerI
     fun checkDuplicate(url : String) : Boolean{
         val db = this.readableDatabase
         val selection = db.rawQuery("SELECT * FROM $tableName WHERE URL = ?", arrayOf(url))
+        val isValid : Boolean = selection.count > 0
         selection.close()
-        return selection.count > 0
+        return isValid
     }
+    // Table Related functions
     fun getTables() : List<String>
     {
         val db = this.readableDatabase
         val result = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", arrayOf())
         val returnList : MutableList<String> = mutableListOf<String>()
+        // The dropdown item used to add books to the list
+        returnList.add("Add a List +")
         if (result.moveToFirst()) {
             do {
                 returnList.add(result.getString(result.getColumnIndex("name")))
@@ -122,9 +133,26 @@ class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context, "readerI
             name == "android_metadata" || name == "sqlite_sequence" }
         return returnList
     }
+    fun createBookList(name : String)
+    {
+        val db = this.writableDatabase
+        db.execSQL("CREATE TABLE IF NOT EXISTS $name (COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME VARCHAR(256), URL VARCHAR(256))")
+    }
+    fun modifyBookList(name : String){
+        val db = this.writableDatabase
+        db.execSQL("ALTER TABLE $tableName RENAME TO $name")
+    }
+    fun deleteBookList(name: String)
+    {
+        val db = this.writableDatabase
+        if (name != "BOOKS")
+            db.execSQL("DROP TABLE IF EXISTS $name")
+        db.close()
+    }
 }
+
 @Parcelize
 data class Book(val col_id : Int, val title: String, val url : String) : Parcelable
 @Parcelize
-data class Wrapper(val bookList : @RawValue MutableList<Book>) : Parcelable
+data class ParcelBookList(val bookList : @RawValue MutableList<Book>) : Parcelable
 

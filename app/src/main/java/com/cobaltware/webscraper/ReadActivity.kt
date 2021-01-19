@@ -1,69 +1,83 @@
 package com.cobaltware.webscraper
 
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
-import android.view.*
-import androidx.annotation.RequiresApi
+import android.util.Log
+import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.reader_view.*
-
+import androidx.core.view.isVisible
 import com.chaquo.python.Python
+import kotlinx.android.synthetic.main.reader_view.*
+import java.util.concurrent.*
+
 
 class ReadActivity : AppCompatActivity() {
-    lateinit var db : DataBaseHandler
-    override fun onCreate(savedInstanceState : Bundle?)
+
+    private var col_id: Int = 0
+    private val executor : Executor = Executors.newSingleThreadExecutor()
+
+    override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        // TODO: Set loading Animation while requesting data
         // Getting important values
         val values = intent.extras!!
-        val url = values["url"].toString()
-        val colId = values["col_id"].toString().toInt()
-        // Set Up Database
-        db = DataBaseHandler(applicationContext)
-        db.tableName = values["database_TableName"].toString()
-        // Customize actionbar
-        supportActionBar!!.hide()
-        // On android R make built in nav bar at the bottom invisible unless swiped
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-            window.insetsController?.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE
+        val url = values["url"] as String
+        col_id = values["col_id"] as Int
+
         // Initial UI Setup
         setContentView(R.layout.reader_view)
         scrolltitle.movementMethod = ScrollingMovementMethod()
-        readBook(colId, url)
+
+        // On android R make built in nav bar at the bottom invisible unless swiped
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            window.insetsController?.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE
+
+        prevButton.isVisible = false
+        nextButton.isVisible = false
+
+        executor.execute { asyncUrlLoad(url) }
     }
-    private fun readBook(col_id : Int, url : String) : String
+    private fun asyncUrlLoad(url: String)
+    {
+        // Get the data
+        val completableFuture: CompletableFuture<List<String>> = CompletableFuture.supplyAsync { getUrlInfo(url) }
+        val data : List<String> = completableFuture.get()
+        Log.d("data", "Data obtained asyncUrlLoad")
+        // Update the gui
+        runOnUiThread {
+            Log.d("GUI", "Update UI from asyncUrlLoad")
+            updateUi(data)
+        }
+    }
+    private fun getUrlInfo(url: String) : List<String>
     {
         // Set up python stuff, and call UrlReading Class with a Url
         val inst = Python.getInstance()
         val webpack = inst.getModule("webdata")
         val currentReader = webpack.callAttr("UrlReading", url)
+        val returnList = mutableListOf<String>()
         // Get data from UrlReading Instance
-        val content = currentReader["content"].toString()
-        val next    = currentReader["next"   ].toString()
-        val prev    = currentReader["prev"   ].toString()
-        val title   = currentReader["title"  ].toString()
+        returnList.add(currentReader["title"  ].toString())
+        returnList.add(currentReader["content"].toString())
+        returnList.add(currentReader["prev"   ].toString())
+        returnList.add(currentReader["next"   ].toString())
+        returnList.add(url)
         // Update Elements with info
-        contentView.text = content
-        scrolltitle.text = title
+        return returnList
+    }
+    private fun updateUi(list: List<String>){
+        scrolltitle.text = list[0]
+        contentView.text = list[1]
 
-        prevButton.visibility = if (prev != "null") View.VISIBLE else View.GONE
-        nextButton.visibility = if (next != "null") View.VISIBLE else View.GONE
+        DB.modify(col_id, list[4], null)
 
-        nextButton.setOnClickListener { readBook(col_id, next) }
-        prevButton.setOnClickListener { readBook(col_id, prev) }
-        // Update database with the new url
-        db.modify(col_id, url, null)
+        prevButton.setOnClickListener {executor.execute{ asyncUrlLoad(list[2]) }}
+        nextButton.setOnClickListener {executor.execute{ asyncUrlLoad(list[3]) }}
 
+        prevButton.isVisible = list[2] != "null"
+        nextButton.isVisible = list[3] != "null"
 
         contentScroll.scrollTo(0,0)
-        return title
-    }
-    fun backButton(v : View)
-    {
-        setResult(0, intent)
-        finish()
     }
 }

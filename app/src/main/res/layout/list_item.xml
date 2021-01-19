@@ -5,24 +5,30 @@
     android:id="@+id/bookHolder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/border"
+    android:layout_marginTop="5sp"
     android:gravity="center">
+    <!--This Layout is only for clicking purposes-->
     <LinearLayout
         android:id="@+id/clickableArea"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_margin="@dimen/cardview_default_elevation"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="2sp"
         android:background="?android:attr/selectableItemBackground"
         android:foreground="?android:attr/selectableItemBackground"
         android:layout_weight="100">
+
         <TextView
             android:id="@+id/bookTitle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/cardview_default_elevation"
-            android:ellipsize="none"
-            android:scrollHorizontally="true"
-            android:scrollbars="horizontal"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="5sp"
+
+            android:gravity="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="?attr/colorOnPrimary"
             android:textSize="20sp" />
     </LinearLayout>
 
@@ -31,7 +37,7 @@
         android:id="@+id/moreButton"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
+        android:layout_marginEnd="5sp"
         app:icon="@drawable/ic_baseline_list_24"
         app:iconGravity="textStart"
         app:iconPadding="0dp">

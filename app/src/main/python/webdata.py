@@ -1,4 +1,6 @@
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 
 # The one public method
@@ -111,6 +113,10 @@ def errorHandler(function: callable):
 # Use this session for getting data from URLs
 # Its preset to bypass websites that ask for a valid user agent
 SESSION = requests.Session()
+retry   = Retry(connect=3, backoff_factor=0.5)
+adapter = HTTPAdapter(max_retries=retry)
+SESSION.mount('http://', adapter)
+SESSION.mount('https://', adapter)
 headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0"}
 SESSION.headers = headers
 
