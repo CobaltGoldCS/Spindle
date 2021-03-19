@@ -1,11 +1,8 @@
 package com.cobaltware.webscraper
 
-import android.content.Context
 import android.view.*
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.TextView
-import androidx.recyclerview.widget.AdapterListUpdateCallback
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.list_item.view.*
@@ -19,6 +16,9 @@ open class BookAdapter(var bookList: List<Book>) : RecyclerView.Adapter<BookAdap
                 parent, false)
         return ItemHolder(itemView)
     }
+    override fun getItemCount() = bookList.size
+
+    fun getItemsList() : ArrayList<Book> = ArrayList(bookList)
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int)
     {
@@ -34,16 +34,13 @@ open class BookAdapter(var bookList: List<Book>) : RecyclerView.Adapter<BookAdap
             openClickHandler(id)
         }
     }
-    override fun getItemCount() = bookList.size
-
-    fun getItemsList() : ArrayList<Book> = ArrayList(bookList)
     // This allows for modification of the click behavior of the buttons
-    open fun addClickHandler(col_id: Int){}
+    open fun addClickHandler (col_id: Int){}
     open fun openClickHandler(col_id: Int){}
 
     fun changeItems(newList: List<Book>){
-        val difresult = DiffUtil.calculateDiff(BookCallback(newList, bookList))
-        difresult.dispatchUpdatesTo(this)
+        val diffresult = DiffUtil.calculateDiff(BookCallback(newList, bookList))
+        diffresult.dispatchUpdatesTo(this)
         bookList = newList
     }
 
@@ -57,28 +54,16 @@ open class BookAdapter(var bookList: List<Book>) : RecyclerView.Adapter<BookAdap
 
 }
 // For calculating difference between new and old in recyclerview
-class BookCallback(newBooks: List<Book>, oldBooks: List<Book>) : DiffUtil.Callback()
+class BookCallback(val newBooks: List<Book>, val oldBooks: List<Book>) : DiffUtil.Callback()
 {
-    var oldBooks: List<Book>
-    var newBooks: List<Book>
-    override fun getOldListSize(): Int {
-        return oldBooks.size
-    }
 
-    override fun getNewListSize(): Int {
-        return newBooks.size
-    }
+    override fun getOldListSize(): Int = oldBooks.size
+    override fun getNewListSize(): Int = newBooks.size
 
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldBooks[oldItemPosition].col_id == newBooks[newItemPosition].col_id
-    }
+    override fun areItemsTheSame(oldItemPos: Int, newItemPos: Int): Boolean
+       = oldBooks[oldItemPos].col_id == newBooks[newItemPos].col_id
 
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldBooks[oldItemPosition] == newBooks[newItemPosition]
-    }
+    override fun areContentsTheSame(oldItemPos: Int, newItemPos: Int): Boolean
+       = oldBooks[oldItemPos] == newBooks[newItemPos]
 
-    init {
-        this.newBooks = newBooks
-        this.oldBooks = oldBooks
-    }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="FadeTransition">
         <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
         <item name="android:windowExitAnimation">@android:anim/fade_out</item>
@@ -8,8 +9,14 @@
         <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
         <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
     </style>
+
     <style name="Theme.Button" parent="Widget.AppCompat.Button.Borderless">
-        <item name="android:color">?attr/colorSecondary</item>
+        <!--<item name="android:color">?attr/colorOnPrimary</item>-->
         <item name="android:textColor">?attr/colorOnSecondary</item>
+    </style>
+
+    <style name="Widget.Theme.WebScraper.ButtonBar.Fullscreen" parent="">
+        <item name="android:background">@color/black_overlay</item>
+        <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
     </style>
 </resources>

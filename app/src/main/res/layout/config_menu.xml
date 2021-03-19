@@ -9,8 +9,7 @@
 
     <TextView
         android:id="@+id/addTitle"
-        android:gravity="center_horizontal"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="@string/add_change_info"
@@ -18,13 +17,47 @@
 
     <EditText
         android:id="@+id/domainUrlInput"
-        android:hint="Reading List Name"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
         android:autofillHints="Any Text"
+        android:hint="Domain of Target Url"
         android:inputType="textUri"
+        android:paddingBottom="20sp"
+        tools:ignore="HardcodedText" />
+
+    <EditText
+        android:id="@+id/contentXpathInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:ignore="HardcodedText">
-    </EditText>
+        android:autofillHints="Any Text"
+        android:hint="Xpath of main Text"
+        android:inputType="text"
+        tools:ignore="HardcodedText" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/previousButtonXpathInput"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:autofillHints="Any Text"
+            android:hint="Xpath to the previous button"
+            android:inputType="text"
+            tools:ignore="HardcodedText" />
+
+        <EditText
+            android:id="@+id/nextButtonXpathInput"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:autofillHints="Any Text"
+            android:hint="Xpath to the next button"
+            android:inputType="text"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,7 +68,7 @@
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete List"
+            android:text="Cancel / Delete"
             tools:ignore="HardcodedText" />
 
         <Button
@@ -47,12 +80,4 @@
             android:text="Add / Modify"
             tools:ignore="HardcodedText" />
     </LinearLayout>
-
-    <Button
-        android:id="@+id/cancelButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:text="Cancel"
-        tools:ignore="HardcodedText" />
 </LinearLayout>

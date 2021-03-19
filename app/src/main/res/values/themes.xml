@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.WebScraper" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/button_lightVar</item>
+        <item name="colorPrimary">@color/light_blue_A200</item>
         <item name="colorPrimaryVariant">@color/button_light</item>
         <item name="colorOnPrimary">@color/dim_gray</item>
         <!-- Secondary brand color. -->
@@ -14,4 +14,5 @@
         <!-- Customize your theme here. -->
         <item name="android:windowAnimationStyle">@style/FadeTransition</item>
     </style>
+
 </resources>
