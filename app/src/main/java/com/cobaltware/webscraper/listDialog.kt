@@ -5,13 +5,15 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Window
 import android.widget.TextView
-import kotlinx.android.synthetic.main.add_list_menu.*
+import com.cobaltware.webscraper.datahandling.DB
+import kotlinx.android.synthetic.main.menu_add_list.*
 import kotlin.String
 
 class ListDialog(context: Context, private var title : String?) : Dialog(context) {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.add_list_menu)
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        setContentView(R.layout.menu_add_list)
         if (title != null)
             domainUrlInput.setText(title!!, TextView.BufferType.EDITABLE)
         deleteButton.setOnClickListener {this.onCancelClick()}

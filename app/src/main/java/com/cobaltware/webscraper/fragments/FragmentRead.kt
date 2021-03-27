@@ -1,7 +1,8 @@
-package com.cobaltware.webscraper
+package com.cobaltware.webscraper.fragments
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -9,16 +10,21 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.chaquo.python.Python
-import kotlinx.android.synthetic.main.reader_view.view.*
+import com.cobaltware.webscraper.MainActivity
+import com.cobaltware.webscraper.R
+import com.cobaltware.webscraper.datahandling.DB
+import com.cobaltware.webscraper.datahandling.webhandlers.webdata
+import kotlinx.android.synthetic.main.fragment_read.view.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 
-class ReadFragment : Fragment() {
+class FragmentRead : Fragment() {
 
     private var colId: Int = 0
     private val executor : Executor = Executors.newSingleThreadExecutor()
@@ -27,7 +33,7 @@ class ReadFragment : Fragment() {
     companion object {
         @JvmStatic
         fun newInstance(url: String, colId: Int) =
-                ReadFragment().apply {
+                FragmentRead().apply {
                     arguments = Bundle().apply {
                         putString("url", url)
                         putInt("col_id", colId)
@@ -40,14 +46,14 @@ class ReadFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        viewer = inflater.inflate(R.layout.reader_view, container, false)
+        viewer = inflater.inflate(R.layout.fragment_read, container, false)
         // Getting important values
         val url : String = arguments!!.getString("url")!!
         colId = arguments!!.getInt("col_id")
 
-        //scrollable.movementMethod = ScrollingMovementMethod()
 
         setStaticUI()
+        setColors()
 
         executor.execute { asyncUrlLoad(url) }
 
@@ -56,42 +62,50 @@ class ReadFragment : Fragment() {
 
     private fun setStaticUI()
     {
+        viewer.prevButton
         viewer.prevButton.isVisible = false
         viewer.nextButton.isVisible = false
 
         viewer.scrollable.setNavigationOnClickListener {
-            val fragmentTrans = requireFragmentManager().beginTransaction()
-            fragmentTrans.replace(R.id.fragmentSpot, MainFragment())
-            fragmentTrans.commit()
+            val activity : MainActivity = activity as MainActivity
+            fragmentTransition(activity, FragmentMain(), View.VISIBLE)
         }
     }
-
-
-    private fun vibrate(milis: Int){
-        val vibrator = requireActivity().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        if (vibrator.hasVibrator())
-            vibrator.vibrate(
-                    VibrationEffect.createOneShot
-                    (milis.toLong(), VibrationEffect.EFFECT_HEAVY_CLICK))
+    private fun setColors()
+    {
+        val darkMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        val backgroundColor : Int = if (darkMode) R.color.background else Color.WHITE
+        val context  = requireContext()
+        viewer.contentScroll.setBackgroundColor(ContextCompat.getColor(context, backgroundColor))
     }
+    
+
+
+
     private fun asyncUrlLoad(url: String)
     {
         vibrate(100)
         // Get the data
         Log.d("data", "running completable future")
-        val completableFuture: CompletableFuture<List<String>> = CompletableFuture.supplyAsync { getUrlInfo(url) }
+        val completableFuture: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(url) }
         Log.d("data", "getting data from completableFuture")
-        val data : List<String> = completableFuture.get()
+        val data : List<String?> = completableFuture.get()
         Log.d("data", "Data obtained asyncUrlLoad")
         vibrate(150)
         // Update the gui
         requireActivity().runOnUiThread {
             Log.d("GUI", "Update UI from asyncUrlLoad")
-            updateUi(data[0], data[1], data[2], data[3], data[4])
+            updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!)
         }
     }
-    private fun getUrlInfo(url: String) : List<String>
+    private fun getUrlInfo(url: String) : List<String?>
     {
+        // Integration with Config table
+        val domain = url.split("/")[2].replace("www.", "")
+        val data = DB.getConfigFromDomain("CONFIG", domain)
+        if (!data.isNullOrEmpty())
+            return webdata(url, data[2], data[3], data[4])
+
         // Set up python stuff, and call UrlReading Class with a Url
         val inst = Python.getInstance()
         val webpack = inst.getModule("webdata")
@@ -107,14 +121,14 @@ class ReadFragment : Fragment() {
         return returnList
     }
 
-    private fun updateUi(title: String, content: String, prevUrl: String, nextUrl: String, current: String){
+    private fun updateUi(title: String, content: String, prevUrl: String?, nextUrl: String?, current: String){
         viewer.scrollTitle.title = title
         viewer.contentView.text = content
 
-        DB.modifyBooklistItem(null, colId, current, null)
+        DB.modifyItem(null, colId, arrayOf("URL").zip(arrayOf(current)).toMap())
 
-        viewer.prevButton.isVisible = prevUrl != "null"
-        viewer.nextButton.isVisible = nextUrl != "null"
+        viewer.prevButton.isVisible = prevUrl != null && prevUrl != "null"
+        viewer.nextButton.isVisible = nextUrl != null && nextUrl != "null"
 
         // Title modifications to fit
         when {
@@ -127,25 +141,39 @@ class ReadFragment : Fragment() {
         // Full process of this mirrors asyncUrlLoad without the logs
         if (viewer.prevButton.isVisible)
         {
-            val prevData: CompletableFuture<List<String>> = CompletableFuture.supplyAsync { getUrlInfo(prevUrl) }
+            val prevData: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(prevUrl!!) }
             // PrevButton click just updates the ui
             viewer.prevButton.setOnClickListener { executor.execute{
                 vibrate(100)
                 val data = prevData.get()
-                requireActivity().runOnUiThread { updateUi(data[0], data[1], data[2], data[3], data[4]) }
+                requireActivity().runOnUiThread { updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!) }
             }}
         }
         if (viewer.nextButton.isVisible)
         {
-            val nextData: CompletableFuture<List<String>> = CompletableFuture.supplyAsync { getUrlInfo(nextUrl) }
+            val nextData: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(nextUrl!!) }
             // Same as prevButton click
             viewer.nextButton.setOnClickListener { executor.execute{
                 vibrate(100)
                 val data = nextData.get()
-                requireActivity().runOnUiThread { updateUi(data[0], data[1], data[2], data[3], data[4]) }
+                requireActivity().runOnUiThread { updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!) }
             }}
         }
 
         viewer.contentScroll.scrollTo(0, 0)
+    }
+
+    private fun vibrate(milis: Int){
+        try {
+            val vibrator = requireActivity().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (vibrator.hasVibrator())
+                vibrator.vibrate(
+                    VibrationEffect.createOneShot
+                        (milis.toLong(), VibrationEffect.EFFECT_HEAVY_CLICK))
+        } catch (e: Exception)
+        {
+            return
+        }
+
     }
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/ic_book"
+        android:icon="@drawable/icon_book"
+        android:title="Books"/>
+    <item android:id="@+id/ic_settings"
+        android:icon="@drawable/icon_settings"
+        android:title="Options"/>
+</menu>

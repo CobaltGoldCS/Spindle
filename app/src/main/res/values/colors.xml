@@ -21,4 +21,6 @@
     <color name="black_overlay">#66000000</color>
     <!--Boring necessary colors-->
 
+    <color name="background">#1e2127</color>
+
 </resources>

@@ -21,10 +21,12 @@
         android:layout_marginBottom="16dp"
         android:clickable="true"
         android:contentDescription="Add Book to List Button"
+        android:layoutAnimation="@anim/booklist_anim"
         app:layout_constraintBottom_toBottomOf="@+id/configView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/add_icon"
+        app:srcCompat="@drawable/icon_add"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:ignore="HardcodedText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

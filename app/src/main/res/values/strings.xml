@@ -7,4 +7,7 @@
     <string name="placeholder">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Amet nisl purus in mollis nunc sed. Praesent semper feugiat nibh sed pulvinar proin gravida. Arcu dui vivamus arcu felis bibendum ut tristique et egestas. Auctor elit sed vulputate mi sit. Enim lobortis scelerisque fermentum dui faucibus in. Faucibus a pellentesque sit amet. Aenean vel elit scelerisque mauris pellentesque pulvinar pellentesque. Nulla facilisi morbi tempus iaculis urna id. Turpis tincidunt id aliquet risus feugiat in ante. Velit dignissim sodales ut eu sem integer vitae. Tristique senectus et netus et malesuada fames. Aenean sed adipiscing diam donec adipiscing.</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="defaultVal">BOOKS</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.cobaltware.webscraper
+package com.cobaltware.webscraper.datahandling
 
 import android.content.ContentValues
 import android.content.Context
@@ -7,24 +7,35 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 import android.util.Log
+import kotlin.collections.ArrayList
 
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.RawValue
-import android.os.Parcelable
 import kotlin.system.exitProcess
 
 lateinit var DB : DataBaseHandler
-class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo", null,
-        1)
+
+class DataBaseHandler(context: Context) :
+        SQLiteOpenHelper(context, "readerInfo", null, 1)
 {
-    var tableName : String = "BOOKS"
-    private fun getTableOrGeneric(table : String?) : String {return if (!table.isNullOrEmpty()) table else tableName}
-
-    override fun onCreate(db: SQLiteDatabase?) { this.createBookList("BOOKS") }
-
+    // Inherited Members to Override
+    override fun onCreate(db: SQLiteDatabase?) {
+        this.createBookList("BOOKS")
+        this.createTable("CONFIG",
+            "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, DOMAIN VARCHAR(256), CONTENTXPATH VARCHAR(256), PREVXPATH VARCHAR(256), NEXTXPATH VARCHAR(256))")
+        populate()
+    }
+    private fun populate()
+    {
+        this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("readnovelfull.com", ".chr-c", ".prev_chap", ".next_chap" )).toMap())
+        DB.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("royalroad.com", ".chapter-inner", "div.col-md-4:nth-child(1) > a:nth-child(1)", ".col-md-offset-4 > a:nth-child(1)" )).toMap())
+        this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("scribblehub.com", "#chp_raw", "div.prenext > a:nth-child(1)", "div.prenext > a:nth-child(2)" )).toMap())
+    }
     override fun onUpgrade(fdb: SQLiteDatabase, oldVersion: Int, newVersion: Int){}
 
-    fun readAllBooklistItems(table : String?): MutableList<List<String>>
+    var tableName : String = "BOOKS"
+
+    private fun getTableOrGeneric(table : String?) : String {return if (!table.isNullOrEmpty()) table else tableName}
+
+    fun readAllItems(table : String?, columns : List<String>): MutableList<List<String>>
     {
         val tableData : String = getTableOrGeneric(table)
 
@@ -35,18 +46,20 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo"
         if (result.moveToFirst()) {
             do
             {
-                val line : MutableList<String> = mutableListOf<String>()
-                line.add(result.getString(result.getColumnIndex("COL_ID")))
-                line.add(result.getString(result.getColumnIndex("NAME"  )))
-                line.add(result.getString(result.getColumnIndex("URL"   )))
-                list.add(line)
+                val line : MutableList<String> = mutableListOf()
+                for (column in columns)
+                    line.add(result.getString(result.getColumnIndex(column)))
+                if (line.size > 1)
+                    list.add(line)
+                else
+                    list.add(columns)
             }
             while (result.moveToNext())
         }
         result.close()
         return list
     }
-    fun readBooklistItem(table : String?, COL_ID : Int) : List<String>
+    fun readItem(table : String?, COL_ID : Int, columns : List<String>) : List<String>
     {
         val tableData : String = getTableOrGeneric(table)
 
@@ -55,43 +68,41 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo"
         val query = "Select * from $tableData WHERE COL_ID = ?"
         val result = db.rawQuery(query, arrayOf(COL_ID.toString()))
 
-        val line : MutableList<String> = mutableListOf<String>()
+        val line : MutableList<String> = mutableListOf()
         if (result.moveToFirst())
         {
-            line.add(result.getString(result.getColumnIndex("COL_ID")))
-            line.add(result.getString(result.getColumnIndex("NAME"  )))
-            line.add(result.getString(result.getColumnIndex("URL"   )))
+            for (column in columns)
+                line.add(result.getString(result.getColumnIndex(column)))
         }
 
         result.close()
         return line
     }
-    fun insertItemIntoBooklist(table : String?, name : String, url : String) : Boolean
+    fun insertItemIntoTable(table : String?, map: Map<String, String>) : Boolean
     {   // Write Line to database
         val tableData : String = getTableOrGeneric(table)
 
         val db = this.writableDatabase
         val values = ContentValues()
-        
-        values.put("NAME", name)
-        values.put("URL", url)
+        for (entry in map)
+            values.put(entry.key, entry.value)
+
         val success = db.insert(tableData, null, values)
         db.close()
         return success != -1L
     }
-    fun modifyBooklistItem(table : String?, col_id : Int, url : String, name: String?) : Boolean
+    fun modifyItem(table : String?, col_id : Int, map: Map<String, String>) : Boolean
     {   // Modify line of database
         val tableData : String = getTableOrGeneric(table)
 
         val db = this.writableDatabase
         val content = ContentValues()
-        if (name != null)
-            content.put("NAME", name)
-        content.put("URL", url)
+        for (item in map)
+            content.put(item.key, item.value)
         db.update(tableData, content, "COL_ID = ?", arrayOf(col_id.toString()))
         return true
     }
-    fun getId(table : String?, url : String?, title : String) : Int
+    fun getIdFromBooklistItem(table : String?, url : String?, title : String?) : Int
     {   // Get col_id of Line
         val tableData : String = getTableOrGeneric(table)
 
@@ -102,10 +113,12 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo"
             query = "SELECT COL_ID FROM $tableData WHERE URL = ?"
             args = url
         }
-        else{
+        else if (!title.isNullOrEmpty()){
             query = "SELECT COL_ID FROM $tableData WHERE NAME = ?"
             args = title
         }
+        else
+            throw IllegalArgumentException("Both title and url are null")
 
         val cursor = db.rawQuery(query, arrayOf(args))
         val index = cursor.getColumnIndex("COL_ID")
@@ -119,6 +132,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo"
         }
         throw exitProcess(0)
     }
+
     fun deleteUsingID(table : String?, id : Int){
         val tableData : String = getTableOrGeneric(table)
 
@@ -134,12 +148,28 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo"
         selection.close()
         return isValid
     }
+    fun getConfigFromDomain (table : String, domain : String) : MutableList<String>
+    {
+        val db = this.readableDatabase
+        val result = db.rawQuery("SELECT * FROM $table WHERE DOMAIN = ?", arrayOf(domain))
+        val line : MutableList<String> = mutableListOf()
+        if (result.moveToFirst())
+        {
+            line.add(result.getString(result.getColumnIndex("COL_ID"      )))
+            line.add(result.getString(result.getColumnIndex("DOMAIN"      )))
+            line.add(result.getString(result.getColumnIndex("CONTENTXPATH")))
+            line.add(result.getString(result.getColumnIndex("PREVXPATH"   )))
+            line.add(result.getString(result.getColumnIndex("NEXTXPATH"   )))
+        }
+        result.close()
+        return line
+    }
     // Table Related functions
     fun getTables() : List<String>
     {
         val db = this.readableDatabase
         val result = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", arrayOf())
-        val returnList : MutableList<String> = mutableListOf<String>()
+        val returnList : MutableList<String> = mutableListOf()
         // The dropdown item used to add books to the list
         returnList.add("Add a List +")
         if (result.moveToFirst()) {
@@ -149,7 +179,8 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo"
         }
         result.close()
         returnList.removeIf { name ->
-            name == "android_metadata" || name == "sqlite_sequence" }
+            name in listOf("android_metadata", "sqlite_sequence", "CONFIG")
+        }
         return returnList
     }
     fun createTable(name : String, values : String)
@@ -164,7 +195,6 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo"
     {
         val cleanedName = name.replace(" ", "_")
         createTable(cleanedName, "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME VARCHAR(256), URL VARCHAR(256))")
-
     }
     fun modifyTable(currentTable : String?, name : String){
         val tableData : String = getTableOrGeneric(currentTable)
@@ -183,10 +213,4 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, "readerInfo"
         db.close()
     }
 }
-
-// Parcelized data structures for carrying values between activities
-@Parcelize
-data class Book(val col_id : Int, val title: String, val url : String) : Parcelable
-@Parcelize
-data class ParcelBookList(val bookList : @RawValue MutableList<Book>) : Parcelable
 

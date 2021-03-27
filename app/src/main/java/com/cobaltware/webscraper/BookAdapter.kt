@@ -5,20 +5,18 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.list_item.view.*
-import java.util.*
+import com.cobaltware.webscraper.datahandling.Book
+import kotlinx.android.synthetic.main.item_reader_list.view.*
 
 
 open class BookAdapter(var bookList: List<Book>) : RecyclerView.Adapter<BookAdapter.ItemHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder
     {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item,
+        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_reader_list,
                 parent, false)
         return ItemHolder(itemView)
     }
     override fun getItemCount() = bookList.size
-
-    fun getItemsList() : ArrayList<Book> = ArrayList(bookList)
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int)
     {
@@ -54,7 +52,7 @@ open class BookAdapter(var bookList: List<Book>) : RecyclerView.Adapter<BookAdap
 
 }
 // For calculating difference between new and old in recyclerview
-class BookCallback(val newBooks: List<Book>, val oldBooks: List<Book>) : DiffUtil.Callback()
+class BookCallback(private val newBooks: List<Book>, private val oldBooks: List<Book>) : DiffUtil.Callback()
 {
 
     override fun getOldListSize(): Int = oldBooks.size
