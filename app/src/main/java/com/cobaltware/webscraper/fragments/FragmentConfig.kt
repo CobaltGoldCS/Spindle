@@ -1,13 +1,10 @@
 package com.cobaltware.webscraper.fragments
 
-import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cobaltware.webscraper.ConfigAdapter
 import com.cobaltware.webscraper.ConfigDialog
@@ -30,10 +27,9 @@ class FragmentConfig : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        var viewer = inflater.inflate(R.layout.fragment_config, container, false)
+        val viewer = inflater.inflate(R.layout.fragment_config, container, false)
         initRecycler(viewer)
         initBasicUi(viewer)
-        setColors(viewer)
         return viewer
     }
 
@@ -47,7 +43,8 @@ class FragmentConfig : Fragment() {
         configAdapter = object : ConfigAdapter(actualList.toList()) {
             override fun clickHandler(col_id : Int)
             {
-                val neededConfig = actualList.find { it.col_id == col_id }
+                val list = DB.readItem("CONFIG", col_id, listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH"))
+                val neededConfig = Config(list[0].toInt(), list[1], list[2], list[3], list[4])
                 runAddDialog(neededConfig)
             }
         }
@@ -64,16 +61,9 @@ class FragmentConfig : Fragment() {
             runAddDialog(null)
         }
     }
-    private fun setColors(v : View)
-    {
-        val darkMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-        val backgroundColor : Int = if (darkMode) R.color.background else Color.WHITE
-        val context  = requireContext()
-        v.configView.setBackgroundColor(ContextCompat.getColor(context, backgroundColor))
-    }
     private fun runAddDialog(config : Config?)
     {
-        val dialog = ConfigDialog(requireContext(), config, configAdapter)
-        dialog.show()
+        val dialog = ConfigDialog(config, configAdapter)
+        dialog.show(requireActivity().supportFragmentManager, "Add New Config")
     }
 }

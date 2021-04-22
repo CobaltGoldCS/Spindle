@@ -27,29 +27,11 @@ class UrlReading:
         """
         domain = url.split("/")[2].replace("www.", "")
         websites = {
-        "readnovelfull.com"   : (lambda webpage: generalWebsite(webpage, "chr-c",
-                                lambda tag: tag.get('id') == "prev_chap",
-                                lambda tag: tag.get('id') == "next_chap")),
-        "royalroad.com"       : (lambda webpage: generalWebsite(webpage, "chapter-content",
-                                lambda tag: "Previous Chapter" in tag.text and tag.name == 'a',
-                                lambda tag: "Next Chapter"     in tag.text and tag.name == 'a')),
-        "scribblehub.com"     : (lambda webpage: generalWebsite(webpage, 'chp_raw',
-                                lambda tag: "Previous" == tag.text,
-                                lambda tag: "Next"     == tag.text)),
-        "boxnovel.net"        : (lambda webpage: generalWebsite(webpage, 'text-content',
-                                lambda tag: tag.get('class') == ['btn', 'prev_page'],
-                                lambda tag: tag.get('class') == ['btn', 'next_page'])),
-        "novelhall.com"       : (lambda webpage: generalWebsite(webpage, "entry-content",
-                                lambda tag: "Previous" in tag.text and tag.name == 'a',
-                                lambda tag: "Next" in tag.text and tag.name ==     'a', forceAllText = True)),
-        "readlightnovel.org"  : (lambda webpage: generalWebsite(webpage, "desc",
-                                lambda tag: tag.get('class') == ["prev", "prev-link"],
-                                lambda tag: tag.get('class') == ["next", "next-link"],
-                                storyParams = {"name": "p", "recursive" : False, "text" : True})),
         "lightnovelworld.com" : (lambda webpage: lnWorld  (webpage)),
         "fanfiction.net"      : (lambda webpage: fanfnet  (webpage)),
         "wattpad.com"         : (lambda webpage: wattpad  (webpage)),
-        "webnovel.com"        : (lambda webpage: webnovel (webpage))}
+        "webnovel.com"        : (lambda webpage: webnovel (webpage))
+        }
         try:
             self.website = websites[domain]
         except KeyError:
@@ -192,4 +174,5 @@ def generalWebsite(URL: str, storyClass: str, prevLambda: bool, nextLambda: bool
     else: next_url = None
     return content, title, prev_url, next_url
 
-print(UrlReading("https://www.readlightnovel.org/i-was-caught-up-in-a-hero-summoning-but-that-world-is-at-peace/chapter-7").content)
+if __name__ == '__main__':
+    UrlReading("https://www.wattpad.com/788747893-my-altered-life-gilgamesh-male-reader-x-dxd")

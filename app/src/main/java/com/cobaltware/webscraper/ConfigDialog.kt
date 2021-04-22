@@ -1,28 +1,32 @@
 package com.cobaltware.webscraper
 
-import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
+import android.view.*
 import com.cobaltware.webscraper.datahandling.Config
 import com.cobaltware.webscraper.datahandling.DB
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.menu_config.*
+import kotlinx.android.synthetic.main.menu_config.view.*
 
-class ConfigDialog(context : Context, private var config : Config?, private var adapter : ConfigAdapter) : Dialog(context){
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+class ConfigDialog(private var config : Config?, private var adapter : ConfigAdapter) : BottomSheetDialogFragment() {
+    override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ) : View? {
+
         DB.createTable("CONFIG",
-            "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, DOMAIN VARCHAR(256), CONTENTXPATH VARCHAR(256), PREVXPATH VARCHAR(256), NEXTXPATH VARCHAR(256))")
-        setContentView(R.layout.menu_config)
-        setAllTexts()
-        actionButton.setOnClickListener {onActionClick()}
-        deleteButton.setOnClickListener {onDelete()}
-        cancelButton.setOnClickListener {dismiss() }
-
+                "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, DOMAIN VARCHAR(256), CONTENTXPATH VARCHAR(256), PREVXPATH VARCHAR(256), NEXTXPATH VARCHAR(256))")
+        val view = inflater.inflate(R.layout.menu_config, container, true)
+        setAllTexts(view)
+        view.actionButton.setOnClickListener {onActionClick()}
+        view.deleteButton.setOnClickListener {onDelete()}
+        view.cancelButton.setOnClickListener {dismiss() }
+        return view
     }
-    fun onActionClick()
+
+    private fun onActionClick()
     {
-        val filled = guaranteeAllFields()
-        if (!filled)
+        if (!guaranteeAllFields())
             return
         val modify = config != null
 
@@ -40,9 +44,10 @@ class ConfigDialog(context : Context, private var config : Config?, private var 
             DB.modifyItem("CONFIG", config!!.col_id, createDictFromArrays(insertVals, insertArgs))
             updateAdapter()
         }
+        dismiss()
     }
 
-    fun onDelete()
+    private fun onDelete()
     {
         if (config != null) {
             DB.deleteUsingID("CONFIG", config!!.col_id)
@@ -59,16 +64,16 @@ class ConfigDialog(context : Context, private var config : Config?, private var 
         adapter.changeItems(newList)
     }
 
-    private fun setAllTexts()
+    private fun setAllTexts(v : View)
     {
         if (config == null)
             return
-        domainUrlInput.setText(config!!.domain)
-        nextButtonXpathInput.setText(config!!.nextXPath)
-        previousButtonXpathInput.setText(config!!.prevXPath)
-        contentXpathInput.setText(config!!.mainXPath)
+        v.domainUrlInput.setText(config!!.domain)
+        v.nextButtonXpathInput.setText(config!!.nextXPath)
+        v.previousButtonXpathInput.setText(config!!.prevXPath)
+        v.contentXpathInput.setText(config!!.mainXPath)
     }
-
+    // Returns true if all fields are filled, else false
     private fun guaranteeAllFields() : Boolean
     {
         if (domainUrlInput.text.isEmpty()||

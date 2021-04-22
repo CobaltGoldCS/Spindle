@@ -1,19 +1,20 @@
 package com.cobaltware.webscraper.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.DB
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.fragment_add.view.*
 
 
-class FragmentAdd : Fragment() {
+class FragmentAdd : BottomSheetDialogFragment() {
     lateinit var bookList: MutableList<Book>
     // Supposed to represent if you clicked on an existing book or not
     private var book : Book? = null
@@ -22,7 +23,7 @@ class FragmentAdd : Fragment() {
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_add, container, false)
+        val view = inflater.inflate(R.layout.fragment_add, container, true)
 
         // Get args for Initialization
         val   url = arguments!!.getString("url")
@@ -56,6 +57,9 @@ class FragmentAdd : Fragment() {
             // Switch back to other screen
             dismiss()
         }
+        v.title.setNavigationOnClickListener {
+            fragmentTransition(requireActivity() as MainActivity, FragmentMain(), View.VISIBLE)
+        }
     }
 
     private fun addBook(urlInput: String, titleInput: String, modify: Boolean)
@@ -86,12 +90,6 @@ class FragmentAdd : Fragment() {
         // Update values and add them as new line to recycler
         this.dismiss()
     }
-    private fun dismiss()
-    {
-        val activity : MainActivity = activity as MainActivity
-        fragmentTransition(activity, FragmentMain(), View.VISIBLE)
-    }
-
     companion object {
         /**
          * Use this factory method to create a new instance of

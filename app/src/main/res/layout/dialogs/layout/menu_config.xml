@@ -2,9 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_root"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="fill_horizontal"
+    android:background="?attr/backgroundColor"
     android:orientation="vertical"
+    style="@style/Dialog.NoTitle"
     android:padding="10dp" >
 
     <TextView
@@ -13,15 +16,17 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
+        android:textColor="?attr/colorOnPrimary"
         android:text="@string/add_change_info"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
         android:id="@+id/domainUrlInput"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="wrap_content"
         android:autofillHints="Any Text"
         android:hint="Domain of Target Url"
+        android:textColorHint="?attr/colorOnPrimary"
         android:inputType="textUri"
         android:paddingBottom="20sp"
         tools:ignore="HardcodedText" />
@@ -32,14 +37,17 @@
         android:layout_height="wrap_content"
         android:autofillHints="Any Text"
         android:hint="CSS Selector of main Text"
+        android:textColorHint="?attr/colorOnPrimary"
         android:inputType="text"
         tools:ignore="HardcodedText" />
+
     <EditText
         android:id="@+id/previousButtonXpathInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autofillHints="Any Text"
         android:hint="Prev Button CSS Selector"
+        android:textColorHint="?attr/colorOnPrimary"
         android:inputType="text"
         tools:ignore="HardcodedText" />
 
@@ -50,6 +58,7 @@
         android:layout_gravity="end"
         android:autofillHints="Any Text"
         android:hint="Next Button CSS Selector"
+        android:textColorHint="?attr/colorOnPrimary"
         android:inputType="text"
         tools:ignore="HardcodedText" />
 
@@ -61,8 +70,9 @@
         <Button
             android:id="@+id/deleteButton"
             style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight=".4"
             android:paddingStart="40dp"
             android:paddingEnd="40dp"
             android:text="Delete"
@@ -71,8 +81,9 @@
         <Button
             android:id="@+id/actionButton"
             style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight=".6"
             android:layout_gravity="end"
             android:text="Add / Modify"
             tools:ignore="HardcodedText" />

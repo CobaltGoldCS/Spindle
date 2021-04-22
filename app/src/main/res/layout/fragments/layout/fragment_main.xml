@@ -4,10 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:backgroundTint="@color/button_Var"
-    android:backgroundTintMode="src_atop"
     tools:context=".MainActivity">
-
 
 
     <LinearLayout
@@ -16,6 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="5"
+        android:background="?attr/backgroundColor"
         app:layout_constraintBottom_toTopOf="@+id/bookLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -54,7 +52,6 @@
             android:layout_weight="1"
             android:paddingTop="11dp"
             android:paddingBottom="11dp"
-            android:visibility="invisible"
             app:icon="@drawable/icon_list"
             app:iconGravity="textStart"
             app:iconTint="?attr/colorOnPrimary" />
@@ -67,6 +64,7 @@
         android:layout_height="0dp"
         android:orientation="horizontal"
         android:layoutAnimation="@anim/booklist_anim"
+        android:background="?attr/backgroundColor"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

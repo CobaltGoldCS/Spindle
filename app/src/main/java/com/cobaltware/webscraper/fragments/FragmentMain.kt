@@ -1,7 +1,5 @@
 package com.cobaltware.webscraper.fragments
 
-import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,13 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cobaltware.webscraper.*
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.DB
+import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlin.concurrent.thread
 
@@ -31,27 +29,22 @@ class FragmentMain : Fragment() {
         // Inflate the layout for this fragment
         viewer = inflater.inflate(R.layout.fragment_main, container, false)!!
         thread {
+            setupDropdown(viewer)
             setupRecyclerView(viewer)
             initSimpleUiComponents(viewer)
-            setupDropdown(viewer)
-            setColors(viewer)
         }
 
         return viewer
     }
 
     private fun initSimpleUiComponents(v : View){requireActivity().runOnUiThread {
-        // Set ui things
-        v.bookLists.setText(R.string.defaultVal)
-        v.changeButton.visibility = View.INVISIBLE
         // Setup add book button
         v.addMenuButton.setOnClickListener { this.initAddFragment(null, null) }
 
         // Hide and show add menu button depending on scroll
         v.bookLayout.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, downX : Int, downY: Int) {
-                when
-                {
+                when {
                     // Going up on scroll
                     downY < 0 && !v.addMenuButton.isShown -> v.addMenuButton.show()
                     // Going down on scroll
@@ -84,74 +77,63 @@ class FragmentMain : Fragment() {
                 initReadFragment(data[0].toInt(), data[2])
             }
         }
-        // Initial Recycler change needed for sync properly
-        val table = DB.getTables()[1]
-        DB.tableName = table
-        val newList = changeBooks()
 
         requireActivity().runOnUiThread{
             v.bookLayout.adapter = bookAdapter
             v.bookLayout.layoutManager = LinearLayoutManager(requireContext())
             v.bookLayout.setHasFixedSize(true)
-
-            // Ui changes for initial recycler change
-            v.bookLayout.layoutAnimation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.booklist_anim)
-            v.bookLayout.startLayoutAnimation()
-            bookAdapter.changeItems(newList)
         }
 
     }
-    }
-    private fun setColors(v : View)
-    {
-        val darkMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-        val backgroundColor : Int = if (darkMode) R.color.background else Color.WHITE
-        val context  = requireContext()
-
-        requireActivity().runOnUiThread {
-            v.bookLayout.setBackgroundColor(ContextCompat.getColor(context, backgroundColor))
-            v.listLayout.setBackgroundColor(ContextCompat.getColor(context, backgroundColor))
-            // Been having issues with setting the selection
-            v.bookLists.listSelection = 1
-        }
     }
 
     private fun setupDropdown(v : View)
     {thread{
         // Set Dropdown menu items and behavior
         val books : MutableList<String> = DB.getTables().toMutableList()
-        val dropdownAdapter = ArrayAdapter<String>(requireContext(), R.layout.item_dropdown, books)
+        val dropdownAdapter = ArrayAdapter(requireContext(), R.layout.item_dropdown, books)
 
+        val tables = DB.getTables()
         requireActivity().runOnUiThread{
             v.bookLists.setAdapter(dropdownAdapter)
             v.bookLists.setOnItemClickListener { _, _, position, _ ->
-                if (position == 0) // if the selected item is the add book item
+                if (position == 0) { // if the selected item is the add book item
                     startPopup(dropdownAdapter, null)
-                else {
-                    // Update TableName
-                    val table = DB.getTables()[position]
-                    if (table == DB.tableName) // If the selected item has been clicked again
-                        return@setOnItemClickListener
-                    DB.tableName = table
-                    // Update UI (This uses DB.tableName in the function)
-                    v.bookLayout.layoutAnimation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.booklist_anim)
-                    val newList = changeBooks()
-                    v.bookLayout.startLayoutAnimation()
-                    bookAdapter.changeItems(newList)
+                    return@setOnItemClickListener
                 }
-                // Hide changeButton when not in use
-                if (position <= 1 && v.changeButton.visibility == View.VISIBLE)
-                    v.changeButton.visibility = View.INVISIBLE
-                else if (position > 1 && v.changeButton.visibility == View.INVISIBLE)
-                    v.changeButton.visibility = View.VISIBLE
+                // Update TableName
+                val table = tables[position]
+                if (table == DB.tableName) // If the selected item has been clicked again
+                    return@setOnItemClickListener
+                DB.tableName = table
+                // Update UI (This uses DB.tableName in the function)
+                v.bookLayout.layoutAnimation = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.booklist_anim)
+                val newList = changeBooks()
+                v.bookLayout.startLayoutAnimation()
+                bookAdapter.changeItems(newList)
+
+                listLayout.weightSum = if (position == 1) 4f else 5f
+
             }
             v.changeButton.setOnClickListener{
                 if (books.indexOf(v.bookLists.text.toString()) > 1)
                     startPopup(dropdownAdapter, DB.tableName)
             }
         }
-    }
-    }
+        modifyDropdown(dropdownAdapter.getPosition(DB.tableName))
+    }}
+    private fun modifyDropdown(position : Int)
+    {thread {
+        requireActivity().runOnUiThread {
+            bookLists.setText(DB.tableName, false)
+            bookLists.listSelection = position
+            bookLists.callOnClick()
+            bookLists.performCompletion()
+
+            listLayout.weightSum = if (position == 1) 4f else 5f
+        }
+    }}
+
     private fun startPopup(adapter: ArrayAdapter<String>, title: String?)
     {
         val menu = ListDialog(requireContext(), title)
@@ -167,7 +149,7 @@ class FragmentMain : Fragment() {
 
     private fun changeBooks(): MutableList<Book> {
         // Change Books to ones in the given table
-        val lineList = DB.readAllItems(null, listOf<String>("COL_ID", "NAME", "URL"))
+        val lineList = DB.readAllItems(null, listOf("COL_ID", "NAME", "URL"))
         val bookList = mutableListOf<Book>()
         lineList.forEach{ line ->
             val book = Book(line[0].toInt(), line[1], line[2])
@@ -178,7 +160,7 @@ class FragmentMain : Fragment() {
     // Change fragments
     private fun initAddFragment(title: String?, url: String?) {
         val activity : MainActivity = activity as MainActivity
-        fragmentTransition(activity, FragmentAdd.newInstance(bookList!!.toList(), url, title), View.GONE)
+        FragmentAdd.newInstance(bookList!!.toList(), url, title).show(activity.supportFragmentManager, "Add or Change Book")
     }
 
     private fun initReadFragment(col_id: Int, url: String)    {

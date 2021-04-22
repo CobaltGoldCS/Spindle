@@ -26,8 +26,9 @@ class DataBaseHandler(context: Context) :
     private fun populate()
     {
         this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("readnovelfull.com", ".chr-c", ".prev_chap", ".next_chap" )).toMap())
-        DB.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("royalroad.com", ".chapter-inner", "div.col-md-4:nth-child(1) > a:nth-child(1)", ".col-md-offset-4 > a:nth-child(1)" )).toMap())
+        this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("royalroad.com", ".chapter-inner", "div.col-md-4:nth-child(1) > a:nth-child(1)", ".col-md-offset-4 > a:nth-child(1)" )).toMap())
         this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("scribblehub.com", "#chp_raw", "div.prenext > a:nth-child(1)", "div.prenext > a:nth-child(2)" )).toMap())
+        this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("readlightnovel.org", ".hidden", ".prev-link", ".next-link" )).toMap())
     }
     override fun onUpgrade(fdb: SQLiteDatabase, oldVersion: Int, newVersion: Int){}
 

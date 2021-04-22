@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         activityFragmentSwitch(FragmentMain())
 
     }
-    fun setNavTransitions()
+    private fun setNavTransitions()
     {
         nav.setOnNavigationItemSelectedListener {
             when(it.itemId)
@@ -39,12 +39,11 @@ class MainActivity : AppCompatActivity() {
             true
         }
     }
-    fun activityFragmentSwitch(fragment: Fragment)
+    private fun activityFragmentSwitch(fragment: Fragment)
     {
         val fragmentTrans = supportFragmentManager.beginTransaction()
         fragmentTrans.replace(R.id.fragmentSpot, fragment)
         fragmentTrans.commit()
     }
-    // TODO : Add config fragment support for UI and BACKEND
     // TODO : Add handler for switching fragments when one of the nav items is clicked
 }

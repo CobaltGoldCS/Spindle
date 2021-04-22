@@ -1,8 +1,6 @@
 package com.cobaltware.webscraper.fragments
 
 import android.content.Context
-import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -10,7 +8,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.chaquo.python.Python
@@ -53,16 +50,28 @@ class FragmentRead : Fragment() {
 
 
         setStaticUI()
-        setColors()
 
-        executor.execute { asyncUrlLoad(url) }
+        // First time run
+        executor.execute {
+            vibrate(100)
+            Log.d("data", "running completable future to obtain data")
+            val completableFuture: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(url) }
+            Log.d("data", "getting data from completableFuture")
+            val data : List<String?> = completableFuture.get()
+            Log.d("data", "Data obtained asyncUrlLoad")
+            vibrate(150)
+            // Update the gui
+            requireActivity().runOnUiThread {
+                Log.d("GUI", "Update UI from asyncUrlLoad")
+                updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!)
+            }
+        }
 
         return viewer
     }
 
     private fun setStaticUI()
     {
-        viewer.prevButton
         viewer.prevButton.isVisible = false
         viewer.nextButton.isVisible = false
 
@@ -71,36 +80,10 @@ class FragmentRead : Fragment() {
             fragmentTransition(activity, FragmentMain(), View.VISIBLE)
         }
     }
-    private fun setColors()
-    {
-        val darkMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-        val backgroundColor : Int = if (darkMode) R.color.background else Color.WHITE
-        val context  = requireContext()
-        viewer.contentScroll.setBackgroundColor(ContextCompat.getColor(context, backgroundColor))
-    }
-    
 
-
-
-    private fun asyncUrlLoad(url: String)
-    {
-        vibrate(100)
-        // Get the data
-        Log.d("data", "running completable future")
-        val completableFuture: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(url) }
-        Log.d("data", "getting data from completableFuture")
-        val data : List<String?> = completableFuture.get()
-        Log.d("data", "Data obtained asyncUrlLoad")
-        vibrate(150)
-        // Update the gui
-        requireActivity().runOnUiThread {
-            Log.d("GUI", "Update UI from asyncUrlLoad")
-            updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!)
-        }
-    }
     private fun getUrlInfo(url: String) : List<String?>
     {
-        // Integration with Config table
+        // Integration with Config table and Configurations
         val domain = url.split("/")[2].replace("www.", "")
         val data = DB.getConfigFromDomain("CONFIG", domain)
         if (!data.isNullOrEmpty())
@@ -170,10 +153,6 @@ class FragmentRead : Fragment() {
                 vibrator.vibrate(
                     VibrationEffect.createOneShot
                         (milis.toLong(), VibrationEffect.EFFECT_HEAVY_CLICK))
-        } catch (e: Exception)
-        {
-            return
-        }
-
+        } catch (e: Exception){}
     }
 }
