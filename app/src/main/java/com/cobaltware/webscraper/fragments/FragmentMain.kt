@@ -23,14 +23,16 @@ class FragmentMain : Fragment() {
     var bookList : MutableList<Book>? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
         viewer = inflater.inflate(R.layout.fragment_main, container, false)!!
+
         thread {
-            setupDropdown(viewer)
             setupRecyclerView(viewer)
+            setupDropdown(viewer)
             initSimpleUiComponents(viewer)
         }
 
@@ -48,7 +50,7 @@ class FragmentMain : Fragment() {
                     // Going up on scroll
                     downY < 0 && !v.addMenuButton.isShown -> v.addMenuButton.show()
                     // Going down on scroll
-                    downY > 0 && v.addMenuButton.isShown -> v.addMenuButton.hide()
+                    downY > 0 &&  v.addMenuButton.isShown -> v.addMenuButton.hide()
                 }
             }
         })
@@ -56,7 +58,7 @@ class FragmentMain : Fragment() {
     }
 
     private fun setupRecyclerView(v : View)
-    {thread {
+    {
         // Initial Population of the recyclerview
         bookList = changeBooks()
         // With the book adapter initializations, click handlers are also added
@@ -83,12 +85,10 @@ class FragmentMain : Fragment() {
             v.bookLayout.layoutManager = LinearLayoutManager(requireContext())
             v.bookLayout.setHasFixedSize(true)
         }
-
-    }
     }
 
     private fun setupDropdown(v : View)
-    {thread{
+    {
         // Set Dropdown menu items and behavior
         val books : MutableList<String> = DB.getTables().toMutableList()
         val dropdownAdapter = ArrayAdapter(requireContext(), R.layout.item_dropdown, books)
@@ -121,7 +121,7 @@ class FragmentMain : Fragment() {
             }
         }
         modifyDropdown(dropdownAdapter.getPosition(DB.tableName))
-    }}
+    }
     private fun modifyDropdown(position : Int)
     {thread {
         requireActivity().runOnUiThread {
@@ -160,7 +160,8 @@ class FragmentMain : Fragment() {
     // Change fragments
     private fun initAddFragment(title: String?, url: String?) {
         val activity : MainActivity = activity as MainActivity
-        FragmentAdd.newInstance(bookList!!.toList(), url, title).show(activity.supportFragmentManager, "Add or Change Book")
+        val menu = FragmentAdd.newInstance(bookAdapter, url, title)
+        menu.show(activity.supportFragmentManager, "Add or Change Book")
     }
 
     private fun initReadFragment(col_id: Int, url: String)    {

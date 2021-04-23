@@ -20,11 +20,12 @@ class DataBaseHandler(context: Context) :
     override fun onCreate(db: SQLiteDatabase?) {
         this.createBookList("BOOKS")
         this.createTable("CONFIG",
-            "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, DOMAIN VARCHAR(256), CONTENTXPATH VARCHAR(256), PREVXPATH VARCHAR(256), NEXTXPATH VARCHAR(256))")
+            "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, DOMAIN VARCHAR(256) NOT NULL, CONTENTXPATH VARCHAR(256) NOT NULL, PREVXPATH VARCHAR(256) NOT NULL, NEXTXPATH VARCHAR(256)) NOT NULL")
         populate()
     }
     private fun populate()
     {
+        // TODO : Make this automatically update the table using the internet and a central file
         this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("readnovelfull.com", ".chr-c", ".prev_chap", ".next_chap" )).toMap())
         this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("royalroad.com", ".chapter-inner", "div.col-md-4:nth-child(1) > a:nth-child(1)", ".col-md-offset-4 > a:nth-child(1)" )).toMap())
         this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("scribblehub.com", "#chp_raw", "div.prenext > a:nth-child(1)", "div.prenext > a:nth-child(2)" )).toMap())
@@ -34,9 +35,10 @@ class DataBaseHandler(context: Context) :
 
     var tableName : String = "BOOKS"
 
-    private fun getTableOrGeneric(table : String?) : String {return if (!table.isNullOrEmpty()) table else tableName}
+    private fun getTableOrGeneric(table : String?) : String
+        = if (!table.isNullOrEmpty()) table else tableName
 
-    fun readAllItems(table : String?, columns : List<String>): MutableList<List<String>>
+    fun readAllItems(table : String?, columns : List<String>): List<List<String>>
     {
         val tableData : String = getTableOrGeneric(table)
 
@@ -50,10 +52,8 @@ class DataBaseHandler(context: Context) :
                 val line : MutableList<String> = mutableListOf()
                 for (column in columns)
                     line.add(result.getString(result.getColumnIndex(column)))
-                if (line.size > 1)
-                    list.add(line)
-                else
-                    list.add(columns)
+
+                if (line.size > 1) list.add(line) else list.add(columns)
             }
             while (result.moveToNext())
         }
@@ -84,11 +84,13 @@ class DataBaseHandler(context: Context) :
         val tableData : String = getTableOrGeneric(table)
 
         val db = this.writableDatabase
+        // Add values to sql statement
         val values = ContentValues()
         for (entry in map)
             values.put(entry.key, entry.value)
 
         val success = db.insert(tableData, null, values)
+
         db.close()
         return success != -1L
     }
@@ -118,8 +120,11 @@ class DataBaseHandler(context: Context) :
             query = "SELECT COL_ID FROM $tableData WHERE NAME = ?"
             args = title
         }
-        else
+        else {
+            // Should fix itself if you try to modify it
+            this.writableDatabase.execSQL("DELETE FROM $tableName WHERE NAME IS NULL OR trim(NAME) = ''")
             throw IllegalArgumentException("Both title and url are null")
+        }
 
         val cursor = db.rawQuery(query, arrayOf(args))
         val index = cursor.getColumnIndex("COL_ID")
@@ -134,12 +139,11 @@ class DataBaseHandler(context: Context) :
         throw exitProcess(0)
     }
 
-    fun deleteUsingID(table : String?, id : Int){
-        val tableData : String = getTableOrGeneric(table)
-
-        val db = this.writableDatabase
-        db.delete(tableData, "COL_ID = ?", arrayOf(id.toString()))
-    }
+    fun deleteUsingID(table : String?, id : Int) =
+        this.writableDatabase.let { database ->
+            val tableData : String = getTableOrGeneric(table)
+            database.delete(tableData, "COL_ID = ?", arrayOf(id.toString()))
+        }
     fun checkDuplicateBooklist(table : String?, url : String) : Boolean{
         val db = this.readableDatabase
         val tableData : String = getTableOrGeneric(table)
@@ -151,8 +155,7 @@ class DataBaseHandler(context: Context) :
     }
     fun getConfigFromDomain (table : String, domain : String) : MutableList<String>
     {
-        val db = this.readableDatabase
-        val result = db.rawQuery("SELECT * FROM $table WHERE DOMAIN = ?", arrayOf(domain))
+        val result = this.readableDatabase.rawQuery("SELECT * FROM $table WHERE DOMAIN = ?", arrayOf(domain))
         val line : MutableList<String> = mutableListOf()
         if (result.moveToFirst())
         {
@@ -168,8 +171,7 @@ class DataBaseHandler(context: Context) :
     // Table Related functions
     fun getTables() : List<String>
     {
-        val db = this.readableDatabase
-        val result = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", arrayOf())
+        val result = this.readableDatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", arrayOf())
         val returnList : MutableList<String> = mutableListOf()
         // The dropdown item used to add books to the list
         returnList.add("Add a List +")
@@ -179,9 +181,7 @@ class DataBaseHandler(context: Context) :
             } while (result.moveToNext())
         }
         result.close()
-        returnList.removeIf { name ->
-            name in listOf("android_metadata", "sqlite_sequence", "CONFIG")
-        }
+        returnList.removeIf { name -> name in listOf("android_metadata", "sqlite_sequence", "CONFIG") }
         return returnList
     }
     fun createTable(name : String, values : String)
@@ -193,25 +193,24 @@ class DataBaseHandler(context: Context) :
         db.close()
     }
     fun createBookList(name : String)
-    {
-        val cleanedName = name.replace(" ", "_")
-        createTable(cleanedName, "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME VARCHAR(256), URL VARCHAR(256))")
-    }
+        = createTable(name, "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME VARCHAR(256) NOT NULL, URL VARCHAR(256)) NOT NULL")
     fun modifyTable(currentTable : String?, name : String){
-        val tableData : String = getTableOrGeneric(currentTable)
 
+        val tableData : String = getTableOrGeneric(currentTable)
         val cleanedName = name.replace(" ", "_")
         val db = this.writableDatabase
+
         db.execSQL("ALTER TABLE $tableData RENAME TO $cleanedName")
-        tableName = cleanedName
+        tableName = name
         db.close()
     }
-    fun deleteTable(name: String)
-    {
-        val db = this.writableDatabase
-        if (name != "BOOKS")
-            db.execSQL("DROP TABLE IF EXISTS $name")
-        db.close()
-    }
+    fun deleteTable(name: String) =
+        this.writableDatabase.let {
+            if (name != "BOOKS")
+            {
+                it.execSQL("DROP TABLE IF EXISTS $name")
+            }
+            it.close()
+        }
 }
 

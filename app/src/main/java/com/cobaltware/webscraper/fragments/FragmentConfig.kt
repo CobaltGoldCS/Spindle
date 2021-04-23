@@ -23,8 +23,8 @@ class FragmentConfig : Fragment() {
     private lateinit var configAdapter: ConfigAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
         val viewer = inflater.inflate(R.layout.fragment_config, container, false)
@@ -33,33 +33,31 @@ class FragmentConfig : Fragment() {
         return viewer
     }
 
-    private fun initRecycler(v : View)
-    { thread {
-        val rawData = DB.readAllItems("CONFIG", listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH"))
-        val actualList = mutableListOf<Config>()
-        for (data in rawData)
-            actualList.add(Config(data[0].toInt(), data[1], data[2], data[3], data[4]))
+    private fun initRecycler(v: View) {
+        thread {
+            val fromDatabase = DB.readAllItems("CONFIG", listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH"))
+            val actualList = mutableListOf<Config>()
+            fromDatabase.forEach { data ->
+                actualList.add(Config(data[0].toInt(), data[1], data[2], data[3], data[4]))
+            }
 
-        configAdapter = object : ConfigAdapter(actualList.toList()) {
-            override fun clickHandler(col_id : Int)
-            {
-                val list = DB.readItem("CONFIG", col_id, listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH"))
-                val neededConfig = Config(list[0].toInt(), list[1], list[2], list[3], list[4])
-                runAddDialog(neededConfig)
+            configAdapter = object : ConfigAdapter(actualList.toList()) {
+                override fun clickHandler(col_id: Int) {
+                    val list = DB.readItem("CONFIG", col_id, listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH"))
+                    val neededConfig = Config(list[0].toInt(), list[1], list[2], list[3], list[4])
+                    runAddDialog(neededConfig)
+                }
+            }
+            requireActivity().runOnUiThread {
+                v.configView.adapter = configAdapter
+                v.configView.layoutManager = LinearLayoutManager(requireContext())
+                v.configView.setHasFixedSize(true)
             }
         }
-        requireActivity().runOnUiThread {
-            v.configView.adapter = configAdapter
-            v.configView.layoutManager = LinearLayoutManager(requireContext())
-            v.configView.setHasFixedSize(true)
-        }
     }
-    }
-    private fun initBasicUi(v : View)
-    {
-        v.addActionButton.setOnClickListener {
-            runAddDialog(null)
-        }
+
+    private fun initBasicUi(v: View) {
+            v.addActionButton.setOnClickListener { runAddDialog(null) }
     }
     private fun runAddDialog(config : Config?)
     {

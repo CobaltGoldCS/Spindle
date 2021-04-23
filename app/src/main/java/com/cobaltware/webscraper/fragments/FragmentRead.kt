@@ -15,6 +15,7 @@ import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.datahandling.DB
 import com.cobaltware.webscraper.datahandling.webhandlers.webdata
+import kotlinx.android.synthetic.main.fragment_read.*
 import kotlinx.android.synthetic.main.fragment_read.view.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
@@ -58,6 +59,7 @@ class FragmentRead : Fragment() {
             val completableFuture: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(url) }
             Log.d("data", "getting data from completableFuture")
             val data : List<String?> = completableFuture.get()
+            if (data.isNullOrEmpty()) quit() // TODO : Tell user to add a config for this domain
             Log.d("data", "Data obtained asyncUrlLoad")
             vibrate(150)
             // Update the gui
@@ -76,8 +78,7 @@ class FragmentRead : Fragment() {
         viewer.nextButton.isVisible = false
 
         viewer.scrollable.setNavigationOnClickListener {
-            val activity : MainActivity = activity as MainActivity
-            fragmentTransition(activity, FragmentMain(), View.VISIBLE)
+            quit()
         }
     }
 
@@ -92,16 +93,21 @@ class FragmentRead : Fragment() {
         // Set up python stuff, and call UrlReading Class with a Url
         val inst = Python.getInstance()
         val webpack = inst.getModule("webdata")
-        val instance = webpack.callAttr("UrlReading", url)
-        val returnList = mutableListOf<String>()
-        // Get data from UrlReading Instance
-        returnList.add(instance["title"].toString())
-        returnList.add(instance["content"].toString())
-        returnList.add(instance["prev"].toString())
-        returnList.add(instance["next"].toString())
-        returnList.add(url)
+        try {
+            val instance = webpack.callAttr("UrlReading", url)
+            val returnList = mutableListOf<String>()
+            // Get data from UrlReading Instance
+            with(returnList)
+            {
+                this.add(instance["title"].toString())
+                this.add(instance["content"].toString())
+                this.add(instance["prev"].toString())
+                this.add(instance["next"].toString())
+                this.add(url)
+            }
+            return returnList
 
-        return returnList
+        }catch (e: Exception){return emptyList()}
     }
 
     private fun updateUi(title: String, content: String, prevUrl: String?, nextUrl: String?, current: String){
@@ -146,13 +152,17 @@ class FragmentRead : Fragment() {
         viewer.contentScroll.scrollTo(0, 0)
     }
 
-    private fun vibrate(milis: Int){
+    private fun vibrate(milis: Int) {
         try {
             val vibrator = requireActivity().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             if (vibrator.hasVibrator())
-                vibrator.vibrate(
-                    VibrationEffect.createOneShot
-                        (milis.toLong(), VibrationEffect.EFFECT_HEAVY_CLICK))
-        } catch (e: Exception){}
+                vibrator.vibrate(VibrationEffect.createOneShot
+                (milis.toLong(), VibrationEffect.EFFECT_HEAVY_CLICK))
+        } catch (e: Exception) {}
+    }
+    private fun quit()
+    {
+        val activity : MainActivity = activity as MainActivity
+        fragmentTransition(activity, FragmentMain(), View.VISIBLE)
     }
 }

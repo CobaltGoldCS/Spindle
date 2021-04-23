@@ -16,7 +16,7 @@ class ListDialog(context: Context, private var title : String?) : Dialog(context
         setContentView(R.layout.menu_add_list)
         if (title != null)
             domainUrlInput.setText(title!!, TextView.BufferType.EDITABLE)
-        deleteButton.setOnClickListener {this.onCancelClick()}
+        deleteButton.setOnClickListener {this.onDeleteClick()}
         actionButton.setOnClickListener {this.onActionClick()}
         cancelButton.setOnClickListener {dismiss()}
     }
@@ -33,7 +33,7 @@ class ListDialog(context: Context, private var title : String?) : Dialog(context
         }
         dismiss()
     }
-    private fun onCancelClick(){
+    private fun onDeleteClick(){
         if (title != null) {
             DB.deleteTable(title!!)
         }

@@ -7,6 +7,7 @@ import com.cobaltware.webscraper.datahandling.DB
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.menu_config.*
 import kotlinx.android.synthetic.main.menu_config.view.*
+import kotlin.concurrent.thread
 
 class ConfigDialog(private var config : Config?, private var adapter : ConfigAdapter) : BottomSheetDialogFragment() {
     override fun onCreateView(
@@ -18,13 +19,13 @@ class ConfigDialog(private var config : Config?, private var adapter : ConfigAda
                 "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, DOMAIN VARCHAR(256), CONTENTXPATH VARCHAR(256), PREVXPATH VARCHAR(256), NEXTXPATH VARCHAR(256))")
         val view = inflater.inflate(R.layout.menu_config, container, true)
         setAllTexts(view)
-        view.actionButton.setOnClickListener {onActionClick()}
+        view.actionButton.setOnClickListener {onClick() }
         view.deleteButton.setOnClickListener {onDelete()}
         view.cancelButton.setOnClickListener {dismiss() }
         return view
     }
 
-    private fun onActionClick()
+    private fun onClick()
     {
         if (!guaranteeAllFields())
             return
@@ -49,19 +50,22 @@ class ConfigDialog(private var config : Config?, private var adapter : ConfigAda
 
     private fun onDelete()
     {
-        if (config != null) {
-            DB.deleteUsingID("CONFIG", config!!.col_id)
-            updateAdapter()
+        thread{
+            if (config != null) {
+                DB.deleteUsingID("CONFIG", config!!.col_id)
+                updateAdapter()
+            }
+            dismiss()
         }
-        dismiss()
     }
-    private fun makeConfigFromList(list : List<String>) = Config(list[0].toInt(), list[1], list[2], list[3], list[4])
+    private fun databaseToConfigs() = DB.readAllItems("CONFIG",
+        listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH")
+            ).map { list -> Config(list[0].toInt(), list[1], list[2], list[3], list[4])}
+
     private fun updateAdapter()
     {
-        val newList = DB.readAllItems("CONFIG",
-            listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH")
-            ).map { makeConfigFromList(it) }
-        adapter.changeItems(newList)
+        val newList = databaseToConfigs()
+        requireActivity().runOnUiThread{ adapter.changeItems(newList) }
     }
 
     private fun setAllTexts(v : View)
