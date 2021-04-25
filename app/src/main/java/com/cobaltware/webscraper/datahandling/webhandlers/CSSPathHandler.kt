@@ -1,7 +1,6 @@
 package com.cobaltware.webscraper.datahandling.webhandlers
 
 import android.util.Log
-import androidx.annotation.Nullable
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.util.*
@@ -46,21 +45,20 @@ fun csspathReader(document : Document, contentPath : String,
  * @see csspathReader
  * @param document The document to get the attribute from
  * @param CssPath The css path with the attribute syntax stored in it
- * @return The string from the attribute selected; or null if the attribute is not found in the csspath
- * @return If the syntax is not found, it will return the normal Element type
+ * @return The string from the attribute selected; or null if the attribute is not found in the css path.
+ * If the syntax is not found, it will return the normal Element type
  */
 @Suppress("KDocUnresolvedReference")
 fun customSyntaxAnalyzer(document : Document, cssPath : String) : Any?
 {
     val split = cssPath.split(" ")
-    val first = split[0]
     if (cssPath.trim().startsWith("$"))
     {
-        val newPath = split.drop(1).joinToString(" ")
-        val element = document.select(newPath).firstOrNull()
+        val pathOnly = split.drop(1).joinToString(" ")
+        val element = document.select(pathOnly).firstOrNull()
         Log.d("All Attributes", element?.attributes().toString())
-
-        val attrSelector = first.substring(1)
+        
+        val attrSelector = split[0].substring(1) // Takes away '$'
 
         val attr = if (attrSelector.toLowerCase(Locale.ROOT) != "text") element?.attr(attrSelector) else element?.text()
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WebScraper</string>
+    <string name="app_name">Spindle</string>
     <string name="book_list">Url - Supports\n kisslightnovels.info, readwebnovels.net,\n boxnovel.com, boxnovel.net (Broken),
         \n readnovelfull.com, royalroad.com,\n scribblehub.com, fanfiction.net,\n wattpad.com, webnovel.com,\n readlightnovel.org \nlightnovelworld.com cloudflare issues</string>
     <string name="addbook">Add A Book</string>
