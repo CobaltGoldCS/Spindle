@@ -45,5 +45,4 @@ class MainActivity : AppCompatActivity() {
         fragmentTrans.replace(R.id.fragmentSpot, fragment)
         fragmentTrans.commit()
     }
-    // TODO : Add handler for switching fragments when one of the nav items is clicked
 }

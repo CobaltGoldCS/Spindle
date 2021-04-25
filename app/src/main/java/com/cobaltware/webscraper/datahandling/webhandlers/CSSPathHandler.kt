@@ -6,7 +6,15 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.util.*
 
-fun csspathReader(document : Document, url : String, contentPath : String,
+/** Reads css paths in the format for processing a configuration with a Url
+ * @see customSyntaxAnalyzer
+ * @param document The document containing elements disclosed by the paths
+ * @param contentPath The css path used to get the text of the book
+ * @param prevPath The css path used to get the url of the previous url of the book
+ * @param nextPath The css path used to get the url of the next url of the book
+ * @return Returns data important to the ui in the order (title, main text content, previous url, next url, current url)
+ */
+fun csspathReader(document : Document, contentPath : String,
                   prevPath : String, nextPath :String) : List<String?>
 {
     val title = document.title()
@@ -31,16 +39,22 @@ fun csspathReader(document : Document, url : String, contentPath : String,
     val nextUrl : String? = if(nextElement is Element && nextElement.attr("abs:href") !in listOf("#", ""))
         nextElement.absUrl("href")
     else { nextElement as String? }
-    return listOf(title, text, prevUrl, nextUrl, url)
+    return listOf(title, text, prevUrl, nextUrl, document.location())
 }
 
-// Analyzes custom syntax I will define to work for this program
-// TODO: Turn into coroutines to speed up performance
+/** Analyzes custom syntax defined to get attributes for processing if needed
+ * @see csspathReader
+ * @param document The document to get the attribute from
+ * @param CssPath The css path with the attribute syntax stored in it
+ * @return The string from the attribute selected; or null if the attribute is not found in the csspath
+ * @return If the syntax is not found, it will return the normal Element type
+ */
+@Suppress("KDocUnresolvedReference")
 fun customSyntaxAnalyzer(document : Document, cssPath : String) : Any?
 {
     val split = cssPath.split(" ")
     val first = split[0]
-    if (cssPath.startsWith("$"))
+    if (cssPath.trim().startsWith("$"))
     {
         val newPath = split.drop(1).joinToString(" ")
         val element = document.select(newPath).firstOrNull()

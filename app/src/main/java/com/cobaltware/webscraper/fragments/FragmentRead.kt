@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.chaquo.python.Python
@@ -57,10 +58,17 @@ class FragmentRead : Fragment() {
             vibrate(100)
             Log.d("data", "running completable future to obtain data")
             val completableFuture: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(url) }
-            Log.d("data", "getting data from completableFuture")
             val data : List<String?> = completableFuture.get()
-            if (data.isNullOrEmpty()) quit() // TODO : Tell user to add a config for this domain
-            Log.d("data", "Data obtained asyncUrlLoad")
+
+            if (data.isNullOrEmpty()) {
+                // Error handling
+                Log.e("Domain Error","Domain may not be properly supported; exiting")
+                quit("This domain / url is not properly supported in the configs")
+
+                return@execute
+            }
+
+            Log.d("data", "Data obtained from future")
             vibrate(150)
             // Update the gui
             requireActivity().runOnUiThread {
@@ -135,6 +143,11 @@ class FragmentRead : Fragment() {
             viewer.prevButton.setOnClickListener { executor.execute{
                 vibrate(100)
                 val data = prevData.get()
+                if (data.isNullOrEmpty())
+                {   // Error Handling in event of url break
+                    quit("Unknown Error has occurred, may be linking to bad url")
+                    return@execute
+                }
                 requireActivity().runOnUiThread { updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!) }
             }}
         }
@@ -145,6 +158,11 @@ class FragmentRead : Fragment() {
             viewer.nextButton.setOnClickListener { executor.execute{
                 vibrate(100)
                 val data = nextData.get()
+                if (data.isNullOrEmpty())
+                {   // Error Handling in event of url break
+                    quit("Unknown Error has occurred, may be linking to bad url")
+                    return@execute
+                }
                 requireActivity().runOnUiThread { updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!) }
             }}
         }
@@ -160,9 +178,10 @@ class FragmentRead : Fragment() {
                 (milis.toLong(), VibrationEffect.EFFECT_HEAVY_CLICK))
         } catch (e: Exception) {}
     }
-    private fun quit()
+    private fun quit(error: String? = null)
     {
         val activity : MainActivity = activity as MainActivity
+        if (error != null) Toast.makeText(activity,  error, Toast.LENGTH_SHORT).show()
         fragmentTransition(activity, FragmentMain(), View.VISIBLE)
     }
 }

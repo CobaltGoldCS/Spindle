@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.URLUtil
 import android.widget.TextView
 import com.cobaltware.webscraper.BookAdapter
 import com.cobaltware.webscraper.MainActivity
@@ -106,12 +107,17 @@ class FragmentAdd : BottomSheetDialogFragment() {
     }
     private fun guaranteeValidInputs () : Boolean
     {
-        if (textName.text.toString().replace("\n", "").isNotEmpty() &&
-                textUrl .text.toString().replace("\n", "").isNotEmpty()
-        ) { return true }
-        textName.error = "You have an invalid input"
-        textUrl .error = "You have an invalid input"
-        return false
+        if (textName.text.toString().replace("\n", "").isEmpty())
+        {
+            textName.error = "You have an invalid input"
+            return false
+        }
+        if (!URLUtil.isValidUrl(textUrl.text.toString()))
+        {
+            textUrl.error = "You have an invalid Url"
+            return false
+        }
+        return true
     }
 
     override fun onDismiss(dialog: DialogInterface) {
