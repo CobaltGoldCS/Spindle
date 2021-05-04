@@ -8,14 +8,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import com.chaquo.python.Python
 import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.datahandling.DB
 import com.cobaltware.webscraper.datahandling.webhandlers.webdata
+import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.fragment_read.*
 import kotlinx.android.synthetic.main.fragment_read.view.*
 import java.util.concurrent.CompletableFuture
@@ -28,6 +31,9 @@ class FragmentRead : Fragment() {
     private var colId: Int = 0
     private val executor : Executor = Executors.newSingleThreadExecutor()
     lateinit var viewer : View
+
+    private var nextHandler = PageChangeHandler(this)
+    private var prevHandler = PageChangeHandler(this)
 
     companion object {
         @JvmStatic
@@ -56,19 +62,16 @@ class FragmentRead : Fragment() {
         // First time run
         executor.execute {
             vibrate(100)
-            Log.d("data", "running completable future to obtain data")
-            val completableFuture: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(url) }
-            val data : List<String?> = completableFuture.get()
+            Log.d("data", "Obtaining data")
+            val data : List<String?> = getUrlInfo(url)
 
             if (data.isNullOrEmpty()) {
                 // Error handling
                 Log.e("Domain Error","Domain may not be properly supported; exiting")
                 quit("This domain / url is not properly supported in the configs")
-
                 return@execute
             }
 
-            Log.d("data", "Data obtained from future")
             vibrate(150)
             // Update the gui
             requireActivity().runOnUiThread {
@@ -88,9 +91,16 @@ class FragmentRead : Fragment() {
         viewer.scrollable.setNavigationOnClickListener {
             quit()
         }
+
+        viewer.nextButton.setOnClickListener { executor.execute{ nextHandler.changePage() }}
+        viewer.prevButton.setOnClickListener { executor.execute {prevHandler.changePage() }}
     }
 
-    private fun getUrlInfo(url: String) : List<String?>
+    /** Returns data required to change pages from a sample Url, using either the configs or python bindings
+     * @param url The url to obtain data from
+     * @return Either an empty list if invalid, or a list in the order [title, content, prevUrl, nextUrl, currentUrl]
+     */
+    fun getUrlInfo(url: String) : List<String?>
     {
         // Integration with Config table and Configurations
         val domain = url.split("/")[2].replace("www.", "")
@@ -101,7 +111,8 @@ class FragmentRead : Fragment() {
         // Set up python stuff, and call UrlReading Class with a Url
         val inst = Python.getInstance()
         val webpack = inst.getModule("webdata")
-        try {
+
+        return try {
             val instance = webpack.callAttr("UrlReading", url)
             val returnList = mutableListOf<String>()
             // Get data from UrlReading Instance
@@ -113,12 +124,14 @@ class FragmentRead : Fragment() {
                 this.add(instance["next"].toString())
                 this.add(url)
             }
-            return returnList
+            returnList
 
-        }catch (e: Exception){return emptyList()}
+        }catch (e: Exception){
+            emptyList()
+        }
     }
 
-    private fun updateUi(title: String, content: String, prevUrl: String?, nextUrl: String?, current: String){
+    fun updateUi(title: String, content: String, prevUrl: String?, nextUrl: String?, current: String){
         viewer.scrollTitle.title = title
         viewer.contentView.text = content
 
@@ -134,43 +147,16 @@ class FragmentRead : Fragment() {
             else -> viewer.scrollTitle.setExpandedTitleTextAppearance(R.style.TextAppearance_Design_CollapsingToolbar_Expanded)
         }
 
-        // Preload next and previous pages
-        // Full process of this mirrors asyncUrlLoad without the logs
+        // Since the visibility is already changed, we don't have to check again
         if (viewer.prevButton.isVisible)
-        {
-            val prevData: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(prevUrl!!) }
-            // PrevButton click just updates the ui
-            viewer.prevButton.setOnClickListener { executor.execute{
-                vibrate(100)
-                val data = prevData.get()
-                if (data.isNullOrEmpty())
-                {   // Error Handling in event of url break
-                    quit("Unknown Error has occurred, may be linking to bad url")
-                    return@execute
-                }
-                requireActivity().runOnUiThread { updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!) }
-            }}
-        }
+            prevHandler.prepPageChange(prevUrl!!)
         if (viewer.nextButton.isVisible)
-        {
-            val nextData: CompletableFuture<List<String?>> = CompletableFuture.supplyAsync { getUrlInfo(nextUrl!!) }
-            // Same as prevButton click
-            viewer.nextButton.setOnClickListener { executor.execute{
-                vibrate(100)
-                val data = nextData.get()
-                if (data.isNullOrEmpty())
-                {   // Error Handling in event of url break
-                    quit("Unknown Error has occurred, may be linking to bad url")
-                    return@execute
-                }
-                requireActivity().runOnUiThread { updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!) }
-            }}
-        }
+            nextHandler.prepPageChange(nextUrl!!)
 
         viewer.contentScroll.scrollTo(0, 0)
     }
 
-    private fun vibrate(milis: Int) {
+    fun vibrate(milis: Int) {
         try {
             val vibrator = requireActivity().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             if (vibrator.hasVibrator())
@@ -178,10 +164,36 @@ class FragmentRead : Fragment() {
                 (milis.toLong(), VibrationEffect.EFFECT_HEAVY_CLICK))
         } catch (e: Exception) {}
     }
-    private fun quit(error: String? = null)
+
+    fun quit(error: String? = null)
     {
         val activity : MainActivity = activity as MainActivity
-        if (error != null) Toast.makeText(activity,  error, Toast.LENGTH_SHORT).show()
+        if (error != null) requireActivity().runOnUiThread {Toast.makeText(activity,  error, Toast.LENGTH_SHORT).show()}
         fragmentTransition(activity, FragmentMain(), View.VISIBLE)
+    }
+}
+
+/** Handler for handling page changing logistics
+ * @param readFragment The readFragment, which this uses the methods from
+ */
+class PageChangeHandler(private val readFragment: FragmentRead)
+{
+    lateinit var futureUrl : CompletableFuture<List<String?>>
+    /** Preloads the url asynchronously
+     *  @param url The url to preload
+     */
+    fun prepPageChange(url : String) {futureUrl = CompletableFuture.supplyAsync { readFragment.getUrlInfo(url) } }
+
+    /** Handles updating the UI of the fragment */
+    fun changePage()
+    {
+        readFragment.vibrate(100)
+        val data = futureUrl.get()
+        if (data.isNullOrEmpty())
+        {   // Error Handling in event of url break
+            readFragment.quit("Unknown Error has occurred, may be linking to bad url")
+            return
+        }
+        readFragment.requireActivity().runOnUiThread { readFragment.updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4]!!) }
     }
 }

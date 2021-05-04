@@ -1,4 +1,4 @@
-package com.cobaltware.webscraper.fragments
+package com.cobaltware.webscraper.dialogs
 
 import android.content.DialogInterface
 import android.os.Bundle
@@ -12,13 +12,15 @@ import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.DB
+import com.cobaltware.webscraper.fragments.FragmentMain
+import com.cobaltware.webscraper.fragments.fragmentTransition
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.menu_add_book.*
 import kotlinx.android.synthetic.main.menu_add_book.view.*
 import kotlin.concurrent.thread
 
 
-class FragmentAdd : BottomSheetDialogFragment() {
+class AddDialog : BottomSheetDialogFragment() {
     lateinit var bookAdapter : BookAdapter
     lateinit var bookList: MutableList<Book>
     // Supposed to represent if you clicked on an existing book or not
@@ -62,7 +64,7 @@ class FragmentAdd : BottomSheetDialogFragment() {
             // On click listeners
             v.AddButton.setOnClickListener {
                 val modify = book != null
-                addBook(v.textUrl.text.toString(), v.textName.text.toString(), modify)
+                addOrModifyBook(v.textUrl.text.toString(), v.textName.text.toString(), modify)
             }
             v.DelButton.setOnClickListener {
                 if (book != null) {
@@ -78,9 +80,8 @@ class FragmentAdd : BottomSheetDialogFragment() {
         }
     }
 
-    private fun addBook(urlInput: String, titleInput: String, modify: Boolean)
+    private fun addOrModifyBook(urlInput: String, titleInput: String, modify: Boolean)
     {
-        // Needed references to EditText input
         if (!guaranteeValidInputs())
             return
         if (!modify)
@@ -105,6 +106,10 @@ class FragmentAdd : BottomSheetDialogFragment() {
         // Update values and add them as new line to recycler
         this.dismiss()
     }
+
+    /** Makes sure that all inputs are valid; otherwise gives certain errors to the textviews
+     * @return if both [textName] and [textUrl]'s inputs are valid
+     */
     private fun guaranteeValidInputs () : Boolean
     {
         if (textName.text.toString().replace("\n", "").isEmpty())
@@ -120,6 +125,7 @@ class FragmentAdd : BottomSheetDialogFragment() {
         return true
     }
 
+    /** Updates the recycler as well as dismissing */
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
         bookAdapter.changeItems(bookList)
@@ -136,7 +142,7 @@ class FragmentAdd : BottomSheetDialogFragment() {
          */
         @JvmStatic
         fun newInstance(bookAdapter: BookAdapter, url : String?, title : String?) =
-            FragmentAdd().apply {
+            AddDialog().apply {
                 bookList = bookAdapter.bookList.toMutableList()
                 this.bookAdapter = bookAdapter
                 arguments = Bundle().apply {

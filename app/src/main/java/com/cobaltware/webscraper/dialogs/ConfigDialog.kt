@@ -1,7 +1,9 @@
-package com.cobaltware.webscraper
+package com.cobaltware.webscraper.dialogs
 
 import android.os.Bundle
 import android.view.*
+import com.cobaltware.webscraper.ConfigAdapter
+import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.datahandling.Config
 import com.cobaltware.webscraper.datahandling.DB
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -18,33 +20,32 @@ class ConfigDialog(private var config : Config?, private var adapter : ConfigAda
         DB.createTable("CONFIG",
                 "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, DOMAIN VARCHAR(256), CONTENTXPATH VARCHAR(256), PREVXPATH VARCHAR(256), NEXTXPATH VARCHAR(256))")
         val view = inflater.inflate(R.layout.menu_config, container, true)
+
         setAllTexts(view)
-        view.actionButton.setOnClickListener {onClick() }
+        view.actionButton.setOnClickListener {onAction()}
         view.deleteButton.setOnClickListener {onDelete()}
-        view.cancelButton.setOnClickListener {dismiss() }
+        view.cancelButton.setOnClickListener {dismiss ()}
+
         return view
     }
 
-    private fun onClick()
+    private fun onAction()
     {
         if (!guaranteeAllFields())
             return
+
         val modify = config != null
 
         val insertArgs = arrayOf(domainUrlInput.text.toString(), contentXpathInput.text.toString(), previousButtonXpathInput.text.toString(), nextButtonXpathInput.text.toString())
         val insertVals = arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH")
+        val insertDict = createDictFromArrays(insertVals, insertArgs)
 
-        if (!modify)
+        when(modify)
         {
-
-            val insert = createDictFromArrays(insertVals, insertArgs)
-            DB.insertItemIntoTable("CONFIG", insert)
-            updateAdapter()
+            true  -> DB.modifyItem("CONFIG", config!!.col_id, insertDict)
+            false -> DB.insertItemIntoTable("CONFIG", insertDict)
         }
-        else{
-            DB.modifyItem("CONFIG", config!!.col_id, createDictFromArrays(insertVals, insertArgs))
-            updateAdapter()
-        }
+        updateAdapter()
         dismiss()
     }
 
@@ -77,23 +78,27 @@ class ConfigDialog(private var config : Config?, private var adapter : ConfigAda
         v.previousButtonXpathInput.setText(config!!.prevXPath)
         v.contentXpathInput.setText(config!!.mainXPath)
     }
-    // Returns true if all fields are filled, else false
+
+    /** Dispenses errors for text inputs if they are invalid
+     * @return True if all fields are valid, false if not
+     */
     private fun guaranteeAllFields() : Boolean
     {
-        if (domainUrlInput.text.isEmpty()||
-            nextButtonXpathInput.text.isEmpty()||
-            previousButtonXpathInput.text.isEmpty()||
-            contentXpathInput.text.isEmpty())
-        {
-            domainUrlInput.error = "All fields are required"
-            nextButtonXpathInput.error = "All fields are required"
-            previousButtonXpathInput.error = "All fields are required"
-            contentXpathInput.error = "All fields are required"
-            return false
+        var valid = true
+        listOf(domainUrlInput, nextButtonXpathInput, previousButtonXpathInput, contentXpathInput).forEach {
+            if (it.text.isEmpty()) {
+                it.error = "This field is invalid"
+                valid = false
+            }
         }
-        return true
+        return valid
     }
 
+    /** Creates a map from list of keys and list of arguments
+     * @param keys The keys for the map
+     * @param args The arguments to match to the keys
+     * @return The map with keys as keys to the args
+     */
     private fun createDictFromArrays(keys : Array<String>, args : Array<String>) : Map<String, String> = keys.zip(args).toMap()
 
 }

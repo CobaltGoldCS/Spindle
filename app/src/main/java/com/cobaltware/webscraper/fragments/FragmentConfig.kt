@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cobaltware.webscraper.ConfigAdapter
-import com.cobaltware.webscraper.ConfigDialog
+import com.cobaltware.webscraper.dialogs.ConfigDialog
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.datahandling.Config
 import com.cobaltware.webscraper.datahandling.DB
@@ -33,8 +33,12 @@ class FragmentConfig : Fragment() {
         return viewer
     }
 
+    /** Populates and generally sets up the recyclerview
+     * @param v The view that the recycler is part of
+     */
     private fun initRecycler(v: View) {
         thread {
+            // Populate recyclerview
             val fromDatabase = DB.readAllItems("CONFIG", listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH"))
             val actualList = mutableListOf<Config>()
             fromDatabase.forEach { data ->
@@ -43,11 +47,11 @@ class FragmentConfig : Fragment() {
 
             configAdapter = object : ConfigAdapter(actualList.toList()) {
                 override fun clickHandler(col_id: Int) {
-                    val list = DB.readItem("CONFIG", col_id, listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH"))
-                    val neededConfig = Config(list[0].toInt(), list[1], list[2], list[3], list[4])
-                    runAddDialog(neededConfig)
+                    val neededConfig = actualList.find {it.col_id == col_id}
+                    addOrChangeDialog(neededConfig)
                 }
             }
+
             requireActivity().runOnUiThread {
                 v.configView.adapter = configAdapter
                 v.configView.layoutManager = LinearLayoutManager(requireContext())
@@ -56,10 +60,9 @@ class FragmentConfig : Fragment() {
         }
     }
 
-    private fun initBasicUi(v: View) {
-            v.addActionButton.setOnClickListener { runAddDialog(null) }
-    }
-    private fun runAddDialog(config : Config?)
+    private fun initBasicUi(v: View) = v.addActionButton.setOnClickListener { addOrChangeDialog(null) }
+
+    private fun addOrChangeDialog(config : Config?)
     {
         val dialog = ConfigDialog(config, configAdapter)
         dialog.show(requireActivity().supportFragmentManager, "Add New Config")

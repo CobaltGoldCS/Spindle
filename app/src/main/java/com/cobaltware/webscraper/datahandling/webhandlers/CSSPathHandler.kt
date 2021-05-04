@@ -22,7 +22,7 @@ fun csspathReader(document : Document, contentPath : String,
     if (content is Element)
     {
         try {
-            if (content.tagName() == "div"){ content.children().forEach { text += "\n" + it.text() } }
+            if (content.tagName() == "div"){ content.children().forEach { text += "\n     " + it.text() } }
             else {text = content.text()}
         } catch (e : NullPointerException){text = "Invalid Content Selector"}
     }

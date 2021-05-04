@@ -1,7 +1,6 @@
 package com.cobaltware.webscraper
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.chaquo.python.Python
@@ -10,7 +9,6 @@ import com.cobaltware.webscraper.datahandling.DB
 import com.cobaltware.webscraper.datahandling.DataBaseHandler
 import com.cobaltware.webscraper.fragments.FragmentConfig
 import com.cobaltware.webscraper.fragments.FragmentMain
-import com.cobaltware.webscraper.fragments.fragmentTransition
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -21,7 +19,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // Create and setup various background processes
         if (!Python.isStarted()) Python.start(AndroidPlatform(this))
-        DB = DataBaseHandler(this) // This is the ONLY Time the database should be changed
+        DB = DataBaseHandler(this) // This is the ONLY Time the database should be initialized
         setContentView(R.layout.activity_main)
         setNavTransitions()
 

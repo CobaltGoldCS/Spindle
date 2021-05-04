@@ -1,15 +1,16 @@
-package com.cobaltware.webscraper
+package com.cobaltware.webscraper.dialogs
 
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.Window
 import android.widget.TextView
+import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.datahandling.DB
 import kotlinx.android.synthetic.main.menu_add_list.*
 import kotlin.String
 
-class ListDialog(context: Context, private var title : String?) : Dialog(context) {
+class ModifyListDialog(context: Context, private var title : String?) : Dialog(context) {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -21,16 +22,13 @@ class ListDialog(context: Context, private var title : String?) : Dialog(context
         cancelButton.setOnClickListener {dismiss()}
     }
     private fun onActionClick(){
-        val modify = title != null
-        if (domainUrlInput.text.isEmpty())
-            return
+
+        if (domainUrlInput.text.isEmpty()) return
         val bookListName = domainUrlInput.text.toString()
-        if (!modify){
-            DB.createBookList(bookListName)
-        }
-        else {
-            DB.modifyTable(null, bookListName)
-        }
+
+        val modify = title != null
+        if (modify){ DB.modifyTable(null, bookListName) }
+        else       { DB.createBookList(bookListName) }
         dismiss()
     }
     private fun onDeleteClick(){
