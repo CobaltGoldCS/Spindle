@@ -49,11 +49,15 @@ class OverScrollBehavior(@Suppress("UNUSED_PARAMETER") context: Context, @Suppre
         }
 
         overScrollY -= (dyUnconsumed/OVER_SCROLL_AREA)
+        // Set a max over scroll distance
+        overScrollY = clamp(overScrollY.toFloat(), -MAX_OVER_SCROLL, MAX_OVER_SCROLL).toInt()
         val group = target as ViewGroup
         val count = group.childCount
         for (i in 0 until count) {
             val view = group.getChildAt(i)
-            view.translationY = clamp(overScrollY.toFloat(), -MAX_OVER_SCROLL, MAX_OVER_SCROLL)
+            if (view.translationY == overScrollY.toFloat())
+                break
+            view.translationY = overScrollY.toFloat()
         }
         super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type, consumed)
     }

@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.menu_add_book.view.*
 import kotlin.concurrent.thread
 
 
-class AddDialog : BottomSheetDialogFragment() {
+class ModifyBookDialog : BottomSheetDialogFragment() {
     lateinit var bookAdapter : BookAdapter
     lateinit var bookList: MutableList<Book>
     // Supposed to represent if you clicked on an existing book or not
@@ -142,7 +142,7 @@ class AddDialog : BottomSheetDialogFragment() {
          */
         @JvmStatic
         fun newInstance(bookAdapter: BookAdapter, url : String?, title : String?) =
-            AddDialog().apply {
+            ModifyBookDialog().apply {
                 bookList = bookAdapter.bookList.toMutableList()
                 this.bookAdapter = bookAdapter
                 arguments = Bundle().apply {

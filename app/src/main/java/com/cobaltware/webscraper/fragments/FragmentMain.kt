@@ -12,11 +12,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cobaltware.webscraper.*
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.DB
-import com.cobaltware.webscraper.dialogs.AddDialog
+import com.cobaltware.webscraper.dialogs.ModifyBookDialog
 import com.cobaltware.webscraper.dialogs.ModifyListDialog
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlin.concurrent.thread
+
 
 class FragmentMain : Fragment() {
     lateinit var bookAdapter : BookAdapter
@@ -172,7 +173,7 @@ class FragmentMain : Fragment() {
     // Change fragments
     private fun initAddFragmentDialog(title: String?, url: String?) {
         val activity : MainActivity = activity as MainActivity
-        val menu = AddDialog.newInstance(bookAdapter, url, title)
+        val menu = ModifyBookDialog.newInstance(bookAdapter, url, title)
         menu.show(activity.supportFragmentManager, "Add or Change Book")
     }
 

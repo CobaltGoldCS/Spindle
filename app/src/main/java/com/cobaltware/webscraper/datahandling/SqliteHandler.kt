@@ -25,18 +25,19 @@ class DataBaseHandler(context: Context) :
     }
     private fun populate()
     {
-        // TODO : Make this automatically update the table using the internet and a central file
-        this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("readnovelfull.com", ".chr-c", ".prev_chap", ".next_chap" )).toMap())
-        this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("royalroad.com", ".chapter-inner", "div.col-md-4:nth-child(1) > a:nth-child(1)", ".col-md-offset-4 > a:nth-child(1)" )).toMap())
-        this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("scribblehub.com", "#chp_raw", "div.prenext > a:nth-child(1)", "div.prenext > a:nth-child(2)" )).toMap())
-        this.insertItemIntoTable("CONFIG", arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH").zip(arrayOf("readlightnovel.org", ".hidden", ".prev-link", ".next-link" )).toMap())
+        // Combine two arrays of strings into a [Map<String, String>]
+        fun formatForInsertAction(valArgs : Array<String>) = (arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH") zip valArgs).toMap()
+
+        // Each val array contains a domain contentPath PreviousUrlPath and NextUrlPath
+        this.insertItemIntoTable("CONFIG", formatForInsertAction (arrayOf("readnovelfull.com", ".chr-c", ".prev_chap", ".next_chap" )) )
+        this.insertItemIntoTable("CONFIG", formatForInsertAction (arrayOf("royalroad.com", ".chapter-inner", "div.col-md-4:nth-child(1) > a:nth-child(1)", ".col-md-offset-4 > a:nth-child(1)" )) )
+        this.insertItemIntoTable("CONFIG", formatForInsertAction (arrayOf("scribblehub.com", "#chp_raw", "div.prenext > a:nth-child(1)", "div.prenext > a:nth-child(2)" )) )
+        this.insertItemIntoTable("CONFIG", formatForInsertAction (arrayOf("readlightnovel.org", ".hidden", ".prev-link", ".next-link" )) )
     }
     override fun onUpgrade(fdb: SQLiteDatabase, oldVersion: Int, newVersion: Int){}
 
     var tableName : String = "BOOKS"
-
-    private fun getTableOrGeneric(table : String?) : String
-        = if (!table.isNullOrEmpty()) table else tableName
+    private fun getTableOrGeneric(table : String?) : String = if (!table.isNullOrEmpty()) table else tableName
 
     fun readAllItems(table : String?, columns : List<String>): List<List<String>>
     {
@@ -157,13 +158,16 @@ class DataBaseHandler(context: Context) :
     {
         val result = this.readableDatabase.rawQuery("SELECT * FROM $table WHERE DOMAIN = ?", arrayOf(domain))
         val line : MutableList<String> = mutableListOf()
+
+        fun getStringFromColumnName(colName : String) = result.getString(result.getColumnIndex(colName))
+
         if (result.moveToFirst())
         {
-            line.add(result.getString(result.getColumnIndex("COL_ID"      )))
-            line.add(result.getString(result.getColumnIndex("DOMAIN"      )))
-            line.add(result.getString(result.getColumnIndex("CONTENTXPATH")))
-            line.add(result.getString(result.getColumnIndex("PREVXPATH"   )))
-            line.add(result.getString(result.getColumnIndex("NEXTXPATH"   )))
+            line.add(getStringFromColumnName("COL_ID"      ))
+            line.add(getStringFromColumnName("DOMAIN"      ))
+            line.add(getStringFromColumnName("CONTENTXPATH"))
+            line.add(getStringFromColumnName("PREVXPATH"   ))
+            line.add(getStringFromColumnName("NEXTXPATH"   ))
         }
         result.close()
         return line
@@ -186,14 +190,13 @@ class DataBaseHandler(context: Context) :
     }
     fun createTable(name : String, values : String)
     {
-        // Values (String) : The sql put in parentheses, look at createBooklist for example
+        // Values (String) : The sql put in parentheses, look at [createBooklist] for example
         val cleanedName = name.replace(" ", "_")
         val db = this.writableDatabase
         db.execSQL("CREATE TABLE IF NOT EXISTS $cleanedName $values")
         db.close()
     }
-    fun createBookList(name : String)
-        = createTable(name, "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME VARCHAR(256) NOT NULL, URL VARCHAR(256)) NOT NULL")
+    fun createBookList(name : String) = createTable(name, "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME VARCHAR(256) NOT NULL, URL VARCHAR(256)) NOT NULL")
     fun modifyTable(currentTable : String?, name : String){
 
         val tableData : String = getTableOrGeneric(currentTable)
@@ -207,9 +210,7 @@ class DataBaseHandler(context: Context) :
     fun deleteTable(name: String) =
         this.writableDatabase.let {
             if (name != "BOOKS")
-            {
                 it.execSQL("DROP TABLE IF EXISTS $name")
-            }
             it.close()
         }
 }
