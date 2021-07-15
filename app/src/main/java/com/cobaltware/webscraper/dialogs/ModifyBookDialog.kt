@@ -86,7 +86,7 @@ class ModifyBookDialog : BottomSheetDialogFragment() {
             return
         if (!modify)
         {   // Write new line to database
-            if (!DB.checkDuplicateBooklist(null, urlInput)) {
+            if (!DB.itemAlreadyExists(null, urlInput)) {
 
                 val insert: Boolean = DB.insertItemIntoTable(null, arrayOf("NAME", "URL").zip(arrayOf(titleInput, urlInput)).toMap())
                 if (!insert)

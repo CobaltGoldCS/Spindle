@@ -42,6 +42,8 @@ class MainActivity : AppCompatActivity() {
             true
         }
     }
+    /**Switches to another [fragment] with an animation
+     * @param fragment The fragment to switch to*/
     private fun activityFragmentSwitch(fragment: Fragment)
     {
         if (fragment.isVisible)

@@ -25,7 +25,7 @@ open class BookAdapter(var bookList: List<Book>) : RecyclerView.Adapter<BookAdap
         // Hacky way to make the on click listeners of list items customizable from outside
         holder.moreButton.setOnClickListener{
             val id : Int = currentItem.col_id
-            addClickHandler(id)
+            modifyClickHandler(id)
         }
         holder.clickableArea.setOnClickListener {
             val id : Int = currentItem.col_id
@@ -33,7 +33,7 @@ open class BookAdapter(var bookList: List<Book>) : RecyclerView.Adapter<BookAdap
         }
     }
     // This allows for modification of the click behavior of the buttons
-    open fun addClickHandler (col_id: Int){}
+    open fun modifyClickHandler (col_id: Int){}
     open fun openClickHandler(col_id: Int){}
 
     fun changeItems(newList: List<Book>){
@@ -46,8 +46,8 @@ open class BookAdapter(var bookList: List<Book>) : RecyclerView.Adapter<BookAdap
     {
         // Important variables for functions
         val titleView :  TextView = itemView.bookTitle
-        val moreButton : Button  = itemView.moreButton
-        val clickableArea : View = itemView.clickableArea
+        val moreButton : Button   = itemView.moreButton
+        val clickableArea : View  = itemView.clickableArea
     }
 
 }

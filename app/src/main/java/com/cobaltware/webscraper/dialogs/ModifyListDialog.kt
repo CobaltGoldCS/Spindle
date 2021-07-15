@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.menu_add_list.*
 import kotlin.String
 
 class ModifyListDialog(context: Context, private var title : String?) : Dialog(context) {
+    var deleted = false
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -27,13 +28,14 @@ class ModifyListDialog(context: Context, private var title : String?) : Dialog(c
         val bookListName = domainUrlInput.text.toString()
 
         val modify = title != null
-        if (modify){ DB.modifyTable(null, bookListName) }
+        if (modify){ DB.modifyTableName(null, bookListName) }
         else       { DB.createBookList(bookListName) }
         dismiss()
     }
     private fun onDeleteClick(){
         if (title != null) {
             DB.deleteTable(title!!)
+            deleted = true
         }
         dismiss()
     }

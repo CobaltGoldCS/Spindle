@@ -11,10 +11,10 @@
         android:id="@+id/listLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/backgroundColor"
         android:orientation="horizontal"
         android:weightSum="5"
-        android:background="?attr/backgroundColor"
-        app:layout_constraintBottom_toTopOf="@+id/bookLayout"
+        app:layout_constraintBottom_toTopOf="@+id/colayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,10 +27,10 @@
             android:layout_height="match_parent"
             android:layout_weight="4"
             android:hint="Reading Lists"
-            app:startIconDrawable="@drawable/icon_book"
             app:layout_constraintBottom_toTopOf="@+id/bookLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:startIconDrawable="@drawable/icon_book"
             tools:ignore="HardcodedText">
 
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -58,31 +58,32 @@
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/bookLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:layoutAnimation="@anim/booklist_anim"
-        android:background="?attr/backgroundColor"
-        android:overScrollMode="always"
-
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/listLayout" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/colayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginBottom="30dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/backgroundColor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/listLayout">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/bookLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+
+            android:background="?attr/backgroundColor"
+            android:layoutAnimation="@anim/booklist_anim"
+            android:orientation="vertical"
+            android:overScrollMode="always"
+
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/addMenuButton"
@@ -90,6 +91,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="20dp"
             android:contentDescription="@string/addbook"
             android:elevation="0dp"
             android:src="@drawable/icon_add"

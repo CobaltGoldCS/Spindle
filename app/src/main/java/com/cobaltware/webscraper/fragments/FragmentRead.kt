@@ -36,8 +36,7 @@ class FragmentRead : Fragment() {
         /** The only way you should initialize this class
          * @param url The url of the book to read
          * @param colId The Column id that the book itself is tied to
-         * @return new Instance of [FragmentRead]
-         */
+         * @return new Instance of [FragmentRead]*/
         @JvmStatic
         fun newInstance(url: String, colId: Int) =
                 FragmentRead().apply {
@@ -96,8 +95,7 @@ class FragmentRead : Fragment() {
 
     /** Returns data required to change pages from a sample Url, using either the configs or python bindings
      * @param url The url to obtain data from
-     * @return Either an [emptyList] if invalid, or a list in the order [title, content, prevUrl, nextUrl, currentUrl]
-     */
+     * @return Either an [emptyList] if invalid, or a list in the order [title, content, prevUrl, nextUrl, currentUrl]*/
     fun getUrlInfo(url: String) : List<String?>
     {
         // Integration with Config table and Configurations
@@ -141,8 +139,7 @@ class FragmentRead : Fragment() {
      *  @param content Content of the chapter
      *  @param prevUrl The url to the previous chapter
      *  @param nextUrl The url to the next chapter
-     *  @param current The url of the current chapter
-     */
+     *  @param current The url of the current chapter*/
     fun updateUi(title: String, content: String, prevUrl: String?, nextUrl: String?, current: String) {
         viewer.scrollTitle.title = title
         viewer.contentView.text = content
@@ -168,6 +165,8 @@ class FragmentRead : Fragment() {
         viewer.contentScroll.scrollTo(0, 0)
     }
 
+    /**A simple function to call to vibrate the phone
+     * @param milis The milliseconds to vibrate for*/
     fun vibrate(milis: Int) {
         try {
             val vibrator = requireActivity().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -179,8 +178,7 @@ class FragmentRead : Fragment() {
 
     /** Returns to main activity with an optional error message
      * @param error The error message itself
-     * @return Returns to the [FragmentMain] where the book lists are
-     */
+     * @return Returns to the [FragmentMain] where the book lists are using [fragmentTransition], doesn't return anything*/
     fun quit(error: String? = null)
     {try {
 
@@ -199,8 +197,7 @@ class PageChangeHandler(private val readFragment: FragmentRead)
     private lateinit var futureUrl : CompletableFuture<List<String?>>
 
     /** Preloads the url asynchronously
-     *  @param url The url to preload
-     */
+     *  @param url The url to preload*/
     fun prepPageChange(url : String) {futureUrl = CompletableFuture.supplyAsync { readFragment.getUrlInfo(url) }}
 
     /** Handles updating the UI of the fragment from the preloaded [futureUrl] defined in [prepPageChange]*/

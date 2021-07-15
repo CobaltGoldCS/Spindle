@@ -29,6 +29,8 @@ class ConfigDialog(private var config : Config?, private var adapter : ConfigAda
         return view
     }
 
+    /**Modifies the given [config] if there is one, or creates a new config and adds it to the database. Also makes sure all fields are valid using [guaranteeAllFields]
+     * @see guaranteeAllFields*/
     private fun onAction()
     {
         if (!guaranteeAllFields())
@@ -49,6 +51,7 @@ class ConfigDialog(private var config : Config?, private var adapter : ConfigAda
         dismiss()
     }
 
+    /**Deletes the current [config], or dismisses if there is nothing to delete*/
     private fun onDelete()
     {
         thread{
@@ -59,16 +62,22 @@ class ConfigDialog(private var config : Config?, private var adapter : ConfigAda
             dismiss()
         }
     }
+
+    /**Converts the items in the CONFIG table to a list of [Config]
+     * @return A list of [Config] relating to the database items*/
     private fun databaseToConfigs() = DB.readAllItems("CONFIG",
         listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH")
             ).map { list -> Config(list[0].toInt(), list[1], list[2], list[3], list[4])}
 
+    /**Dispatches an update to the [adapter]*/
     private fun updateAdapter()
     {
         val newList = databaseToConfigs()
         requireActivity().runOnUiThread{ adapter.changeItems(newList) }
     }
 
+    /**Sets all of the text input boxes automatically using the given [config]
+     * @param v The view used to reference the text input boxes*/
     private fun setAllTexts(v : View)
     {
         if (config == null)
