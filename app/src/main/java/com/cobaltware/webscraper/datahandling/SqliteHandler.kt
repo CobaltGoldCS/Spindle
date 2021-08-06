@@ -8,22 +8,23 @@ import android.util.Log
 import java.lang.IllegalStateException
 import kotlin.system.exitProcess
 
-lateinit var DB : DataBaseHandler
+lateinit var DB: DataBaseHandler
 
 class DataBaseHandler(context: Context) :
-        SQLiteOpenHelper(context, "readerInfo", null, 1)
-{
+    SQLiteOpenHelper(context, "readerInfo", null, 1) {
     var currentDB: SQLiteDatabase? = null
-    var tableName : String = "BOOKS"
+    var tableName: String = "BOOKS"
 
     // Inherited Members to Override
-    override fun onUpgrade(fdb: SQLiteDatabase, oldVersion: Int, newVersion: Int){}
+    override fun onUpgrade(fdb: SQLiteDatabase, oldVersion: Int, newVersion: Int) {}
 
     override fun onCreate(db: SQLiteDatabase?) {
         currentDB = db!!
         this.createBookList("BOOKS")
-        this.createTable("CONFIG",
-                "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, DOMAIN VARCHAR(256) NOT NULL, CONTENTXPATH VARCHAR(256) NOT NULL, PREVXPATH VARCHAR(256) NOT NULL, NEXTXPATH VARCHAR(256) NOT NULL)")
+        this.createTable(
+            "CONFIG",
+            "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, DOMAIN VARCHAR(256) NOT NULL, CONTENTXPATH VARCHAR(256) NOT NULL, PREVXPATH VARCHAR(256) NOT NULL, NEXTXPATH VARCHAR(256) NOT NULL)"
+        )
         populate()
     }
 
@@ -40,42 +41,81 @@ class DataBaseHandler(context: Context) :
     }
     // End of overridden functions
     /**When the database is first created, populate it with some default values*/
-    private fun populate()
-    {
+    private fun populate() {
         // Combine two arrays of strings into a [Map<String, String>]
-        fun formatForInsertAction(valArgs: Array<String>) = (arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH") zip valArgs).toMap()
+        fun formatForInsertAction(valArgs: Array<String>) =
+            (arrayOf("DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH") zip valArgs).toMap()
 
         // Each val array contains a domain contentPath PreviousUrlPath and NextUrlPath
-        this.insertItemIntoTable("CONFIG", formatForInsertAction(arrayOf("readnovelfull.com", ".chr-c", ".prev_chap", ".next_chap")))
-        this.insertItemIntoTable("CONFIG", formatForInsertAction(arrayOf("royalroad.com", ".chapter-inner", "div.col-md-4:nth-child(1) > a:nth-child(1)", ".col-md-offset-4 > a:nth-child(1)")))
-        this.insertItemIntoTable("CONFIG", formatForInsertAction(arrayOf("scribblehub.com", "#chp_raw", "div.prenext > a:nth-child(1)", "div.prenext > a:nth-child(2)")))
-        this.insertItemIntoTable("CONFIG", formatForInsertAction(arrayOf("readlightnovel.org", ".hidden", ".prev-link", ".next-link")))
+        this.insertItemIntoTable(
+            "CONFIG",
+            formatForInsertAction(
+                arrayOf(
+                    "readnovelfull.com",
+                    ".chr-c",
+                    ".prev_chap",
+                    ".next_chap"
+                )
+            )
+        )
+        this.insertItemIntoTable(
+            "CONFIG",
+            formatForInsertAction(
+                arrayOf(
+                    "royalroad.com",
+                    ".chapter-inner",
+                    "div.col-md-4:nth-child(1) > a:nth-child(1)",
+                    ".col-md-offset-4 > a:nth-child(1)"
+                )
+            )
+        )
+        this.insertItemIntoTable(
+            "CONFIG",
+            formatForInsertAction(
+                arrayOf(
+                    "scribblehub.com",
+                    "#chp_raw",
+                    "div.prenext > a:nth-child(1)",
+                    "div.prenext > a:nth-child(2)"
+                )
+            )
+        )
+        this.insertItemIntoTable(
+            "CONFIG",
+            formatForInsertAction(
+                arrayOf(
+                    "readlightnovel.org",
+                    ".hidden",
+                    ".prev-link",
+                    ".next-link"
+                )
+            )
+        )
     }
+
     /**Helper function used to convert a nullable to the default table or a given one*/
-    private fun getTableOrGeneric(table: String?) : String = if (!table.isNullOrEmpty()) table else tableName
+    private fun getTableOrGeneric(table: String?): String =
+        if (!table.isNullOrEmpty()) table else tableName
 
     /**Read all values in columns given
      * @param table The table to read all the items from
      * @param columns The columns to pull the data from
      * @return A List<List<String>> containing the data from each individual row*/
-    fun readAllItems(table: String?, columns: List<String>): List<List<String>>
-    {
-        val tableData : String = getTableOrGeneric(table)
+    fun readAllItems(table: String?, columns: List<String>): List<List<String>> {
+        val tableData: String = getTableOrGeneric(table)
 
         val list: MutableList<List<String>> = ArrayList()
         val db = this.readableDatabase
         val query = "Select * from $tableData"
         val result = db.rawQuery(query, null)
         if (result.moveToFirst()) {
-            do
-            {
-                val line : MutableList<String> = mutableListOf()
+            do {
+                val line: MutableList<String> = mutableListOf()
                 for (column in columns)
                     line.add(result.getString(result.getColumnIndex(column)))
 
                 if (line.size > 1) list.add(line) else list.add(columns)
-            }
-            while (result.moveToNext())
+            } while (result.moveToNext())
         }
         result.close()
         return list
@@ -85,16 +125,14 @@ class DataBaseHandler(context: Context) :
      * @param table The table to read the item from
      * @param row_id The row id of the given item
      * @return The item's data in a list in the order of the columns*/
-    fun readItem(table: String?, row_id: Int, columns: List<String>) : List<String>
-    {
-        val tableData : String = getTableOrGeneric(table)
+    fun readItem(table: String?, row_id: Int, columns: List<String>): List<String> {
+        val tableData: String = getTableOrGeneric(table)
 
         val query = "Select * from $tableData WHERE COL_ID = ?"
         val result = this.readableDatabase.rawQuery(query, arrayOf(row_id.toString()))
 
-        val line : MutableList<String> = mutableListOf()
-        if (result.moveToFirst())
-        {
+        val line: MutableList<String> = mutableListOf()
+        if (result.moveToFirst()) {
             for (column in columns)
                 line.add(result.getString(result.getColumnIndex(column)))
         }
@@ -107,9 +145,11 @@ class DataBaseHandler(context: Context) :
      * @param table The table to insert the [data] into
      * @param data The data in a Map of <column, value> pairs
      * @return If the operation was successful or not*/
-    fun insertItemIntoTable(table: String?, data: Map<String, String>) : Boolean
-    {   // Write Line to database
-        val tableData : String = getTableOrGeneric(table)
+    fun insertItemIntoTable(
+        table: String?,
+        data: Map<String, String>
+    ): Boolean {   // Write Line to database
+        val tableData: String = getTableOrGeneric(table)
 
         val db = this.writableDatabase
         // Add values to sql statement
@@ -127,9 +167,12 @@ class DataBaseHandler(context: Context) :
      * @param row_id The unique identifier for the item to modify
      * @param data A map of <column, value> pairs to tell the function what columns and values to modify
      * @return returns true*/
-    fun modifyItem(table: String?, row_id: Int, data: Map<String, String>) : Boolean
-    {   // Modify line of database
-        val tableData : String = getTableOrGeneric(table)
+    fun modifyItem(
+        table: String?,
+        row_id: Int,
+        data: Map<String, String>
+    ): Boolean {   // Modify line of database
+        val tableData: String = getTableOrGeneric(table)
 
         val db = this.writableDatabase
         val content = ContentValues()
@@ -145,36 +188,36 @@ class DataBaseHandler(context: Context) :
      * @param url The url of the item as an identifier
      * @param title The title of the item as an identifier
      * @return The row_id of the given item*/
-    fun getIdFromBooklistItem(table: String?, url: String?, title: String?) : Int
-    {   // Get col_id of Line
-        val tableData : String = getTableOrGeneric(table)
+    fun getIdFromBooklistItem(
+        table: String?,
+        url: String?,
+        title: String?
+    ): Int {   // Get col_id of Line
+        val tableData: String = getTableOrGeneric(table)
         val db = this.readableDatabase
-        val query : String
-        val args : String
-        if (!url.isNullOrEmpty()){
+        val query: String
+        val args: String
+        if (!url.isNullOrEmpty()) {
             query = "SELECT COL_ID FROM $tableData WHERE URL = ?"
             args = url
-        }
-        else if (!title.isNullOrEmpty()){
+        } else if (!title.isNullOrEmpty()) {
             query = "SELECT COL_ID FROM $tableData WHERE NAME = ?"
             args = title
-        }
-        else {
+        } else {
             // Should fix itself if you try to modify it
             db.execSQL("DELETE FROM $tableName WHERE NAME IS NULL OR trim(NAME) = ''")
             throw IllegalArgumentException("Both title and url are null")
         }
 
         val cursor = db.rawQuery(query, arrayOf(args))
-        if (cursor.count > 1)
-        {
+        if (cursor.count > 1) {
             throw IllegalStateException("This function has more than one matching result")
         }
 
         val index = cursor.getColumnIndex("COL_ID")
         Log.d("Empty?", (!cursor.moveToFirst()).toString())
 
-        if (cursor.moveToFirst() && cursor != null){
+        if (cursor.moveToFirst() && cursor != null) {
             val id = cursor.getInt(index)
             Log.d("Content", id.toString())
             cursor.close()
@@ -188,7 +231,7 @@ class DataBaseHandler(context: Context) :
      * @param row_id The unique identifier of the item*/
     fun deleteUsingID(table: String?, row_id: Int) =
         this.writableDatabase.let { database ->
-            val tableData : String = getTableOrGeneric(table)
+            val tableData: String = getTableOrGeneric(table)
             database.delete(tableData, "COL_ID = ?", arrayOf(row_id.toString()))
         }
 
@@ -196,11 +239,12 @@ class DataBaseHandler(context: Context) :
      * @param table The table to check the item in
      * @param url An identifier used to check if any items already contain that url
      * @return Boolean that tells you if the item exists or not*/
-    fun itemAlreadyExists(table: String?, url: String) : Boolean{
-        val tableData : String = getTableOrGeneric(table)
+    fun itemAlreadyExists(table: String?, url: String): Boolean {
+        val tableData: String = getTableOrGeneric(table)
 
-        val selection = this.readableDatabase.rawQuery("SELECT * FROM $tableData WHERE URL = ?", arrayOf(url))
-        val exists : Boolean = selection.count > 0
+        val selection =
+            this.readableDatabase.rawQuery("SELECT * FROM $tableData WHERE URL = ?", arrayOf(url))
+        val exists: Boolean = selection.count > 0
         selection.close()
         return exists
     }
@@ -209,16 +253,15 @@ class DataBaseHandler(context: Context) :
      * @param table The table containing the configurations to check
      * @param domain The domain of a website that serves as a unique identifier to find a configuration
      * @return A list containing (row_id, domain, contentxpath, prevxpath, nextxpath) of the configuration*/
-    fun getConfigFromDomain(table: String, domain: String) : MutableList<String>
-    {
+    fun getConfigFromDomain(table: String, domain: String): MutableList<String> {
         val db = this.readableDatabase
         val result = db.rawQuery("SELECT * FROM $table WHERE DOMAIN = ?", arrayOf(domain))
-        val line : MutableList<String> = mutableListOf()
+        val line: MutableList<String> = mutableListOf()
 
-        fun getStringFromColumnName(colName: String) = result.getString(result.getColumnIndex(colName))
+        fun getStringFromColumnName(colName: String) =
+            result.getString(result.getColumnIndex(colName))
 
-        if (result.moveToFirst())
-        {
+        if (result.moveToFirst()) {
             line.add(getStringFromColumnName("COL_ID"))
             line.add(getStringFromColumnName("DOMAIN"))
             line.add(getStringFromColumnName("CONTENTXPATH"))
@@ -230,10 +273,12 @@ class DataBaseHandler(context: Context) :
     }
 
     /**Gets the tables of the database, except for "android_metadata", "sqlite_sequence", and "CONFIG"*/
-    fun getTables() : List<String>
-    {
-        val result = this.readableDatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", arrayOf())
-        val returnList : MutableList<String> = mutableListOf()
+    fun getTables(): List<String> {
+        val result = this.readableDatabase.rawQuery(
+            "SELECT name FROM sqlite_master WHERE type='table'",
+            arrayOf()
+        )
+        val returnList: MutableList<String> = mutableListOf()
         // The dropdown item used to add books to the list
         returnList.add("Add a List +")
         if (result.moveToFirst()) {
@@ -242,7 +287,13 @@ class DataBaseHandler(context: Context) :
             } while (result.moveToNext())
         }
         result.close()
-        returnList.removeIf { name -> name in listOf("android_metadata", "sqlite_sequence", "CONFIG") }
+        returnList.removeIf { name ->
+            name in listOf(
+                "android_metadata",
+                "sqlite_sequence",
+                "CONFIG"
+            )
+        }
         return returnList
     }
 
@@ -250,26 +301,29 @@ class DataBaseHandler(context: Context) :
      * @param name The name of the table to create
      * @param values The sql put in parentheses, look at [createBookList] for example
      * @see createBookList*/
-    fun createTable(name: String, values: String)
-    {
+    fun createTable(name: String, values: String) {
         val cleanedName = name.replace(" ", "_")
         this.writableDatabase.execSQL("CREATE TABLE IF NOT EXISTS $cleanedName $values")
     }
 
     /**A simple function that creates a booklist using [createTable]
      * @see createTable*/
-    fun createBookList(name: String) = createTable(name, "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME VARCHAR(256) NOT NULL, URL VARCHAR(256) NOT NULL)")
+    fun createBookList(name: String) = createTable(
+        name,
+        "(COL_ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME VARCHAR(256) NOT NULL, URL VARCHAR(256) NOT NULL)"
+    )
 
     /**Modifies a table's name
      * @param currentTable The current name of the table to change
      * @param name The new name of the table*/
-    fun modifyTableName(currentTable: String?, name: String){
+    fun modifyTableName(currentTable: String?, name: String) {
 
-        val tableData : String = getTableOrGeneric(currentTable)
+        val tableData: String = getTableOrGeneric(currentTable)
         val cleanedName = name.replace(" ", "_")
         this.writableDatabase.execSQL("ALTER TABLE $tableData RENAME TO $cleanedName")
         tableName = name
     }
+
     /**Deletes a table given its [name]
      * @param name The name of the table to delete*/
     fun deleteTable(name: String) =

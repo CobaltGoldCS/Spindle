@@ -10,29 +10,36 @@ import com.cobaltware.webscraper.datahandling.DB
 import kotlinx.android.synthetic.main.menu_add_list.*
 import kotlin.String
 
-class ModifyListDialog(context: Context, private var title : String?) : Dialog(context) {
+class ModifyListDialog(context: Context, private var title: String?) : Dialog(context) {
     var deleted = false
-    override fun onCreate(savedInstanceState: Bundle?){
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.menu_add_list)
         if (title != null)
             domainUrlInput.setText(title!!, TextView.BufferType.EDITABLE)
-        deleteButton.setOnClickListener {this.onDeleteClick()}
-        actionButton.setOnClickListener {this.onActionClick()}
-        cancelButton.setOnClickListener {dismiss()}
+        deleteButton.setOnClickListener { this.onDeleteClick() }
+        actionButton.setOnClickListener { this.onActionClick() }
+        cancelButton.setOnClickListener { dismiss() }
     }
-    private fun onActionClick(){
+
+    /** Handles when the action button is clicked by either modifying or adding a book list **/
+    private fun onActionClick() {
 
         if (domainUrlInput.text.isEmpty()) return
         val bookListName = domainUrlInput.text.toString()
 
         val modify = title != null
-        if (modify){ DB.modifyTableName(null, bookListName) }
-        else       { DB.createBookList(bookListName) }
+        if (modify) {
+            DB.modifyTableName(null, bookListName)
+        } else {
+            DB.createBookList(bookListName)
+        }
         dismiss()
     }
-    private fun onDeleteClick(){
+
+    /**Deletes a book list if it exists**/
+    private fun onDeleteClick() {
         if (title != null) {
             DB.deleteTable(title!!)
             deleted = true

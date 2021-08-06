@@ -23,8 +23,8 @@ class FragmentConfig : Fragment() {
     private lateinit var configAdapter: ConfigAdapter
 
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
         val viewer = inflater.inflate(R.layout.fragment_config, container, false)
@@ -38,7 +38,10 @@ class FragmentConfig : Fragment() {
      */
     private fun initRecycler(v: View) = thread {
         // Populate recyclerview
-        val fromDatabase = DB.readAllItems("CONFIG", listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH"))
+        val fromDatabase = DB.readAllItems(
+            "CONFIG",
+            listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH")
+        )
         val actualList = mutableListOf<Config>()
         fromDatabase.forEach { data ->
             val (col_id, domain, mainXpath, prevXpath, nextXpath) = data
@@ -47,7 +50,7 @@ class FragmentConfig : Fragment() {
 
         configAdapter = object : ConfigAdapter(actualList.toList()) {
             override fun clickHandler(col_id: Int) {
-                val neededConfig = actualList.find {it.col_id == col_id}
+                val neededConfig = actualList.find { it.col_id == col_id }
                 addOrChangeDialog(neededConfig)
             }
         }
@@ -59,10 +62,9 @@ class FragmentConfig : Fragment() {
         }
     }
 
-    /** Creates a config dialog using the given [config]
-     * @param config The config to put in the dialog*/
-    private fun addOrChangeDialog(config : Config?)
-    {
+    /** Creates a [ConfigDialog] using the given [config] and displays it
+     * @param config The config to put in the [ConfigDialog]*/
+    private fun addOrChangeDialog(config: Config?) {
         val dialog = ConfigDialog(config, configAdapter)
         dialog.show(requireActivity().supportFragmentManager, "Add New Config")
     }

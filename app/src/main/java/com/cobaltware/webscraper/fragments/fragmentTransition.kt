@@ -10,11 +10,10 @@ import kotlinx.android.synthetic.main.activity_main.*
  * @param targetFragment The fragment to switch to
  * @param visibility The desired visibility of the nav bar component
  */
-fun fragmentTransition(activity : MainActivity, targetFragment : Fragment, visibility : Int)
-{
+fun fragmentTransition(activity: MainActivity, targetFragment: Fragment, visibility: Int) {
     val fragmentTrans = activity.supportFragmentManager.beginTransaction()
     fragmentTrans.setCustomAnimations(R.animator.frag_fade_in, R.animator.frag_fade_out)
     fragmentTrans.replace(R.id.fragmentSpot, targetFragment)
     fragmentTrans.commit()
-    activity.runOnUiThread {activity.nav.visibility = visibility}
+    activity.runOnUiThread { activity.nav.visibility = visibility }
 }

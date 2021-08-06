@@ -6,20 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.math.MathUtils.clamp
 import androidx.core.view.ViewCompat
 import com.google.android.material.appbar.AppBarLayout
+import kotlin.math.abs
 
 class OverScrollBehavior(@Suppress("UNUSED_PARAMETER") context: Context, @Suppress("UNUSED_PARAMETER") attributeSet: AttributeSet) // Needed but unused vals
     : AppBarLayout.ScrollingViewBehavior() {
 
     companion object {
         private const val OVER_SCROLL_AREA = 4
-        private const val MAX_OVER_SCROLL = 200f
+        private const val MAX_OVER_SCROLL = 200
     }
 
     private var overScrollY = 0
-
     override fun onStartNestedScroll(
         coordinatorLayout: CoordinatorLayout,
         child: View,
@@ -49,13 +48,11 @@ class OverScrollBehavior(@Suppress("UNUSED_PARAMETER") context: Context, @Suppre
         }
 
         overScrollY -= (dyUnconsumed/OVER_SCROLL_AREA)
-        // Set a max over scroll distance
-        overScrollY = clamp(overScrollY.toFloat(), -MAX_OVER_SCROLL, MAX_OVER_SCROLL).toInt()
         val group = target as ViewGroup
         val count = group.childCount
         for (i in 0 until count) {
             val view = group.getChildAt(i)
-            if (view.translationY == overScrollY.toFloat())
+            if (view.translationY == overScrollY.toFloat() || abs(overScrollY) >= MAX_OVER_SCROLL)
                 break
             view.translationY = overScrollY.toFloat()
         }

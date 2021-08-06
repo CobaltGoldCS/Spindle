@@ -2,11 +2,11 @@
     <!-- Base application theme. -->
     <style name="Theme.WebScraper" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/button_light</item>
+        <item name="colorPrimary">@color/light_second</item>
         <item name="colorPrimaryVariant">@color/button_lightVar</item>
         <item name="colorOnPrimary">@color/dim_gray</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/light_second</item>
+        <item name="colorSecondary">@color/button_light</item>
         <item name="colorSecondaryVariant">@color/light_secondVar</item>
         <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->

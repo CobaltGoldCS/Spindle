@@ -1,0 +1,19 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="Reader">
+        <EditTextPreference
+            app:key="textsize"
+            app:title="Text Size"
+            app:defaultValue="@integer/textsize"
+            app:useSimpleSummaryProvider="true"
+            app:min="1"
+            android:summary="Text size from 1 to 50"/>
+        <SwitchPreferenceCompat
+            app:key="highcontrast"
+            app:title="High Contrast Mode"
+            app:defaultValue="true"
+            android:summary="Gives better readability in higher light environments"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>
