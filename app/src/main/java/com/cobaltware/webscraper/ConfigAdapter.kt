@@ -10,7 +10,7 @@ import com.cobaltware.webscraper.datahandling.Config
 import kotlinx.android.synthetic.main.item_config_list.view.*
 import kotlinx.android.synthetic.main.item_reader_list.view.clickableArea
 
-open class ConfigAdapter(var configList: List<Config>) :
+open class ConfigAdapter(private var configList: List<Config>) :
     RecyclerView.Adapter<ConfigAdapter.ItemHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(
@@ -24,7 +24,7 @@ open class ConfigAdapter(var configList: List<Config>) :
         val currentItem = configList[position]
         holder.titleView.text = currentItem.domain
         holder.clickableArea.setOnClickListener {
-            clickHandler(currentItem.col_id)
+            clickHandler(currentItem.row_id)
         }
     }
 
@@ -34,13 +34,15 @@ open class ConfigAdapter(var configList: List<Config>) :
         val clickableArea: View = itemView.clickableArea
     }
 
-    fun changeItems(newList: List<Config>) {
-        val diffresult = DiffUtil.calculateDiff(ConfigCallback(newList, configList))
-        diffresult.dispatchUpdatesTo(this)
-        configList = newList
+    fun changeItems(newList: List<Config>?) {
+        if (newList != null){
+            val diffresult = DiffUtil.calculateDiff(ConfigCallback(newList, configList))
+            diffresult.dispatchUpdatesTo(this)
+            configList = newList
+        }
     }
 
-    open fun clickHandler(col_id: Int) {}
+    open fun clickHandler(row_id: Int) {}
     override fun getItemCount(): Int = configList.size
 }
 
@@ -52,7 +54,7 @@ class ConfigCallback(private val newConfigs: List<Config>, private val oldConfig
     override fun getNewListSize(): Int = newConfigs.size
 
     override fun areItemsTheSame(oldItemPos: Int, newItemPos: Int): Boolean =
-        oldConfigs[oldItemPos].col_id == newConfigs[newItemPos].col_id
+        oldConfigs[oldItemPos].row_id == newConfigs[newItemPos].row_id
 
     override fun areContentsTheSame(oldItemPos: Int, newItemPos: Int): Boolean =
         oldConfigs[oldItemPos] == newConfigs[newItemPos]

@@ -2,35 +2,36 @@ package com.cobaltware.webscraper.fragments
 
 import android.accounts.NetworkErrorException
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.preference.PreferenceManager
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.ColorInt
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.chaquo.python.Python
 import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.R
-import com.cobaltware.webscraper.datahandling.DB
+import com.cobaltware.webscraper.ReaderApplication.Companion.DB
+import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.webhandlers.webdata
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.fragment_read.*
 import kotlinx.android.synthetic.main.fragment_read.view.*
-import java.io.IOException
 import java.util.concurrent.CompletableFuture
 import kotlin.concurrent.thread
 
 
-class FragmentRead : Fragment() {
+class FragmentRead() : Fragment() {
 
-    private var colId: Int = 0
+    private lateinit var book: Book
     lateinit var viewer: View
 
     private val nextHandler = PageChangeHandler(this)
@@ -44,8 +45,6 @@ class FragmentRead : Fragment() {
         // Inflate the layout for this fragment
         viewer = inflater.inflate(R.layout.fragment_read, container, false)
         // Getting important values
-        val url: String = requireArguments().getString("url")!!
-        colId = requireArguments().getInt("col_id")
 
 
         setStaticUI()
@@ -54,7 +53,7 @@ class FragmentRead : Fragment() {
         thread {
             vibrate(100)
             Log.d("data", "Obtaining data")
-            val data: List<String?> = getUrlInfo(url)
+            val data: List<String?> = getUrlInfo(book.url)
 
             if (data.isNullOrEmpty()) {
                 // Error handling
@@ -87,12 +86,18 @@ class FragmentRead : Fragment() {
     private fun preferenceHandler() {
         val preferences = PreferenceManager.getDefaultSharedPreferences(requireActivity())
         viewer.contentView.textSize = preferences.getString("textsize", "22")!!.toFloat()
+
+        val typedValue = TypedValue()
+        val theme = requireContext().theme
+        theme.resolveAttribute(R.attr.colorOnPrimary, typedValue, true)
+        val themecolor = typedValue.data
+
         viewer.contentView.setTextColor(
-            if (preferences.getBoolean(
-                    "highcontrast",
-                    true
-                )
-            ) Color.WHITE else Color.LTGRAY
+            if (preferences.getBoolean("highcontrast", true)) {
+                themecolor
+            } else {
+                if (themecolor == Color.WHITE) Color.LTGRAY else Color.GRAY
+            }
         )
 
     }
@@ -103,11 +108,11 @@ class FragmentRead : Fragment() {
     fun getUrlInfo(url: String): List<String?> {
         // Integration with Config table and Configurations
         val domain = url.split("/")[2].replace("www.", "")
-        val data = DB.getConfigFromDomain("CONFIG", domain)
-        if (!data.isNullOrEmpty()) {
+        val data = DB.readItemFromConfigs(domain)
+        if (data != null) {
             return try {
                 // Error handling in case of networking error of some sort
-                webdata(url, data[2], data[3], data[4])
+                webdata(url, data.mainXPath, data.prevXPath, data.nextXPath)
             } catch (e: NetworkErrorException) {
                 quit(e.message)
                 emptyList()
@@ -153,7 +158,8 @@ class FragmentRead : Fragment() {
         viewer.scrollTitle.title = title
         viewer.contentView.text = content
 
-        DB.modifyItem(null, colId, arrayOf("URL").zip(arrayOf(current)).toMap())
+        book.url = current
+        DB.updateBook(book)
 
         // Hide buttons when they cannot be used
         viewer.prevButton.isVisible = prevUrl != null && prevUrl != "null"
@@ -211,16 +217,12 @@ class FragmentRead : Fragment() {
 
     companion object {
         /** The only way you should initialize this class
-         * @param url The url of the book to read
-         * @param colId The Column id that the book itself is tied to
+         * @param book The book to read
          * @return new Instance of [FragmentRead]*/
         @JvmStatic
-        fun newInstance(url: String, colId: Int) =
+        fun newInstance(book: Book) =
             FragmentRead().apply {
-                arguments = Bundle().apply {
-                    putString("url", url)
-                    putInt("col_id", colId)
-                }
+                this.book = book
             }
     }
 }

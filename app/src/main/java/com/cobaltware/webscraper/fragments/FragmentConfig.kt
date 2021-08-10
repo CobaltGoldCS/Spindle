@@ -5,12 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cobaltware.webscraper.ConfigAdapter
 import com.cobaltware.webscraper.dialogs.ConfigDialog
 import com.cobaltware.webscraper.R
+import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.datahandling.Config
-import com.cobaltware.webscraper.datahandling.DB
 import kotlinx.android.synthetic.main.fragment_config.view.*
 import kotlin.concurrent.thread
 
@@ -19,9 +20,7 @@ import kotlin.concurrent.thread
  * A simple [Fragment] subclass.
  * Used for setting up configurations
  */
-class FragmentConfig : Fragment() {
-    private lateinit var configAdapter: ConfigAdapter
-
+class FragmentConfig() : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,19 +37,10 @@ class FragmentConfig : Fragment() {
      */
     private fun initRecycler(v: View) = thread {
         // Populate recyclerview
-        val fromDatabase = DB.readAllItems(
-            "CONFIG",
-            listOf("COL_ID", "DOMAIN", "CONTENTXPATH", "PREVXPATH", "NEXTXPATH")
-        )
-        val actualList = mutableListOf<Config>()
-        fromDatabase.forEach { data ->
-            val (col_id, domain, mainXpath, prevXpath, nextXpath) = data
-            actualList.add(Config(col_id.toInt(), domain, mainXpath, prevXpath, nextXpath))
-        }
 
-        configAdapter = object : ConfigAdapter(actualList.toList()) {
-            override fun clickHandler(col_id: Int) {
-                val neededConfig = actualList.find { it.col_id == col_id }
+        val configAdapter = object : ConfigAdapter(emptyList()) {
+            override fun clickHandler(row_id: Int) {
+                val neededConfig = DB.readItemFromConfigs(row_id)
                 addOrChangeDialog(neededConfig)
             }
         }
@@ -59,13 +49,17 @@ class FragmentConfig : Fragment() {
             v.configView.adapter = configAdapter
             v.configView.layoutManager = LinearLayoutManager(requireContext())
             v.configView.setHasFixedSize(true)
+
+            DB.readAllConfigs.observe(viewLifecycleOwner, {
+                configAdapter.changeItems(it)
+            })
         }
     }
 
     /** Creates a [ConfigDialog] using the given [config] and displays it
      * @param config The config to put in the [ConfigDialog]*/
     private fun addOrChangeDialog(config: Config?) {
-        val dialog = ConfigDialog(config, configAdapter)
+        val dialog = ConfigDialog(config)
         dialog.show(requireActivity().supportFragmentManager, "Add New Config")
     }
 }

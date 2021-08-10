@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="A:/Dylan/Documents/Programming/Kotlin/Android/WebScraper/app/src/main/assets/defaultDatabase.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="0"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1259"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,5:mainBooks"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="Books" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="52"/><column index="2" value="40"/><column index="3" value="40"/><column index="4" value="62"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="CONFIG" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="52"/><column index="2" value="54"/><column index="3" value="77"/><column index="4" value="77"/><column index="5" value="76"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Lists" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="43"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">BEGIN TRANSACTION;
+CREATE TABLE IF NOT EXISTS &quot;Books&quot; (
+	&quot;row_id&quot;	INTEGER NOT NULL,
+	&quot;title&quot;	TEXT NOT NULL,
+	&quot;url&quot;	TEXT NOT NULL,
+	&quot;bookList&quot;	TEXT NOT NULL,
+	PRIMARY KEY(&quot;row_id&quot; AUTOINCREMENT)
+);
+CREATE TABLE IF NOT EXISTS &quot;CONFIG&quot; (
+	&quot;row_id&quot;	INTEGER NOT NULL,
+	&quot;domain&quot;	TEXT NOT NULL,
+	&quot;mainXPath&quot;	TEXT NOT NULL,
+	&quot;prevXPath&quot;	TEXT NOT NULL,
+	&quot;nextXPath&quot;	TEXT NOT NULL,
+	PRIMARY KEY(&quot;row_id&quot; AUTOINCREMENT)
+);
+CREATE TABLE IF NOT EXISTS &quot;Lists&quot; (
+	&quot;name&quot;	TEXT NOT NULL,
+	PRIMARY KEY(&quot;name&quot;)
+);
+INSERT INTO &quot;CONFIG&quot; VALUES (1,'readnovelfull.com','.chr-c','.prev_chap','.next_chap');
+INSERT INTO &quot;CONFIG&quot; VALUES (2,'royalroad.com','.chapter-inner','div.col-md-4:nth-child(1) &gt; a:nth-child(1)','.col-md-offset-4 &gt; a:nth-child(1)');
+INSERT INTO &quot;CONFIG&quot; VALUES (3,'scribblehub.com','#chp_raw','div.prenext &gt; a:nth-child(1)','div.prenext &gt; a:nth-child(2)');
+INSERT INTO &quot;CONFIG&quot; VALUES (4,'readlightnovel.org','.hidden','.prev-link','.next-link');
+INSERT INTO &quot;Lists&quot; VALUES ('Add A BookList');
+INSERT INTO &quot;Lists&quot; VALUES ('Books');
+COMMIT;
+</sql><current_tab id="0"/></tab_sql></sqlb_project>

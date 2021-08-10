@@ -8,7 +8,7 @@ import android.util.Log
 import java.lang.IllegalStateException
 import kotlin.system.exitProcess
 
-lateinit var DB: DataBaseHandler
+//lateinit var DB: DataBaseHandler
 
 class DataBaseHandler(context: Context) :
     SQLiteOpenHelper(context, "readerInfo", null, 1) {
