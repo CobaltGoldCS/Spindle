@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cobaltware.webscraper.*
@@ -21,7 +20,6 @@ import com.cobaltware.webscraper.dialogs.ModifyListDialog
 import com.cobaltware.webscraper.dialogs.Operations
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
-import java.util.*
 import kotlin.concurrent.thread
 
 
@@ -37,27 +35,11 @@ class FragmentMain() : Fragment() {
         val viewer = inflater.inflate(R.layout.fragment_main, container, false)!!
 
         thread {
-            setComplexClassParameters(viewer)
             setupDropdown(viewer)
             requireActivity().runOnUiThread { setUI(viewer) }
         }
 
         return viewer
-    }
-
-    /** Sets complex and long class parameters that would over complicate the [onCreateView] method*/
-    private fun setComplexClassParameters(viewer: View) {
-
-        // With the book adapter initializations, click handlers are also added
-        bookAdapter = object : BookAdapter() {
-            override fun modifyClickHandler(book: Book) =
-                initAddFragmentDialog(book)
-
-            override fun openClickHandler(book: Book) =
-                initReadFragment(book)
-        }
-        viewer.bookLayout.adapter = bookAdapter
-
     }
 
     /**Sets the UI for everything except the dropdown menu, which is set up in [setupDropdown]*/
@@ -66,8 +48,14 @@ class FragmentMain() : Fragment() {
         v.bookLayout.setHasFixedSize(true)
         v.addMenuButton.setOnClickListener { initAddFragmentDialog(null) }
 
-        val listViewModel: BookViewModel = ViewModelProvider(this).get(BookViewModel::class.java)
-        listViewModel.readAllBooks.observe(viewLifecycleOwner, { updateBooksContent(it) })
+        bookAdapter = object : BookAdapter() {
+            override fun modifyClickHandler(book: Book) =
+                initAddFragmentDialog(book)
+
+            override fun openClickHandler(book: Book) =
+                initReadFragment(book)
+        }
+        v.bookLayout.adapter = bookAdapter
     }
 
     private fun updateBooksContent(books: List<Book>) {
@@ -89,7 +77,10 @@ class FragmentMain() : Fragment() {
         val dropdownAdapter =
             ArrayAdapter(requireContext(), R.layout.item_dropdown, mutableListOf<String>())
 
-        requireActivity().runOnUiThread { initializeDropdownUI(v, dropdownAdapter) }
+        requireActivity().runOnUiThread {
+            initializeDropdownUI(v, dropdownAdapter)
+            setObservers(dropdownAdapter)
+        }
 
         modifyDropdown(1)
     }
@@ -125,16 +116,20 @@ class FragmentMain() : Fragment() {
                 DB.currentTable
             )
         }
+    }
+
+    private fun setObservers(dropdownAdapter: ArrayAdapter<String>) {
         val listViewModel: BookViewModel = ViewModelProvider(this).get(BookViewModel::class.java)
         listViewModel.readAllLists().observe(viewLifecycleOwner, {
-            if (!initialAdapter.isEmpty)
-                initialAdapter.clear()
+            if (!dropdownAdapter.isEmpty)
+                dropdownAdapter.clear()
             it.forEach { list ->
-                initialAdapter.add(list.name)
+                dropdownAdapter.add(list.name)
             }
-            initialAdapter.notifyDataSetChanged()
+            dropdownAdapter.notifyDataSetChanged()
         })
-        initialAdapter.notifyDataSetChanged()
+
+        listViewModel.readAllBooks.observe(viewLifecycleOwner, { updateBooksContent(it) })
     }
 
     /**Click handler for the [bookLists] dropdown, changes backend and UI
