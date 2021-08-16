@@ -75,17 +75,21 @@ class FragmentMain() : Fragment() {
             startPopup(DB.currentTable)
         }
         v.bookLists.setOnItemClickListener { _, _, position, _ ->
-            onBookListsClick(position)
-            viewController.modifyDropdown(position)
-            thread {
-                Log.d(
-                    "CONTENTS OF CURRENT TABLE",
-                    DB.readAllFromBookListSync(BookList(DB.currentTable)).toString()
-                )
-            }
-            bookAdapter.changeItems(DB.readAllFromBookListSync(BookList(DB.currentTable)))
-            bookAdapter.notifyDataSetChanged()
+            performDropdownItemClick(position)
         }
+    }
+
+    private fun performDropdownItemClick(position: Int) {
+        onBookListsClick(position)
+        viewController.modifyDropdown(position)
+        thread {
+            Log.d(
+                "CONTENTS OF CURRENT TABLE",
+                DB.fromBookListSync(BookList(DB.currentTable)).toString()
+            )
+        }
+        bookAdapter.changeItems(DB.fromBookListSync(BookList(DB.currentTable)))
+        bookAdapter.notifyDataSetChanged()
     }
 
 
@@ -114,7 +118,7 @@ class FragmentMain() : Fragment() {
 
             if (updateBookList)
                 thread {
-                    val books = DB.readAllFromBookListSync(BookList(DB.currentTable))
+                    val books = DB.fromBookListSync(BookList(DB.currentTable))
                     updateBooksContent(books)
                 }
             if (position == 0) { // if the selected item is the add book item
@@ -136,22 +140,18 @@ class FragmentMain() : Fragment() {
         menu.setOnDismissListener {
             // Make sure that the bookList changes if the item is deleted
             val currentPos = dropdownAdapter.getPosition(DB.currentTable)
-            // TODO: Fix renaming/updating mechanism
-            // TODO: Implement this _when_ so that it navigates properly
+
+            // Navigate to appropriate booklist when a given operation is complete
             when (menu.op) {
                 Operations.Delete -> {
-                    onBookListsClick(1)
+                    performDropdownItemClick(1)
                 }
-                Operations.Insert -> {
-                    onBookListsClick(currentPos, true)
-                }
-                Operations.Update -> thread {
-                    val books = DB.readAllFromBookListSync(BookList(DB.currentTable))
-                    updateBooksContent(books)
-                    viewController.modifyDropdown(currentPos)
-                }
-                Operations.Nothing -> {
 
+                Operations.Nothing -> {}
+
+                // This covers Insert and Update
+                else -> {
+                    performDropdownItemClick(currentPos)
                 }
             }
         }

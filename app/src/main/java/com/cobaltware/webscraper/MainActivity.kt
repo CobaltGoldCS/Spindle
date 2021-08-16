@@ -18,9 +18,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var mainFrag: FragmentMain  // Referenced by FragmentRead.kt
     private lateinit var configFrag: FragmentConfig
     private val settingsFrag = FragmentSettings()
-
-
-    //TODO: Book lists seem to share items between each other and it is really annoying
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
     /** Just for setting up the [nav] itemSelectionListener */
     private fun setNavTransitions() {
-        nav.setOnNavigationItemSelectedListener {
+        nav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.ic_book -> activityFragmentSwitch(mainFrag)
                 R.id.ic_config -> activityFragmentSwitch(configFrag)

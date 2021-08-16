@@ -18,8 +18,11 @@ interface BookDao {
     @Query("SELECT * FROM Books")
     fun readAllFromBookList(): LiveData<List<Book>>
 
+    @Query("SELECT * FROM Books")
+    fun readAllFromBookListSync(): List<Book>
+
     @Query("SELECT * FROM Books WHERE bookList = :name")
-    fun readAllFromBookListSync(name: String): List<Book>
+    fun fromBookListSync(name: String): List<Book>
 
     @Query("DELETE FROM Books WHERE bookList = :name")
     fun deleteFromBookList(name: String)
@@ -34,8 +37,8 @@ interface BookDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun addList(list: BookList)
 
-    @Update
-    suspend fun updateList(list: BookList)
+    @Query("UPDATE Lists SET name= :newName WHERE name = :oldName")
+    suspend fun updateList(newName: String, oldName: String)
 
     @Delete
     suspend fun deleteList(list: BookList)

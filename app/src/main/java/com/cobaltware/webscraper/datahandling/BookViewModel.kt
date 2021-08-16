@@ -53,8 +53,11 @@ class BookViewModel(application: Application) :
         return repository.readAllFromBookList()
     }
 
-    fun readAllFromBookListSync(list: BookList): List<Book> {
-        return repository.readAllFromBookListSync(list.name)
+    fun readAllFromBookListSync(): List<Book> =
+        repository.readAllFromBookListSync()
+
+    fun fromBookListSync(list: BookList): List<Book> {
+        return repository.fromBookListSync(list.name)
     }
 
     fun readItemFromBooks(row: Int): LiveData<Book> =
@@ -72,19 +75,22 @@ class BookViewModel(application: Application) :
         }
     }
 
-    fun updateList(list: BookList) {
+    fun updateList(newName: String, oldName: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateList(list)
-            currentTable = list.name
+            repository.updateList(newName, oldName)
+            fromBookListSync(BookList(oldName)).forEach {
+                it.bookList = newName
+                repository.updateBook(it)
+            }
         }
+        currentTable = newName
     }
 
     fun deleteList(list: BookList) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteList(list)
-            readAllFromBookListSync(list).forEach {
-                if (it.bookList == list.name)
-                    deleteBook(it)
+            fromBookListSync(list).forEach {
+                deleteBook(it)
             }
         }
     }

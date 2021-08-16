@@ -1,8 +1,6 @@
 package com.cobaltware.webscraper.datahandling
 
 import androidx.lifecycle.LiveData
-import androidx.room.*
-import com.cobaltware.webscraper.datahandling.*
 
 class BookRepository(private val bookDao: BookDao, private val configDao: ConfigDao) {
 
@@ -25,8 +23,12 @@ class BookRepository(private val bookDao: BookDao, private val configDao: Config
         return bookDao.readAllFromBookList()
     }
 
-    fun readAllFromBookListSync(list: String): List<Book>{
-        return bookDao.readAllFromBookListSync(list)
+    fun readAllFromBookListSync(): List<Book>{
+        return bookDao.readAllFromBookListSync()
+    }
+
+    fun fromBookListSync(list: String): List<Book>{
+        return bookDao.fromBookListSync(list)
     }
 
     fun readItemFromBooks(row: Int): LiveData<Book>{
@@ -42,12 +44,8 @@ class BookRepository(private val bookDao: BookDao, private val configDao: Config
         bookDao.addList(list)
     }
 
-    suspend fun updateList(list: BookList){
-        bookDao.updateList(list)
-        readAllFromBookListSync(list.name).forEach {
-            it.bookList = list.name
-            bookDao.updateBook(it)
-        }
+    suspend fun updateList(newName: String, oldName: String){
+        bookDao.updateList(newName, oldName)
     }
 
     suspend fun deleteList(list: BookList){

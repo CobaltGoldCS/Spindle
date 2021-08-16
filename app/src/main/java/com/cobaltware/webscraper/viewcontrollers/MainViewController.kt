@@ -85,7 +85,7 @@ class MainViewController(private val view: View, private val fragment: FragmentM
             view.bookLists.let { dropdown ->
                 dropdown.setText(DB.currentTable, false)
                 dropdown.listSelection = position
-                dropdown.callOnClick()
+                dropdown.performClick()
                 dropdown.performCompletion()
             }
             view.listLayout.weightSum = if (position == 1) 4f else 5f

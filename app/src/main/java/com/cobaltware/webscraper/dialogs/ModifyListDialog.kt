@@ -23,6 +23,7 @@ class ModifyListDialog(
 ) : Dialog(context) {
     /** Operation used to determine what the [ModifyListDialog] did */
     var op: Operations = Operations.Nothing
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -43,7 +44,7 @@ class ModifyListDialog(
 
         op = when (title != null) { // Checks if list needs to be updated
             true -> {
-                DB.updateList(BookList(bookListName))
+                DB.updateList(bookListName, title!!)
                 Operations.Update
             }
             false -> {
