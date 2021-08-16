@@ -2,15 +2,12 @@ package com.cobaltware.webscraper.viewcontrollers
 
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.ArrayAdapter
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cobaltware.webscraper.BookAdapter
 import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.datahandling.Book
-import com.cobaltware.webscraper.datahandling.BookViewModel
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
 import com.cobaltware.webscraper.fragments.FragmentMain
 import com.cobaltware.webscraper.fragments.FragmentRead

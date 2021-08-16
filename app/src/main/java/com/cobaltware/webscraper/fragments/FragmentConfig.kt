@@ -5,13 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cobaltware.webscraper.ConfigAdapter
-import com.cobaltware.webscraper.dialogs.ConfigDialog
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.datahandling.Config
+import com.cobaltware.webscraper.dialogs.ConfigDialog
 import kotlinx.android.synthetic.main.fragment_config.view.*
 import kotlin.concurrent.thread
 

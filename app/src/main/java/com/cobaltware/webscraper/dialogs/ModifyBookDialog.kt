@@ -13,7 +13,6 @@ import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.datahandling.Book
-import com.cobaltware.webscraper.datahandling.BookViewModel
 import com.cobaltware.webscraper.fragments.FragmentMain
 import com.cobaltware.webscraper.fragments.fragmentTransition
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
