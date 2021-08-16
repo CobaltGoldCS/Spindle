@@ -106,8 +106,7 @@ class FragmentMain() : Fragment() {
     }
 
     /**Click handler for the [bookLists] dropdown, changes backend and UI
-     * @param position The position of the clicked item
-     * @param dropdownAdapter The adapter connected to [bookLists]*/
+     * @param position The position of the clicked item */
     private fun onBookListsClick(
         position: Int,
         updateBookList: Boolean = false
@@ -130,7 +129,6 @@ class FragmentMain() : Fragment() {
     }
 
     /** Initializes a [ModifyListDialog], used for making and changing lists
-     * @param adapter The [bookLists]' adapter, used for modifying the list
      * @param title The title you want to give to the [ModifyListDialog]*/
     private fun startPopup(title: String?) {
         // DONT MOVE into ViewController, the dismiss

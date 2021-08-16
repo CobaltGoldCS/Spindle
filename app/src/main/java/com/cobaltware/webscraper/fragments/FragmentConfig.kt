@@ -36,7 +36,6 @@ class FragmentConfig() : Fragment() {
      * @param v The view that the recycler is part of
      */
     private fun initRecycler(v: View) = thread {
-        // Populate recyclerview
 
         val configAdapter = object : ConfigAdapter(emptyList()) {
             override fun clickHandler(row_id: Int) {
