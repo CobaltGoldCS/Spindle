@@ -22,13 +22,12 @@ class MainViewController(private val view: View, private val fragment: FragmentM
 
 
     // Fragment functions
-    fun getMainActivity() = fragment.activity as MainActivity
+    private fun getMainActivity() = fragment.activity as MainActivity
 
     /**Sets the UI for everything except the dropdown menu, which is set up in [setupDropdown]*/
     fun setUI() = fragment.requireActivity().runOnUiThread {
         view.bookLayout.layoutManager = LinearLayoutManager(fragment.requireContext())
         view.bookLayout.setHasFixedSize(true)
-        view.addMenuButton.setOnClickListener { initAddFragmentDialog(null) }
 
         fragment.bookAdapter = object : BookAdapter() {
             override fun modifyClickHandler(book: Book) =
@@ -41,46 +40,11 @@ class MainViewController(private val view: View, private val fragment: FragmentM
     }
 
     /**Sets up the [bookLists] dropdown menu frontend and calls the correct Backend function*/
-    fun setupDropdown(dropdownAdapter: ArrayAdapter<String>) =
+    fun setupDropdown() =
         fragment.requireActivity().runOnUiThread {
-            initializeDropdownUI(dropdownAdapter)
-            setObservers(dropdownAdapter)
-            fragment.modifyDropdown(1)
+            view.bookLists.setAdapter(fragment.dropdownAdapter)
+            modifyDropdown(1)
         }
-
-    /** Set Dropdown menu items and behavior
-     * @param initialAdapter The adapter for the [bookLists] dropdown menu
-     */
-    private fun initializeDropdownUI(initialAdapter: ArrayAdapter<String>) {
-        // Set Dropdown menu items and behavior
-        view.bookLists.setAdapter(initialAdapter)
-
-        view.changeButton.setOnClickListener {
-            fragment.startPopup(
-                initialAdapter,
-                DB.currentTable
-            )
-        }
-    }
-
-    private fun setObservers(dropdownAdapter: ArrayAdapter<String>) {
-        val listViewModel: BookViewModel =
-            ViewModelProvider(fragment).get(BookViewModel::class.java)
-        listViewModel.readAllLists().observe(fragment.viewLifecycleOwner, { bookLists ->
-            if (!dropdownAdapter.isEmpty)
-                dropdownAdapter.clear()
-
-            bookLists.forEach { list ->
-                dropdownAdapter.add(list.name)
-            }
-
-            dropdownAdapter.notifyDataSetChanged()
-        })
-
-        listViewModel.readAllBooks.observe(
-            fragment.viewLifecycleOwner,
-            { fragment.updateBooksContent(it) })
-    }
 
     /** Updates the [bookLists] dropdown UI
      * @param selectedItemPosition The position of the selected item in the dropdown
@@ -90,14 +54,14 @@ class MainViewController(private val view: View, private val fragment: FragmentM
             AnimationUtils.loadLayoutAnimation(fragment.requireContext(), R.anim.booklist_anim)
         view.bookLayout.startLayoutAnimation()
 
-        fragment.listLayout.weightSum = if (selectedItemPosition <= 1) 4f else 5f
-        fragment.addMenuButton.show()
+        view.listLayout.weightSum = if (selectedItemPosition <= 1) 4f else 5f
+        view.addMenuButton.show()
     }
 
     /** Initializes a dialog for adding books using [ModifyBookDialog]
      * @param book The book to modify, null will add a book
      */
-    private fun initAddFragmentDialog(book: Book?) {
+    fun initAddFragmentDialog(book: Book?) {
         val menu = ModifyBookDialog.newInstance(book)
         menu.show(getMainActivity().supportFragmentManager, "Add or Change Book")
     }
@@ -111,5 +75,23 @@ class MainViewController(private val view: View, private val fragment: FragmentM
             FragmentRead.newInstance(book),
             View.GONE
         )
+    }
+
+
+    /** Modifies the [bookLists] dropdown menu's gui elements depending upon the [position] given.
+     *  Also calls the onClick method as well as sets a few parameters for [bookLists]
+     * @param position The current position in the drop down
+     * */
+    fun modifyDropdown(position: Int) {
+        // Technically should be moved to view controller
+        fragment.requireActivity().runOnUiThread {
+            view.bookLists.let { dropdown ->
+                dropdown.setText(DB.currentTable, false)
+                dropdown.listSelection = position
+                dropdown.callOnClick()
+                dropdown.performCompletion()
+            }
+            view.listLayout.weightSum = if (position == 1) 4f else 5f
+        }
     }
 }

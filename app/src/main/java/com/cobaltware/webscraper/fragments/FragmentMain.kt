@@ -26,6 +26,7 @@ import kotlin.concurrent.thread
 
 class FragmentMain() : Fragment() {
     lateinit var bookAdapter: BookAdapter
+    lateinit var dropdownAdapter: ArrayAdapter<String>
 
     lateinit var viewController: MainViewController
 
@@ -39,19 +40,58 @@ class FragmentMain() : Fragment() {
         viewController = MainViewController(viewer, this)
 
         thread {
-            val dropdownAdapter =
+            dropdownAdapter =
                 ArrayAdapter(requireContext(), R.layout.item_dropdown, mutableListOf<String>())
-            initDropdown(dropdownAdapter)
 
             viewController.setUI()
-            viewController.setupDropdown(dropdownAdapter)
+            viewController.setupDropdown()
+            setObservers()
+            setListeners(viewer)
         }
 
         return viewer
     }
 
+    private fun setObservers() = requireActivity().runOnUiThread {
+        val listViewModel: BookViewModel =
+            ViewModelProvider(this).get(BookViewModel::class.java)
+        listViewModel.readAllLists().observe(viewLifecycleOwner, { bookLists ->
+            if (!dropdownAdapter.isEmpty)
+                dropdownAdapter.clear()
 
-    fun updateBooksContent(books: List<Book>) {
+            bookLists.forEach { list ->
+                dropdownAdapter.add(list.name)
+            }
+
+            dropdownAdapter.notifyDataSetChanged()
+        })
+
+        listViewModel.readAllBooks.observe(
+            viewLifecycleOwner,
+            { updateBooksContent(it) })
+    }
+
+    private fun setListeners(v: View) {
+        v.addMenuButton.setOnClickListener { viewController.initAddFragmentDialog(null) }
+        v.changeButton.setOnClickListener {
+            startPopup(DB.currentTable)
+        }
+        v.bookLists.setOnItemClickListener { _, _, position, _ ->
+            onBookListsClick(position)
+            viewController.modifyDropdown(position)
+            thread {
+                Log.d(
+                    "CONTENTS OF CURRENT TABLE",
+                    DB.readAllFromBookListSync(BookList(DB.currentTable)).toString()
+                )
+            }
+            bookAdapter.changeItems(DB.readAllFromBookListSync(BookList(DB.currentTable)))
+            bookAdapter.notifyDataSetChanged()
+        }
+    }
+
+
+    private fun updateBooksContent(books: List<Book>) {
         Log.d("CURRENT TABLE", DB.currentTable)
 
         val bookList = mutableListOf<Book>()
@@ -59,10 +99,6 @@ class FragmentMain() : Fragment() {
             if (book.bookList.equals(DB.currentTable, ignoreCase = true))
                 bookList.add(book)
         }
-        updateRecycler(bookList)
-    }
-
-    fun updateRecycler(bookList: MutableList<Book>) {
         requireActivity().runOnUiThread {
             bookAdapter.changeItems(bookList)
             bookAdapter.notifyDataSetChanged()
@@ -74,7 +110,6 @@ class FragmentMain() : Fragment() {
      * @param dropdownAdapter The adapter connected to [bookLists]*/
     private fun onBookListsClick(
         position: Int,
-        dropdownAdapter: ArrayAdapter<String>,
         updateBookList: Boolean = false
     ) {
         if (position != bookLists.listSelection) {
@@ -86,7 +121,7 @@ class FragmentMain() : Fragment() {
                     updateBooksContent(books)
                 }
             if (position == 0) { // if the selected item is the add book item
-                startPopup(dropdownAdapter, null)
+                startPopup(null)
                 return
             }
 
@@ -94,68 +129,30 @@ class FragmentMain() : Fragment() {
         }
     }
 
-    private fun initDropdown(adapter: ArrayAdapter<String>) {
-        requireView().bookLists.setOnItemClickListener { _, _, position, _ ->
-
-            onBookListsClick(position, adapter)
-            modifyDropdown(position)
-            thread {
-                Log.d(
-                    "CONTENTS OF CURRENT TABLE",
-                    DB.readAllFromBookListSync(BookList(DB.currentTable))
-                        .toString()
-                )
-            }
-            bookAdapter.changeItems(
-                DB.readAllFromBookListSync(
-                    BookList(
-                        DB.currentTable
-                    )
-                )
-            )
-            bookAdapter.notifyDataSetChanged()
-        }
-    }
-
-    /** Modifies the [bookLists] dropdown menu's gui elements depending upon the [position] given.
-     *  Also calls the onClick method as well as sets a few parameters for [bookLists]
-     * @param position The current position in the drop down
-     * */
-    fun modifyDropdown(position: Int) {
-        // Technically should be moved to view controller
-        requireActivity().runOnUiThread {
-            bookLists.setText(DB.currentTable, false)
-            bookLists.listSelection = position
-            bookLists.callOnClick()
-            bookLists.performCompletion()
-
-            listLayout.weightSum = if (position == 1) 4f else 5f
-        }
-    }
-
     /** Initializes a [ModifyListDialog], used for making and changing lists
      * @param adapter The [bookLists]' adapter, used for modifying the list
      * @param title The title you want to give to the [ModifyListDialog]*/
-    fun startPopup(adapter: ArrayAdapter<String>, title: String?) {
-        // DONT MOVE into ViewController
+    private fun startPopup(title: String?) {
+        // DONT MOVE into ViewController, the dismiss
+        // listener uses a lot of things from FragmentMain
 
         val menu = ModifyListDialog(requireContext(), title)
         menu.setOnDismissListener {
             // Make sure that the bookList changes if the item is deleted
-            val currentPos = adapter.getPosition(DB.currentTable)
+            val currentPos = dropdownAdapter.getPosition(DB.currentTable)
             // TODO: Fix renaming/updating mechanism
             // TODO: Implement this _when_ so that it navigates properly
             when (menu.op) {
                 Operations.Delete -> {
-                    onBookListsClick(1, adapter)
+                    onBookListsClick(1)
                 }
                 Operations.Insert -> {
-                    onBookListsClick(currentPos, adapter, true)
+                    onBookListsClick(currentPos, true)
                 }
                 Operations.Update -> thread {
                     val books = DB.readAllFromBookListSync(BookList(DB.currentTable))
                     updateBooksContent(books)
-                    modifyDropdown(currentPos)
+                    viewController.modifyDropdown(currentPos)
                 }
                 Operations.Nothing -> {
 
