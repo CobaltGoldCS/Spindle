@@ -22,9 +22,9 @@ import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlin.concurrent.thread
 
 
-class FragmentMain() : Fragment() {
+class FragmentMain : Fragment() {
     lateinit var bookAdapter: BookAdapter
-    lateinit var dropdownAdapter: ArrayAdapter<String>
+    private lateinit var dropdownAdapter: ArrayAdapter<String>
 
     lateinit var viewController: MainViewController
 
@@ -38,16 +38,27 @@ class FragmentMain() : Fragment() {
         viewController = MainViewController(viewer, this)
 
         thread {
-            dropdownAdapter =
-                ArrayAdapter(requireContext(), R.layout.item_dropdown, mutableListOf<String>())
+            initializeAdapters()
 
-            viewController.setUI()
-            viewController.setupDropdown()
+            viewController.setUI(bookAdapter)
+            viewController.setupDropdown(dropdownAdapter)
             setObservers()
             setListeners(viewer)
         }
 
         return viewer
+    }
+
+    private fun initializeAdapters() {
+        dropdownAdapter =
+            ArrayAdapter(requireContext(), R.layout.item_dropdown, mutableListOf<String>())
+        bookAdapter = object : BookAdapter() {
+            override fun modifyClickHandler(book: Book) =
+                viewController.initAddFragmentDialog(book)
+
+            override fun openClickHandler(book: Book) =
+                viewController.initReadFragment(book)
+        }
     }
 
     private fun setObservers() = requireActivity().runOnUiThread {
@@ -57,29 +68,20 @@ class FragmentMain() : Fragment() {
             if (!dropdownAdapter.isEmpty)
                 dropdownAdapter.clear()
 
-            bookLists.forEach { list ->
-                dropdownAdapter.add(list.name)
-            }
-
+            bookLists.forEach { list -> dropdownAdapter.add(list.name) }
             dropdownAdapter.notifyDataSetChanged()
         })
 
-        listViewModel.readAllBooks.observe(
-            viewLifecycleOwner,
-            { updateBooksContent(it) })
+        listViewModel.readAllBooks.observe(viewLifecycleOwner, { updateBooksContent(it) })
     }
 
     private fun setListeners(v: View) {
         v.addMenuButton.setOnClickListener { viewController.initAddFragmentDialog(null) }
-        v.changeButton.setOnClickListener {
-            startPopup(DB.currentTable)
-        }
-        v.bookLists.setOnItemClickListener { _, _, position, _ ->
-            performDropdownItemClick(position)
-        }
+        v.changeButton.setOnClickListener { startPopup(DB.currentTable) }
+        v.bookLists.setOnItemClickListener { _, _, position, _ -> switchBookList(position) }
     }
 
-    private fun performDropdownItemClick(position: Int) {
+    private fun switchBookList(position: Int) {
         onBookListsClick(position)
         viewController.modifyDropdown(position)
         thread {
@@ -92,7 +94,8 @@ class FragmentMain() : Fragment() {
         bookAdapter.notifyDataSetChanged()
     }
 
-
+    /**Update the content of the recyclerview using a list of books
+     * @param books The list of books to populate the adapter with*/
     private fun updateBooksContent(books: List<Book>) {
         Log.d("CURRENT TABLE", DB.currentTable)
 
@@ -131,27 +134,18 @@ class FragmentMain() : Fragment() {
     }
 
     /** Initializes a [ModifyListDialog], used for making and changing lists
-     * @param title The title you want to give to the [ModifyListDialog]*/
+     * @param title The title of the bookList for the [ModifyListDialog]*/
     private fun startPopup(title: String?) {
-        // DONT MOVE into ViewController, the dismiss
-        // listener uses a lot of things from FragmentMain
-
         val menu = ModifyListDialog(requireContext(), title)
         menu.setOnDismissListener {
-            // Make sure that the bookList changes if the item is deleted
             val currentPos = dropdownAdapter.getPosition(DB.currentTable)
-
-            // Navigate to appropriate booklist when a given operation is complete
+            // Navigates to relevant bookLists depending on the operation executed by the menu
             when (menu.op) {
-                Operations.Delete -> {
-                    performDropdownItemClick(1)
+                Operations.Delete, Operations.Nothing -> {
+                    switchBookList(1)
                 }
-
-                Operations.Nothing -> {}
-
-                // This covers Insert and Update
-                else -> {
-                    performDropdownItemClick(currentPos)
+                Operations.Insert, Operations.Update -> {
+                    switchBookList(currentPos)
                 }
             }
         }

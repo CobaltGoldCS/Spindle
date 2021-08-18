@@ -5,8 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
-import com.cobaltware.webscraper.datahandling.BookViewModel
-import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.fragments.FragmentConfig
 import com.cobaltware.webscraper.fragments.FragmentMain
 import com.cobaltware.webscraper.fragments.FragmentSettings

@@ -19,7 +19,7 @@ import kotlin.concurrent.thread
  * A simple [Fragment] subclass.
  * Used for setting up configurations
  */
-class FragmentConfig() : Fragment() {
+class FragmentConfig : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
