@@ -24,9 +24,9 @@ class ChapterChangeHandler(private val readFragment: FragmentRead) {
             readFragment.quit("Unknown Error has occurred, may be linking to bad url")
             return
         }
-        val (title, content, prevUrl, nextUrl) = data
+        val (title, content, prevUrl, nextUrl, current) = data
         readFragment.requireActivity().runOnUiThread {
-            readFragment.updateUi(title!!, content!!, prevUrl, nextUrl)
+            readFragment.updateUi(title!!, content!!, prevUrl, nextUrl, current)
         }
     }
 

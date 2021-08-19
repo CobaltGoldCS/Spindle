@@ -66,7 +66,7 @@ class FragmentRead(private val book: Book) : Fragment() {
             Log.i("GUI", "Update UI from asyncUrlLoad")
             try {
                 requireActivity().runOnUiThread {
-                    updateUi(data[0]!!, data[1]!!, data[2], data[3])
+                    updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4])
                 }
             } catch (e: Exception) {
                 Log.i("FragmentRead", "This fragment should not exist")
@@ -130,6 +130,7 @@ class FragmentRead(private val book: Book) : Fragment() {
                 this.add(instance["content"].toString())
                 this.add(instance["prev"].toString())
                 this.add(instance["next"].toString())
+                this.add(url)
             }
             returnList
 
@@ -160,7 +161,8 @@ class FragmentRead(private val book: Book) : Fragment() {
         title: String,
         content: String,
         prevUrl: String?,
-        nextUrl: String?
+        nextUrl: String?,
+        current: String?
     ) {
         requireActivity().runOnUiThread {
             viewController.updateUi(title, content, prevUrl, nextUrl)
@@ -170,7 +172,7 @@ class FragmentRead(private val book: Book) : Fragment() {
         // Since the visibility is already changed, we don't have to check again
         if (view.prevButton.isVisible) prevHandler.prepPageChange(prevUrl!!)
         if (view.nextButton.isVisible) nextHandler.prepPageChange(nextUrl!!)
-
+        book.url = current!!
         DB.updateBook(book)
     }
 
