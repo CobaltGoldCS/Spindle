@@ -87,11 +87,11 @@ class FragmentMain : Fragment() {
 
 
     private fun handleBookDialogInit(book: Book?) {
-        val menu = ModifyBookDialog(book)
+        val menu = viewController.initAddFragment(book)
         menu.addDismissListener {
             when (menu.op) {
                 Operations.Update, Operations.Insert -> {
-                    // Menu position doesn't count add/change booklist
+                    // Menu position doesn't count add/change booklist, so we need to add one to account for that
                     switchBookList(menu.position + 1)
                 }
                 else -> {
@@ -99,7 +99,6 @@ class FragmentMain : Fragment() {
                 }
             }
         }
-        menu.show(ReaderApplication.activity.supportFragmentManager, "Add or Change Book")
     }
 
     /** Modifies and updates the ui given the position in the [dropdownAdapter]

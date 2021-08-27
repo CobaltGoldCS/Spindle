@@ -1,6 +1,5 @@
 package com.cobaltware.webscraper.viewcontrollers
 
-import android.os.Handler
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
@@ -8,11 +7,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cobaltware.webscraper.BookAdapter
 import com.cobaltware.webscraper.R
+import com.cobaltware.webscraper.ReaderApplication
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.ReaderApplication.Companion.activity
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
-import com.cobaltware.webscraper.dialogs.Operations
 import com.cobaltware.webscraper.fragments.FragmentRead
 import com.cobaltware.webscraper.fragments.fragmentTransition
 import kotlinx.android.synthetic.main.fragment_main.*
@@ -54,6 +53,12 @@ class MainViewController(private val view: View, private val fragment: Fragment)
             FragmentRead(book),
             View.GONE
         )
+    }
+
+    fun initAddFragment(book: Book?): ModifyBookDialog {
+        val menu = ModifyBookDialog(book)
+        menu.show(activity.supportFragmentManager, "Add or Change Book")
+        return menu
     }
 
 
