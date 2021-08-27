@@ -31,7 +31,10 @@ import kotlin.concurrent.thread
 
 class FragmentRead(private val book: Book) : Fragment() {
 
-    lateinit var viewController: ReadViewController
+    private val viewController: ReadViewController by lazy {
+        // This will likely break the app
+        ReadViewController(requireView())
+    }
 
     private val nextHandler = ChapterChangeHandler(this)
     private val prevHandler = ChapterChangeHandler(this)
@@ -43,13 +46,17 @@ class FragmentRead(private val book: Book) : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_read, container, false)
-        viewController = ReadViewController(view)
 
         // Manipulate the GUI
         setListeners(view)
         thread { preferenceHandler() }
 
         // First time run
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         thread {
             vibrate(100)
             Log.i("data", "Obtaining data")
@@ -73,7 +80,6 @@ class FragmentRead(private val book: Book) : Fragment() {
             }
             vibrate(150)
         }
-        return view
     }
 
     /** Sets ClickHandler actions
@@ -196,7 +202,6 @@ class FragmentRead(private val book: Book) : Fragment() {
     fun quit(error: String? = null) {
         try {
 
-            val activity: MainActivity = activity as MainActivity
             if (error != null) requireActivity().runOnUiThread {
                 Toast.makeText(
                     activity,
@@ -204,7 +209,7 @@ class FragmentRead(private val book: Book) : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            fragmentTransition(activity, activity.mainFrag, View.VISIBLE)
+            fragmentTransition(FragmentMain(), View.VISIBLE)
 
         } catch (e: Exception) {
         }

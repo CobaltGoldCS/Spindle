@@ -8,27 +8,21 @@ import com.chaquo.python.android.AndroidPlatform
 import com.cobaltware.webscraper.fragments.FragmentConfig
 import com.cobaltware.webscraper.fragments.FragmentMain
 import com.cobaltware.webscraper.fragments.FragmentSettings
+import com.cobaltware.webscraper.ReaderApplication.Companion.activity
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.concurrent.thread
 
 
 class MainActivity : AppCompatActivity() {
-    lateinit var mainFrag: FragmentMain  // Referenced by FragmentRead.kt
-    private lateinit var configFrag: FragmentConfig
-    private val settingsFrag = FragmentSettings()
+    val mainFrag = FragmentMain()  // Referenced by FragmentRead.kt
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Create and setup various background processes
         if (!Python.isStarted()) Python.start(AndroidPlatform(this))
-        thread {
-            configFrag = FragmentConfig()
-        }
+        activity = this
         setContentView(R.layout.activity_main)
+
         setNavTransitions()
-
-
-        mainFrag = FragmentMain()
         activityFragmentSwitch(mainFrag)
     }
 
@@ -37,8 +31,8 @@ class MainActivity : AppCompatActivity() {
         nav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.ic_book -> activityFragmentSwitch(mainFrag)
-                R.id.ic_config -> activityFragmentSwitch(configFrag)
-                R.id.ic_settings -> activityFragmentSwitch(settingsFrag)
+                R.id.ic_config -> activityFragmentSwitch(FragmentConfig())
+                R.id.ic_settings -> activityFragmentSwitch(FragmentSettings())
             }
             true
         }

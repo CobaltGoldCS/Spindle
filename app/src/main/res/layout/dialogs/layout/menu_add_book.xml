@@ -12,11 +12,35 @@
         android:layout_width="wrap_content"
         android:layout_height="?attr/actionBarSize"
         app:layout_constraintEnd_toEndOf="parent"
-
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
         app:title="Add or Change a Book" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:id="@+id/supportDropdown"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:hint="Reading Lists"
+        app:layout_constraintBottom_toTopOf="@+id/textName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        app:startIconDrawable="@drawable/icon_book"
+        tools:ignore="HardcodedText">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/bookLists"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            tools:text="BOOKS" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <EditText
         android:id="@+id/textName"
@@ -31,7 +55,7 @@
         android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@id/supportDropdown"
         tools:ignore="Autofill, HardcodedText" />
 
     <EditText

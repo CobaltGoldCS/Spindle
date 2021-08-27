@@ -1,18 +1,25 @@
 package com.cobaltware.webscraper
 
+import android.os.Handler
 import android.view.*
 import android.widget.Button
 import android.widget.TextView
-import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.cobaltware.webscraper.datahandling.Book
+import com.cobaltware.webscraper.dialogs.ModifyBookDialog
+import com.cobaltware.webscraper.dialogs.Operations
+import com.cobaltware.webscraper.fragments.FragmentMain
+import com.cobaltware.webscraper.viewcontrollers.MainViewController
 import kotlinx.android.synthetic.main.item_reader_list.view.*
 
 
-open class BookAdapter() : RecyclerView.Adapter<BookAdapter.ItemHolder>() {
+open class BookAdapter(
+    private val fragment: FragmentMain,
+    private val controller: MainViewController
+) : RecyclerView.Adapter<BookAdapter.ItemHolder>() {
 
-    var bookList = emptyList<Book>()
+    var bookList = mutableListOf<Book>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(
             R.layout.item_reader_list,
@@ -32,13 +39,25 @@ open class BookAdapter() : RecyclerView.Adapter<BookAdapter.ItemHolder>() {
     }
 
     // This allows for modification of the click behavior of the buttons
-    open fun modifyClickHandler(book: Book) {}
-    open fun openClickHandler(book: Book) {}
+    open fun modifyClickHandler(book: Book) {
+        ModifyBookDialog(book)
+    }
+
+    open fun openClickHandler(book: Book) {
+        controller.initReadFragment(book)
+    }
 
     fun changeItems(newList: List<Book>) {
         val diffResult = DiffUtil.calculateDiff(BookCallback(newList, bookList))
         diffResult.dispatchUpdatesTo(this)
-        bookList = newList
+        bookList = newList as MutableList<Book>
+    }
+
+    fun removeItem(predicate: (Book) -> Boolean) {
+        bookList.forEach {
+            if (predicate.invoke(it))
+                bookList.remove(it)
+        }
     }
 
     class ItemHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

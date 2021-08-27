@@ -1,26 +1,24 @@
 package com.cobaltware.webscraper.viewcontrollers
 
+import android.os.Handler
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cobaltware.webscraper.BookAdapter
-import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
+import com.cobaltware.webscraper.ReaderApplication.Companion.activity
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
+import com.cobaltware.webscraper.dialogs.Operations
 import com.cobaltware.webscraper.fragments.FragmentRead
 import com.cobaltware.webscraper.fragments.fragmentTransition
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 
 class MainViewController(private val view: View, private val fragment: Fragment) {
-
-
-    // Fragment functions
-    private fun getMainActivity() = fragment.activity as MainActivity
 
     /**Sets the UI for everything except the dropdown menu, which is set up in [setupDropdown]*/
     fun setUI(bookAdapter: BookAdapter) = fragment.requireActivity().runOnUiThread {
@@ -48,20 +46,11 @@ class MainViewController(private val view: View, private val fragment: Fragment)
         view.addMenuButton.show()
     }
 
-    /** Initializes a dialog for adding books using [ModifyBookDialog]
-     * @param book The book to modify, null will add a book
-     */
-    fun initAddFragmentDialog(book: Book?) {
-        val menu = ModifyBookDialog.newInstance(book)
-        menu.show(getMainActivity().supportFragmentManager, "Add or Change Book")
-    }
-
     /** Initializes a [FragmentRead] for displaying the book in the reader
      * @param book The book to read
      */
     fun initReadFragment(book: Book) {
         fragmentTransition(
-            getMainActivity(),
             FragmentRead(book),
             View.GONE
         )
