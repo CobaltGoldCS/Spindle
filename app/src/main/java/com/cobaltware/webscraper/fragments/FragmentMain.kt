@@ -69,7 +69,6 @@ class FragmentMain : Fragment() {
 
             bookLists.forEach { list -> dropdownAdapter.add(list.name) }
             dropdownAdapter.notifyDataSetChanged()
-
         })
 
 
@@ -85,7 +84,10 @@ class FragmentMain : Fragment() {
         v.bookLists.setOnItemClickListener { _, _, position, _ -> switchBookList(position) }
     }
 
-
+    /** Handles the [ModifyBookDialog] details
+     * @see ModifyBookDialog
+     * @param book The book to be passed to the dialog
+     * */
     private fun handleBookDialogInit(book: Book?) {
         val menu = viewController.initAddFragment(book)
         menu.addDismissListener {
@@ -104,7 +106,7 @@ class FragmentMain : Fragment() {
     /** Modifies and updates the ui given the position in the [dropdownAdapter]
      * @param position The position of the target [BookList] in the dropdown adapter
      * */
-    fun switchBookList(position: Int) {
+    private fun switchBookList(position: Int) {
         thread {
             Log.d(
                 "CONTENTS OF CURRENT TABLE",

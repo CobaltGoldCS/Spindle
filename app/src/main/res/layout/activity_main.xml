@@ -9,7 +9,7 @@
         android:id="@+id/fragmentSpot"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="0.07"/>
+        android:layout_weight="0.1"/>
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav"
         android:layout_width="match_parent"
