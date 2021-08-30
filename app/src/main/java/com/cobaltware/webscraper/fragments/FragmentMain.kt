@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.cobaltware.webscraper.BookAdapter
 import com.cobaltware.webscraper.R
-import com.cobaltware.webscraper.ReaderApplication
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.BookList
@@ -30,7 +29,7 @@ class FragmentMain : Fragment() {
 
 
     private val bookAdapter: BookAdapter by lazy {
-        object : BookAdapter(this, viewController) {
+        object : BookAdapter(viewController) {
             override fun modifyClickHandler(book: Book) {
                 handleBookDialogInit(book)
             }
@@ -93,7 +92,7 @@ class FragmentMain : Fragment() {
         menu.addDismissListener {
             when (menu.op) {
                 Operations.Update, Operations.Insert -> {
-                    // Menu position doesn't count add/change booklist, so we need to add one to account for that
+                    // Menu position doesn't count add/change book list, so we need to add one to account for that
                     switchBookList(menu.position + 1)
                 }
                 else -> {
@@ -107,16 +106,16 @@ class FragmentMain : Fragment() {
      * @param position The position of the target [BookList] in the dropdown adapter
      * */
     private fun switchBookList(position: Int) {
+        val newList = DB.fromBookListSync(BookList(DB.currentTable))
         thread {
             Log.d(
                 "CONTENTS OF CURRENT TABLE",
-                DB.fromBookListSync(BookList(DB.currentTable)).toString()
+                newList.toString()
             )
         }
         onBookListsClick(position)
         viewController.modifyDropdown(position)
-        bookAdapter.changeItems(DB.fromBookListSync(BookList(DB.currentTable)))
-        bookAdapter.notifyDataSetChanged()
+        bookAdapter.changeItems(newList)
     }
 
     /**Update the content of the recyclerview using a list of books
@@ -129,10 +128,7 @@ class FragmentMain : Fragment() {
             if (book.bookList.equals(DB.currentTable, ignoreCase = true))
                 bookList.add(book)
         }
-        requireActivity().runOnUiThread {
-            bookAdapter.changeItems(bookList)
-            bookAdapter.notifyDataSetChanged()
-        }
+        requireActivity().runOnUiThread { bookAdapter.changeItems(bookList) }
     }
 
     /**Click handler for the [bookLists] dropdown, changes backend and UI

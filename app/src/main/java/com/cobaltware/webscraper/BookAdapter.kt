@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.item_reader_list.view.*
 
 
 open class BookAdapter(
-    private val fragment: FragmentMain,
     private val controller: MainViewController
 ) : RecyclerView.Adapter<BookAdapter.ItemHolder>() {
 

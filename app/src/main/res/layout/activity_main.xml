@@ -9,12 +9,12 @@
         android:id="@+id/fragmentSpot"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="0.1"/>
+        android:layout_weight="0.08"/>
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="0.9"
+        android:layout_weight="0.93"
         android:background="?attr/colorPrimary"
         app:itemIconTint="#fff"
         app:itemTextColor="#fff"
