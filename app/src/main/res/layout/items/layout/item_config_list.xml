@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:background="@drawable/border"
     android:layout_marginTop="5sp"
-    android:gravity="center">
+    android:gravity="center"
+    android:baselineAligned="false">
     <!--This Layout is only for clicking purposes-->
     <LinearLayout
         android:id="@+id/clickableArea"

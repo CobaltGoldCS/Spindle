@@ -67,7 +67,7 @@ fun processElementIntoUrl(currentUrl: String?, element: Any?): String? {
 /** Analyzes custom syntax defined to get attributes for processing if needed
  * @see csspathReader
  * @param document The document to get the attribute from
- * @param CssPath The css path with the attribute syntax stored in it
+ * @param cssPath The css path with the attribute syntax stored in it
  * @return The string from the attribute selected; or null if the attribute is not found in the css path.
  * If the syntax is not found, it will return the normal Element type
  */
@@ -80,7 +80,7 @@ fun customSyntaxAnalyzer(document: Document, cssPath: String): Any? {
 
         val attrSelector = split[0].substring(1) // Takes away '$'
 
-        return if (attrSelector.toLowerCase(Locale.ROOT) == "text") element?.text() else element?.attr(
+        return if (attrSelector.lowercase(Locale.ROOT) == "text") element?.text() else element?.attr(
             attrSelector
         )
     }

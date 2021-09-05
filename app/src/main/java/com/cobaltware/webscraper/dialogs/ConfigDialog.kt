@@ -2,12 +2,10 @@ package com.cobaltware.webscraper.dialogs
 
 import android.os.Bundle
 import android.view.*
-import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
+import com.cobaltware.webscraper.databinding.MenuConfigBinding
 import com.cobaltware.webscraper.datahandling.Config
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.menu_config.*
-import kotlinx.android.synthetic.main.menu_config.view.*
 import kotlin.concurrent.thread
 
 class ConfigDialog(private val config: Config?) :
@@ -15,32 +13,32 @@ class ConfigDialog(private val config: Config?) :
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
-        val view = inflater.inflate(R.layout.menu_config, container, true)
+        val view = MenuConfigBinding.inflate(layoutInflater)
 
         setAllTexts(view)
-        view.actionButton.setOnClickListener { onAction() }
+        view.actionButton.setOnClickListener { onAction(view) }
         view.deleteButton.setOnClickListener { onDelete() }
         view.cancelButton.setOnClickListener { dismiss() }
 
-        return view
+        return view.root
     }
 
     /**Modifies the given [config] if there is one, or creates a new config and adds it to the database. Also makes sure all fields are valid using [guaranteeAllFields]
      * @see guaranteeAllFields*/
-    private fun onAction() {
-        if (!guaranteeAllFields())
+    private fun onAction(view: MenuConfigBinding) {
+        if (!guaranteeAllFields(view))
             return
 
         val modify = config != null
 
         val insertArg = Config(
             if (modify) config!!.row_id else 0,
-            domainUrlInput.text.toString(),
-            contentXpathInput.text.toString(),
-            previousButtonXpathInput.text.toString(),
-            nextButtonXpathInput.text.toString()
+            view.domainUrlInput.text.toString(),
+            view.contentXpathInput.text.toString(),
+            view.previousButtonXpathInput.text.toString(),
+            view.nextButtonXpathInput.text.toString()
         )
 
         when (modify) {
@@ -63,7 +61,7 @@ class ConfigDialog(private val config: Config?) :
 
     /**Sets all of the text input boxes automatically using the given [config]
      * @param v The view used to reference the text input boxes*/
-    private fun setAllTexts(v: View) {
+    private fun setAllTexts(v: MenuConfigBinding) {
         if (config != null) {
             v.domainUrlInput.setText(config.domain)
             v.nextButtonXpathInput.setText(config.nextXPath)
@@ -75,13 +73,13 @@ class ConfigDialog(private val config: Config?) :
     /** Dispenses errors for text inputs if they are invalid
      * @return True if all fields are valid, false if not
      */
-    private fun guaranteeAllFields(): Boolean {
+    private fun guaranteeAllFields(view: MenuConfigBinding): Boolean {
         var valid = true
         listOf(
-            domainUrlInput,
-            nextButtonXpathInput,
-            previousButtonXpathInput,
-            contentXpathInput
+            view.domainUrlInput,
+            view.nextButtonXpathInput,
+            view.previousButtonXpathInput,
+            view.contentXpathInput
         ).forEach {
             if (it.text.isEmpty()) {
                 it.error = "This field is invalid"

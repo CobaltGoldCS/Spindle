@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.cobaltware.webscraper.BookAdapter
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
+import com.cobaltware.webscraper.databinding.FragmentMainBinding
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.BookList
 import com.cobaltware.webscraper.datahandling.BookViewModel
@@ -18,8 +19,6 @@ import com.cobaltware.webscraper.dialogs.ModifyBookDialog
 import com.cobaltware.webscraper.dialogs.ModifyListDialog
 import com.cobaltware.webscraper.dialogs.Operations
 import com.cobaltware.webscraper.viewcontrollers.MainViewController
-import kotlinx.android.synthetic.main.fragment_main.*
-import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlin.concurrent.thread
 
 
@@ -45,7 +44,7 @@ class FragmentMain : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        val viewer = inflater.inflate(R.layout.fragment_main, container, false)!!
+        val viewer = FragmentMainBinding.inflate(inflater)
         viewController = MainViewController(viewer, this)
 
         thread {
@@ -55,7 +54,7 @@ class FragmentMain : Fragment() {
             setListeners(viewer)
         }
 
-        return viewer
+        return viewer.root
     }
 
     /** Sets the handlers that automatically modify ui elements as the database changes */
@@ -75,7 +74,8 @@ class FragmentMain : Fragment() {
     }
 
     /** Sets the actions to take depending on input from the user*/
-    private fun setListeners(v: View) {
+    private fun setListeners(v: FragmentMainBinding) {
+
         v.addMenuButton.setOnClickListener {
             handleBookDialogInit(null)
         }
@@ -134,7 +134,7 @@ class FragmentMain : Fragment() {
     /**Click handler for the [bookLists] dropdown, changes backend and UI
      * @param position The position of the clicked item */
     private fun onBookListsClick(position: Int) {
-        if (position != bookLists.listSelection) {
+        if (position != viewController.view.bookLists.listSelection) {
             DB.currentTable = dropdownAdapter.getItem(position)!!
 
             if (position == 0) { // if the selected item is the add book item

@@ -6,15 +6,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/configView"
-        android:background="?attr/backgroundColor"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
+        />
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addActionButton"
         android:layout_width="wrap_content"
@@ -23,6 +19,7 @@
         android:clickable="true"
         android:contentDescription="Add Book to List Button"
         android:layoutAnimation="@anim/booklist_anim"
+        android:background="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/configView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,3 +28,14 @@
         tools:ignore="HardcodedText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--
+<androidx.recyclerview.widget.RecyclerView
+android:id="@+id/configView"
+android:background="?attr/backgroundColor"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintStart_toStartOf="parent" />
+-->

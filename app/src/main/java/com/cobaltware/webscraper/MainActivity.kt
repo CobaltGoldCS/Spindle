@@ -9,28 +9,29 @@ import com.cobaltware.webscraper.fragments.FragmentConfig
 import com.cobaltware.webscraper.fragments.FragmentMain
 import com.cobaltware.webscraper.fragments.FragmentSettings
 import com.cobaltware.webscraper.ReaderApplication.Companion.activity
-import kotlinx.android.synthetic.main.activity_main.*
+import com.cobaltware.webscraper.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
-    val mainFrag = FragmentMain()  // Referenced by FragmentRead.kt
-    
+    val view by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Create and setup various background processes
         if (!Python.isStarted()) Python.start(AndroidPlatform(this))
         activity = this
-        setContentView(R.layout.activity_main)
-
+        setContentView(view.root)
         setNavTransitions()
-        activityFragmentSwitch(mainFrag)
+        activityFragmentSwitch(FragmentMain())
     }
 
-    /** Just for setting up the [nav] itemSelectionListener */
+    /** Just for setting up the navigation itemSelectionListener */
     private fun setNavTransitions() {
-        nav.setOnItemSelectedListener {
+        view.nav.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.ic_book -> activityFragmentSwitch(mainFrag)
+                R.id.ic_book -> activityFragmentSwitch(FragmentMain())
                 R.id.ic_config -> activityFragmentSwitch(FragmentConfig())
                 R.id.ic_settings -> activityFragmentSwitch(FragmentSettings())
             }

@@ -3,7 +3,6 @@ package com.cobaltware.webscraper.fragments
 import androidx.fragment.app.Fragment
 import com.cobaltware.webscraper.ReaderApplication.Companion.activity
 import com.cobaltware.webscraper.R
-import kotlinx.android.synthetic.main.activity_main.*
 
 /** Function for transitioning between fragments so that I don't forget anything on the ui
  * @param targetFragment The fragment to switch to
@@ -14,5 +13,5 @@ fun fragmentTransition(targetFragment: Fragment, visibility: Int) {
     fragmentTrans.setCustomAnimations(R.animator.frag_fade_in, R.animator.frag_fade_out)
     fragmentTrans.replace(R.id.fragmentSpot, targetFragment)
     fragmentTrans.commit()
-    activity.runOnUiThread { activity.nav.visibility = visibility }
+    activity.runOnUiThread { activity.view.nav.visibility = visibility }
 }

@@ -2,12 +2,11 @@ package com.cobaltware.webscraper.viewcontrollers
 
 import android.content.SharedPreferences
 import android.graphics.Color
-import android.view.View
 import androidx.core.view.isVisible
 import com.cobaltware.webscraper.R
-import kotlinx.android.synthetic.main.fragment_read.view.*
+import com.cobaltware.webscraper.databinding.FragmentReadBinding
 
-class ReadViewController(val view: View) {
+class ReadViewController(val view: FragmentReadBinding) {
 
     fun setPreferenceUI(preferences: SharedPreferences, themeColor: Int) {
         view.contentView.textSize = preferences.getString("textsize", "22")!!.toFloat()

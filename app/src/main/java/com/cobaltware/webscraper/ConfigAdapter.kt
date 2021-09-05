@@ -6,17 +6,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.cobaltware.webscraper.databinding.ItemConfigListBinding
 import com.cobaltware.webscraper.datahandling.Config
-import kotlinx.android.synthetic.main.item_config_list.view.*
-import kotlinx.android.synthetic.main.item_reader_list.view.clickableArea
 
 open class ConfigAdapter(private var configList: List<Config>) :
     RecyclerView.Adapter<ConfigAdapter.ItemHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(
-            R.layout.item_config_list,
-            parent, false
-        )
+        val itemView = ItemConfigListBinding.inflate(LayoutInflater.from(parent.context))
         return ItemHolder(itemView)
     }
 
@@ -28,7 +24,7 @@ open class ConfigAdapter(private var configList: List<Config>) :
         }
     }
 
-    class ItemHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ItemHolder(itemView: ItemConfigListBinding) : RecyclerView.ViewHolder(itemView.root) {
         // Important variables for functions
         val titleView: TextView = itemView.configTitle
         val clickableArea: View = itemView.clickableArea

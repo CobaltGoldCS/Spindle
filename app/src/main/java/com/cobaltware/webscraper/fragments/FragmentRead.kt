@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.preference.PreferenceManager
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -14,27 +13,22 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.chaquo.python.Python
-import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
+import com.cobaltware.webscraper.databinding.FragmentReadBinding
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.Config
 import com.cobaltware.webscraper.datahandling.webhandlers.webdata
 import com.cobaltware.webscraper.viewcontrollers.ChapterChangeHandler
 import com.cobaltware.webscraper.viewcontrollers.ReadViewController
-import kotlinx.android.synthetic.main.fragment_main.view.*
-import kotlinx.android.synthetic.main.fragment_read.*
-import kotlinx.android.synthetic.main.fragment_read.view.*
 import kotlin.concurrent.thread
 
 
 class FragmentRead(private val book: Book) : Fragment() {
 
-    private val viewController: ReadViewController by lazy {
-        // This will likely break the app
-        ReadViewController(requireView())
-    }
+    private lateinit var viewController: ReadViewController
 
     private val nextHandler = ChapterChangeHandler(this)
     private val prevHandler = ChapterChangeHandler(this)
@@ -45,14 +39,14 @@ class FragmentRead(private val book: Book) : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_read, container, false)
-
+        val view = FragmentReadBinding.inflate(layoutInflater)
+        viewController = ReadViewController(view)
         // Manipulate the GUI
         setListeners(view)
         thread { preferenceHandler() }
 
         // First time run
-        return view
+        return view.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -84,7 +78,7 @@ class FragmentRead(private val book: Book) : Fragment() {
 
     /** Sets ClickHandler actions
      * @param view The [View] inflated by [FragmentRead]**/
-    private fun setListeners(view: View) {
+    private fun setListeners(view: FragmentReadBinding) {
         view.scrollable.setNavigationOnClickListener { quit() }
         view.nextButton.setOnClickListener { thread { nextHandler.changePage() } }
         view.prevButton.setOnClickListener { thread { prevHandler.changePage() } }

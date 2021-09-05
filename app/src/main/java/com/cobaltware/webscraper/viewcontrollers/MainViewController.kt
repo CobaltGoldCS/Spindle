@@ -7,17 +7,15 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cobaltware.webscraper.BookAdapter
 import com.cobaltware.webscraper.R
-import com.cobaltware.webscraper.ReaderApplication
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.ReaderApplication.Companion.activity
+import com.cobaltware.webscraper.databinding.FragmentMainBinding
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
 import com.cobaltware.webscraper.fragments.FragmentRead
 import com.cobaltware.webscraper.fragments.fragmentTransition
-import kotlinx.android.synthetic.main.fragment_main.*
-import kotlinx.android.synthetic.main.fragment_main.view.*
 
-class MainViewController(private val view: View, private val fragment: Fragment) {
+class MainViewController(val view: FragmentMainBinding, private val fragment: Fragment) {
 
     /**Sets the UI for everything except the dropdown menu, which is set up in [setupDropdown]*/
     fun setUI(bookAdapter: BookAdapter) = fragment.requireActivity().runOnUiThread {

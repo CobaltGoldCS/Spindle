@@ -3,12 +3,13 @@ package com.cobaltware.webscraper.dialogs
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Window
 import android.widget.TextView
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
+import com.cobaltware.webscraper.databinding.MenuAddListBinding
 import com.cobaltware.webscraper.datahandling.BookList
-import kotlinx.android.synthetic.main.menu_add_list.*
 
 enum class Operations {
     Delete,
@@ -18,28 +19,31 @@ enum class Operations {
 }
 
 class ModifyListDialog(
-    context: Context,
+    private val thisContext: Context,
     var title: String?
-) : Dialog(context) {
+) : Dialog(thisContext) {
     /** Operation used to determine what the [ModifyListDialog] did */
     var op: Operations = Operations.Nothing
+    val view by lazy{
+        MenuAddListBinding.inflate(LayoutInflater.from(thisContext))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.menu_add_list)
         if (title != null)
-            domainUrlInput.setText(title, TextView.BufferType.EDITABLE)
-        deleteButton.setOnClickListener { this.onDeleteClick() }
-        actionButton.setOnClickListener { this.onActionClick() }
-        cancelButton.setOnClickListener { dismiss() }
+            view.domainUrlInput.setText(title, TextView.BufferType.EDITABLE)
+        view.deleteButton.setOnClickListener { this.onDeleteClick() }
+        view.actionButton.setOnClickListener { this.onActionClick() }
+        view.cancelButton.setOnClickListener { dismiss() }
     }
 
     /** Handles when the action button is clicked by either modifying or adding a book list **/
     private fun onActionClick() {
 
-        if (domainUrlInput.text.isEmpty()) return
-        val bookListName = domainUrlInput.text.toString()
+        if (view.domainUrlInput.text.isEmpty()) return
+        val bookListName = view.domainUrlInput.text.toString()
 
 
         op = when (title != null) { // Checks if list needs to be updated

@@ -1,17 +1,16 @@
 package com.cobaltware.webscraper
 
-import android.os.Handler
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.cobaltware.webscraper.databinding.ItemReaderListBinding
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
-import com.cobaltware.webscraper.dialogs.Operations
-import com.cobaltware.webscraper.fragments.FragmentMain
 import com.cobaltware.webscraper.viewcontrollers.MainViewController
-import kotlinx.android.synthetic.main.item_reader_list.view.*
 
 
 open class BookAdapter(
@@ -20,10 +19,7 @@ open class BookAdapter(
 
     var bookList = mutableListOf<Book>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(
-            R.layout.item_reader_list,
-            parent, false
-        )
+        val itemView = ItemReaderListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ItemHolder(itemView)
     }
 
@@ -52,19 +48,14 @@ open class BookAdapter(
         bookList = newList as MutableList<Book>
     }
 
-    fun removeItem(predicate: (Book) -> Boolean) {
-        bookList.forEach {
-            if (predicate.invoke(it))
-                bookList.remove(it)
-        }
-    }
-
-    class ItemHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ItemHolder(itemView: ItemReaderListBinding) : RecyclerView.ViewHolder(itemView.root) {
         // Important variables for functions
+
         val titleView: TextView = itemView.bookTitle
         val moreButton: Button = itemView.moreButton
         val clickableArea: View = itemView.clickableArea
     }
+
 
 }
 
