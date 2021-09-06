@@ -76,7 +76,7 @@ class FragmentMain : Fragment() {
             dropdownAdapter.notifyDataSetChanged()
 
             // This is the best way I have found to reliably set up the lazycolumn without anything breaking
-            // TODO: Fix this monstrosity of an if statement
+            // FIXME: Fix this monstrosity of an if statement
             if (firstrun && bookLists.size > 1){
                 switchBookList(1)
                 firstrun = false
