@@ -15,8 +15,8 @@ interface BookDao {
     @Delete
     suspend fun deleteBook(book: Book)
 
-    @Query("SELECT * FROM Books")
-    fun readAllFromBookList(): LiveData<List<Book>>
+    @Query("SELECT * FROM Books WHERE bookList = :name")
+    fun readAllFromBookList(name: String): LiveData<List<Book>>
 
     @Query("SELECT * FROM Books")
     fun readAllFromBookListSync(): List<Book>

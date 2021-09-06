@@ -1,12 +1,15 @@
 package com.cobaltware.webscraper.fragments
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import com.cobaltware.webscraper.BookAdapter
 import com.cobaltware.webscraper.R
@@ -19,21 +22,16 @@ import com.cobaltware.webscraper.dialogs.ModifyBookDialog
 import com.cobaltware.webscraper.dialogs.ModifyListDialog
 import com.cobaltware.webscraper.dialogs.Operations
 import com.cobaltware.webscraper.viewcontrollers.MainViewController
+import java.util.*
+import kotlin.concurrent.schedule
 import kotlin.concurrent.thread
 
 
 class FragmentMain : Fragment() {
 
     lateinit var viewController: MainViewController
+    lateinit var binding: FragmentMainBinding
 
-
-    private val bookAdapter: BookAdapter by lazy {
-        object : BookAdapter(viewController) {
-            override fun modifyClickHandler(book: Book) {
-                handleBookDialogInit(book)
-            }
-        }
-    }
     private val dropdownAdapter: ArrayAdapter<String> by lazy {
         ArrayAdapter(requireContext(), R.layout.item_dropdown, mutableListOf<String>())
     }
@@ -44,17 +42,31 @@ class FragmentMain : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        val viewer = FragmentMainBinding.inflate(inflater)
-        viewController = MainViewController(viewer, this)
+        binding = FragmentMainBinding.inflate(inflater)
+        viewController = MainViewController(binding, this)
 
+        DB.currentTable = "Books"
         thread {
-            viewController.setUI(bookAdapter)
             viewController.setupDropdown(dropdownAdapter)
             setObservers()
-            setListeners(viewer)
+            setListeners(binding)
         }
 
-        return viewer.root
+        Timer("SettingUp", false).schedule(3000) {
+            requireActivity().runOnUiThread { switchBookList(1) }
+        }
+
+        return binding.root
+    }
+
+
+    private fun switchBookList() {
+        binding.bookLayout.setContent {
+            viewController.BookRecycler(
+                DB.readAllFromBookList(DB.currentTable),
+                textclickHandler = { viewController.initReadFragment(it) },
+                buttonClickHandler = { handleBookDialogInit(it) })
+        }
     }
 
     /** Sets the handlers that automatically modify ui elements as the database changes */
@@ -68,9 +80,6 @@ class FragmentMain : Fragment() {
             bookLists.forEach { list -> dropdownAdapter.add(list.name) }
             dropdownAdapter.notifyDataSetChanged()
         })
-
-
-        listViewModel.readAllBooks.observe(viewLifecycleOwner, { updateBooksContent(it) })
     }
 
     /** Sets the actions to take depending on input from the user*/
@@ -88,50 +97,24 @@ class FragmentMain : Fragment() {
      * @param book The book to be passed to the dialog
      * */
     private fun handleBookDialogInit(book: Book?) {
-        val menu = viewController.initAddFragment(book)
-        menu.addDismissListener {
-            when (menu.op) {
-                Operations.Update, Operations.Insert -> {
-                    // Menu position doesn't count add/change book list, so we need to add one to account for that
-                    switchBookList(menu.position + 1)
-                }
-                else -> {
-                    Log.i("Book", "No insert or update of book")
-                }
-            }
-        }
+        viewController.initAddFragment(book)
     }
 
     /** Modifies and updates the ui given the position in the [dropdownAdapter]
      * @param position The position of the target [BookList] in the dropdown adapter
      * */
     private fun switchBookList(position: Int) {
-        val newList = DB.fromBookListSync(BookList(DB.currentTable))
         thread {
             Log.d(
                 "CONTENTS OF CURRENT TABLE",
-                newList.toString()
+                DB.fromBookListSync(BookList(DB.currentTable)).toString()
             )
         }
         onBookListsClick(position)
-        viewController.modifyDropdown(position)
-        bookAdapter.changeItems(newList)
+        switchBookList()
     }
 
-    /**Update the content of the recyclerview using a list of books
-     * @param books The list of books to populate the adapter with*/
-    private fun updateBooksContent(books: List<Book>) {
-        Log.d("CURRENT TABLE", DB.currentTable)
-
-        val bookList = mutableListOf<Book>()
-        for (book in books) {
-            if (book.bookList.equals(DB.currentTable, ignoreCase = true))
-                bookList.add(book)
-        }
-        requireActivity().runOnUiThread { bookAdapter.changeItems(bookList) }
-    }
-
-    /**Click handler for the [bookLists] dropdown, changes backend and UI
+    /**Click handler for the book lists dropdown, changes backend and UI
      * @param position The position of the clicked item */
     private fun onBookListsClick(position: Int) {
         if (position != viewController.view.bookLists.listSelection) {

@@ -19,8 +19,8 @@ class BookRepository(private val bookDao: BookDao, private val configDao: Config
         bookDao.deleteBook(book)
     }
 
-    fun readAllFromBookList(): LiveData<List<Book>>{
-        return bookDao.readAllFromBookList()
+    fun readAllFromBookList(list: String): LiveData<List<Book>>{
+        return bookDao.readAllFromBookList(list)
     }
 
     fun readAllFromBookListSync(): List<Book>{

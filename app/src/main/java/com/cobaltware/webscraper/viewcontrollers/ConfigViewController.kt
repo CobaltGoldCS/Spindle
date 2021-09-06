@@ -1,6 +1,6 @@
 package com.cobaltware.webscraper.viewcontrollers
 
-import android.R
+import com.cobaltware.webscraper.R
 import android.content.Context
 import android.util.TypedValue
 import androidx.compose.foundation.BorderStroke
@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -36,19 +37,18 @@ class ConfigViewController(private val context: Context) {
     @Composable
     fun ConfigRecycler(data: LiveData<List<Config>>, clickHandler: (Config) -> Unit) {
         val columnData by data.observeAsState()
+        val state = rememberLazyListState()
         columnData?.let { list ->
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth()
-                    .background(getColor(R.attr.colorBackground)),
-                contentPadding = PaddingValues(0.dp, 5.dp)
+                    .fillMaxSize()
+                    .background(getColor(R.attr.colorOnBackground)),
+                contentPadding = PaddingValues(0.dp, 3.dp),
+                state = state
             ) {
                 items(items = list, itemContent = { item ->
                     Text(
                         text = item.domain,
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
                         modifier = Modifier
                             .clickable(onClick = { clickHandler.invoke(item) })
                             .fillMaxWidth()
@@ -56,11 +56,14 @@ class ConfigViewController(private val context: Context) {
                             .border(
                                 BorderStroke(
                                     2.dp,
-                                    getColor(R.attr.textColor),
+                                    getColor(R.attr.colorOnPrimary),
                                 ),
                                 RoundedCornerShape(10.dp)
                             )
                             .padding(10.dp, 5.dp),
+                        getColor(R.attr.colorOnPrimary),
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp,
                     )
                 })
             }

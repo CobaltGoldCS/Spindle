@@ -27,7 +27,7 @@ class BookViewModel(application: Application) :
         repository = BookRepository(bookDao, configDao)
         readAllConfigs = repository.readAllConfigs
         readAllLists = repository.readAllLists
-        readAllBooks = readAllFromBookList()
+        readAllBooks = readAllFromBookList(currentTable)
 
     }
 
@@ -49,8 +49,8 @@ class BookViewModel(application: Application) :
         }
     }
 
-    fun readAllFromBookList(): LiveData<List<Book>> {
-        return repository.readAllFromBookList()
+    fun readAllFromBookList(list: String): LiveData<List<Book>> {
+        return repository.readAllFromBookList(list)
     }
 
     fun readAllFromBookListSync(): List<Book> =

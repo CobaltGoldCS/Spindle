@@ -70,20 +70,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/listLayout">
 
-        <androidx.recyclerview.widget.RecyclerView
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/bookLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
-
-            android:background="?attr/backgroundColor"
-            android:layoutAnimation="@anim/booklist_anim"
-            android:orientation="vertical"
-            android:overScrollMode="always"
-
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            android:layout_height="match_parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/addMenuButton"
@@ -104,3 +94,19 @@
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--
+<androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/bookLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+
+            android:background="?attr/backgroundColor"
+            android:layoutAnimation="@anim/booklist_anim"
+            android:orientation="vertical"
+            android:overScrollMode="always"
+
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+-->
