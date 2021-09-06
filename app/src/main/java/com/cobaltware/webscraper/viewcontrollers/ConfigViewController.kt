@@ -41,8 +41,7 @@ class ConfigViewController(private val context: Context) {
         columnData?.let { list ->
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(getColor(R.attr.colorOnBackground)),
+                    .fillMaxSize(),
                 contentPadding = PaddingValues(0.dp, 3.dp),
                 state = state
             ) {
