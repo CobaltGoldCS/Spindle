@@ -44,26 +44,20 @@ class FragmentMain : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentMainBinding.inflate(inflater)
         viewController = MainViewController(binding, this)
-
-        DB.currentTable = "Books"
         thread {
             viewController.setupDropdown(dropdownAdapter)
             setObservers()
             setListeners(binding)
         }
 
-        Timer("SettingUp", false).schedule(3000) {
-            requireActivity().runOnUiThread { switchBookList(1) }
-        }
-
         return binding.root
     }
 
 
-    private fun switchBookList() {
+    private fun switchBookList(data: LiveData<List<Book>> = DB.readAllFromBookList(DB.currentTable)) {
         binding.bookLayout.setContent {
             viewController.BookRecycler(
-                DB.readAllFromBookList(DB.currentTable),
+                data,
                 textclickHandler = { viewController.initReadFragment(it) },
                 buttonClickHandler = { handleBookDialogInit(it) })
         }
@@ -73,12 +67,20 @@ class FragmentMain : Fragment() {
     private fun setObservers() = requireActivity().runOnUiThread {
         val listViewModel: BookViewModel =
             ViewModelProvider(this).get(BookViewModel::class.java)
+        var firstrun = true
         listViewModel.readAllLists().observe(viewLifecycleOwner, { bookLists ->
             if (!dropdownAdapter.isEmpty)
                 dropdownAdapter.clear()
 
             bookLists.forEach { list -> dropdownAdapter.add(list.name) }
             dropdownAdapter.notifyDataSetChanged()
+
+            // This is the best way I have found to reliably set up the lazycolumn without anything breaking
+            // TODO: Fix this monstrosity of an if statement
+            if (firstrun && bookLists.size > 1){
+                switchBookList(1)
+                firstrun = false
+            }
         })
     }
 

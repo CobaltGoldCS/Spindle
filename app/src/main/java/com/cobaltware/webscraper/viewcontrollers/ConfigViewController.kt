@@ -62,7 +62,7 @@ class ConfigViewController(private val context: Context) {
                             .padding(10.dp, 5.dp),
                         getColor(R.attr.colorOnPrimary),
                         textAlign = TextAlign.Center,
-                        fontSize = 16.sp,
+                        fontSize = 20.sp,
                     )
                 })
             }
