@@ -34,24 +34,14 @@ import com.cobaltware.webscraper.fragments.fragmentTransition
 
 class MainViewController(val view: FragmentMainBinding, private val fragment: Fragment) {
 
-    /*
-    /**Sets the UI for everything except the dropdown menu, which is set up in [setupDropdown]*/
-    fun setUI(bookAdapter: BookAdapter) = fragment.requireActivity().runOnUiThread {
-        view.bookLayout.layoutManager = LinearLayoutManager(fragment.requireContext())
-        view.bookLayout.setHasFixedSize(true)
-        view.bookLayout.adapter = bookAdapter
-    }
-
-     */
-
-    /**Sets up the [bookLists] dropdown menu frontend and calls the correct Backend function*/
+    /**Sets up the book Lists dropdown menu frontend and calls the correct Backend function*/
     fun setupDropdown(dropdownAdapter: ArrayAdapter<String>) =
         fragment.requireActivity().runOnUiThread {
             view.bookLists.setAdapter(dropdownAdapter)
-            modifyDropdown(1)
+            modifyDropdown()
         }
 
-    /** Updates the [bookLists] dropdown UI
+    /** Updates the book Lists dropdown UI
      * @param selectedItemPosition The position of the selected item in the dropdown
      * */
     fun changeDropdownUI(selectedItemPosition: Int) {
@@ -80,19 +70,18 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
     }
 
 
-    /** Modifies the [bookLists] dropdown menu's gui elements depending upon the [position] given.
-     *  Also calls the onClick method as well as sets a few parameters for [bookLists]
-     * @param position The current position in the drop down
+    /** Modifies the book Lists dropdown menu's gui elements on first run
+     *  Also calls the onClick method as well as sets a few parameters for book Lists
      * */
-    fun modifyDropdown(position: Int) {
+    private fun modifyDropdown() {
         fragment.requireActivity().runOnUiThread {
             view.bookLists.let { dropdown ->
                 dropdown.setText(DB.currentTable, false)
-                dropdown.listSelection = position
+                dropdown.listSelection = 1
                 dropdown.performClick()
                 dropdown.performCompletion()
             }
-            view.listLayout.weightSum = if (position == 1) 4f else 5f
+            view.listLayout.weightSum = 4f
         }
     }
 
@@ -106,19 +95,19 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
     @Composable
     fun BookRecycler(
         data: LiveData<List<Book>>,
-        textclickHandler: (Book) -> Unit,
+        textClickHandler: (Book) -> Unit,
         buttonClickHandler: (Book) -> Unit
     ) {
         val columnData by data.observeAsState()
         columnData?.let { list ->
-            BookRecycler(list, textclickHandler, buttonClickHandler)
+            BookRecycler(list, textClickHandler, buttonClickHandler)
         }
     }
 
     @Composable
     fun BookRecycler(
         list: List<Book>,
-        textclickHandler: (Book) -> Unit,
+        textClickHandler: (Book) -> Unit,
         buttonClickHandler: (Book) -> Unit
     ) {
         LazyColumn(
@@ -139,6 +128,7 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
                             RoundedCornerShape(10.dp)
                         )
                         .padding(0.dp, 5.dp)
+                        .clickable { textClickHandler.invoke(item) }
                 ) {
                     Button(
                         onClick = { buttonClickHandler.invoke(item) },
@@ -165,7 +155,6 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
                         item.title,
                         Modifier
                             .padding(10.dp, 5.dp, 12.dp, 4.dp)
-                            .clickable { textclickHandler.invoke(item) }
                             .align(Alignment.Start),
                         getColor(R.attr.colorOnPrimary),
                         textAlign = TextAlign.Center,

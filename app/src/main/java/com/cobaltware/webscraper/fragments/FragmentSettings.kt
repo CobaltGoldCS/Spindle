@@ -20,8 +20,8 @@ class FragmentSettings : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val textsize = preferenceManager.findPreference<EditTextPreference>("textsize")!!
-        textsize.setOnBindEditTextListener {
+        val textSize = preferenceManager.findPreference<EditTextPreference>("textsize")!!
+        textSize.setOnBindEditTextListener {
             it.inputType = InputType.TYPE_CLASS_NUMBER
         }
         return super.onCreateView(inflater, container, savedInstanceState)

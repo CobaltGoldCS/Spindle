@@ -177,14 +177,14 @@ class FragmentRead(private val book: Book) : Fragment() {
     }
 
     /**A simple function to call to vibrate the phone
-     * @param milis The milliseconds to vibrate for*/
-    fun vibrate(milis: Int) {
+     * @param millis The milliseconds to vibrate for*/
+    fun vibrate(millis: Int) {
         try {
             val vibrator = requireActivity().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             if (vibrator.hasVibrator())
                 vibrator.vibrate(
                     VibrationEffect.createOneShot
-                        (milis.toLong(), VibrationEffect.DEFAULT_AMPLITUDE)
+                        (millis.toLong(), VibrationEffect.DEFAULT_AMPLITUDE)
                 )
         } catch (e: Exception) {
         }

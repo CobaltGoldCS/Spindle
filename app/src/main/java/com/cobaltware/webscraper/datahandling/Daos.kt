@@ -53,7 +53,7 @@ interface BookDao {
 }
 
 @Dao
-interface ConfigDao{
+interface ConfigDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun addConfig(config: Config)
 
@@ -64,7 +64,7 @@ interface ConfigDao{
     suspend fun deleteConfig(config: Config)
 
     @Query("SELECT * FROM CONFIG")
-    fun readAllFromConfigs() : LiveData<List<Config>>
+    fun readAllFromConfigs(): LiveData<List<Config>>
 
     @Query("SELECT * FROM CONFIG WHERE row_id = :id")
     fun readItemFromConfigs(id: Int): List<Config>

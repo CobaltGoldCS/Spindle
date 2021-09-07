@@ -3,7 +3,7 @@ package com.cobaltware.webscraper
 import android.app.Application
 import com.cobaltware.webscraper.datahandling.BookViewModel
 
-class ReaderApplication() : Application() {
+class ReaderApplication : Application() {
     companion object {
         lateinit var DB: BookViewModel
         lateinit var activity: MainActivity

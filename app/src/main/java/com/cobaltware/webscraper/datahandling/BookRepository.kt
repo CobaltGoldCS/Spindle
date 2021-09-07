@@ -7,11 +7,11 @@ class BookRepository(private val bookDao: BookDao, private val configDao: Config
     val readAllConfigs: LiveData<List<Config>> = configDao.readAllFromConfigs()
     val readAllLists: LiveData<List<BookList>> = bookDao.readAllLists()
 
-    suspend fun addBook(book: Book){
+    suspend fun addBook(book: Book) {
         bookDao.addBook(book)
     }
 
-    suspend fun updateBook(book: Book){
+    suspend fun updateBook(book: Book) {
         bookDao.updateBook(book)
     }
 
@@ -19,59 +19,59 @@ class BookRepository(private val bookDao: BookDao, private val configDao: Config
         bookDao.deleteBook(book)
     }
 
-    fun readAllFromBookList(list: String): LiveData<List<Book>>{
+    fun readAllFromBookList(list: String): LiveData<List<Book>> {
         return bookDao.readAllFromBookList(list)
     }
 
-    fun readAllFromBookListSync(): List<Book>{
+    fun readAllFromBookListSync(): List<Book> {
         return bookDao.readAllFromBookListSync()
     }
 
-    fun fromBookListSync(list: String): List<Book>{
+    fun fromBookListSync(list: String): List<Book> {
         return bookDao.fromBookListSync(list)
     }
 
-    fun readItemFromBooks(row: Int): LiveData<Book>{
+    fun readItemFromBooks(row: Int): LiveData<Book> {
         return bookDao.readItemFromBooks(row)
     }
 
-    fun readIdFromTitleAndUrl(title: String, url: String): Int?{
+    fun readIdFromTitleAndUrl(title: String, url: String): Int? {
         return bookDao.readIdFromTitleAndUrl(title, url)
     }
 
     // Book List stuff
-    suspend fun addList(list: BookList){
+    suspend fun addList(list: BookList) {
         bookDao.addList(list)
     }
 
-    suspend fun updateList(newName: String, oldName: String){
+    suspend fun updateList(newName: String, oldName: String) {
         bookDao.updateList(newName, oldName)
     }
 
-    suspend fun deleteList(list: BookList){
+    suspend fun deleteList(list: BookList) {
         bookDao.deleteList(list)
         bookDao.deleteFromBookList(list.name)
     }
 
-    fun readList(name: String) : BookList{
+    fun readList(name: String): BookList {
         return bookDao.readList(name)
     }
 
-    fun readAllLists(): LiveData<List<BookList>>{
+    fun readAllLists(): LiveData<List<BookList>> {
         return bookDao.readAllLists()
     }
 
 
     // CONFIGURATIONS
-    suspend fun addConfig(config: Config){
+    suspend fun addConfig(config: Config) {
         configDao.addConfig(config)
     }
 
-    suspend fun updateConfig(config: Config){
+    suspend fun updateConfig(config: Config) {
         configDao.updateConfig(config)
     }
 
-    suspend fun deleteConfig(config: Config){
+    suspend fun deleteConfig(config: Config) {
         configDao.deleteConfig(config)
     }
 
@@ -80,9 +80,9 @@ class BookRepository(private val bookDao: BookDao, private val configDao: Config
 
 
     fun readItemFromConfigs(domain: String) =
-        try{
+        try {
             configDao.readItemFromConfigs(domain)[0]
-        } catch (e: IndexOutOfBoundsException){
+        } catch (e: IndexOutOfBoundsException) {
             null
         }
 

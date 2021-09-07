@@ -18,6 +18,7 @@ class BookViewModel(application: Application) :
 
     val readAllConfigs: LiveData<List<Config>>
     var readAllBooks: LiveData<List<Book>>
+        private set
     var readAllLists: LiveData<List<BookList>>
     private val repository: BookRepository
 
@@ -52,12 +53,9 @@ class BookViewModel(application: Application) :
         }
     }
 
-    fun readAllFromBookList(list: String): LiveData<List<Book>> {
+    private fun readAllFromBookList(list: String): LiveData<List<Book>> {
         return repository.readAllFromBookList(list)
     }
-
-    fun readAllFromBookListSync(): List<Book> =
-        repository.readAllFromBookListSync()
 
     fun fromBookListSync(list: BookList): List<Book> {
         return repository.fromBookListSync(list.name)
