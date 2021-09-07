@@ -37,5 +37,5 @@ data class Config(
 @Entity(tableName = "Lists")
 data class BookList(
     @PrimaryKey
-    val name: String
+    var name: String
 )

@@ -10,10 +10,14 @@ import kotlinx.coroutines.launch
 
 class BookViewModel(application: Application) :
     AndroidViewModel(application) {
-    var currentTable: String
+    var currentTable: String = "Books"
+        set(value) {
+            field = value
+            readAllBooks = readAllFromBookList(value)
+        }
 
     val readAllConfigs: LiveData<List<Config>>
-    val readAllBooks: LiveData<List<Book>>
+    var readAllBooks: LiveData<List<Book>>
     var readAllLists: LiveData<List<BookList>>
     private val repository: BookRepository
 
@@ -22,7 +26,6 @@ class BookViewModel(application: Application) :
         val database = BookDatabase.getDatabase(application)
         val bookDao = database.bookDao()
         val configDao = database.configDao()
-        currentTable = "Books"
 
         repository = BookRepository(bookDao, configDao)
         readAllConfigs = repository.readAllConfigs

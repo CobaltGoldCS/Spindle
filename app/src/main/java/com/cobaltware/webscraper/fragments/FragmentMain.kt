@@ -1,17 +1,14 @@
 package com.cobaltware.webscraper.fragments
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
-import com.cobaltware.webscraper.BookAdapter
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.databinding.FragmentMainBinding
@@ -22,8 +19,6 @@ import com.cobaltware.webscraper.dialogs.ModifyBookDialog
 import com.cobaltware.webscraper.dialogs.ModifyListDialog
 import com.cobaltware.webscraper.dialogs.Operations
 import com.cobaltware.webscraper.viewcontrollers.MainViewController
-import java.util.*
-import kotlin.concurrent.schedule
 import kotlin.concurrent.thread
 
 
@@ -48,19 +43,39 @@ class FragmentMain : Fragment() {
             viewController.setupDropdown(dropdownAdapter)
             setObservers()
             setListeners(binding)
+            switchBookList()
         }
 
-        return binding.root
+        return binding.root.apply {
+            binding.bookLayout.apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            }
+        }
     }
 
 
-    private fun switchBookList(data: LiveData<List<Book>> = DB.readAllFromBookList(DB.currentTable)) {
+    private fun switchBookList() = requireActivity().runOnUiThread {
         binding.bookLayout.setContent {
             viewController.BookRecycler(
-                data,
+                DB.readAllBooks,
                 textclickHandler = { viewController.initReadFragment(it) },
                 buttonClickHandler = { handleBookDialogInit(it) })
         }
+    }
+
+
+    /** Modifies and updates the ui given the position in the [dropdownAdapter]
+     * @param position The position of the target [BookList] in the dropdown adapter
+     * */
+    private fun switchBookList(position: Int) {
+        thread {
+            Log.d(
+                "CONTENTS OF CURRENT TABLE",
+                DB.fromBookListSync(BookList(DB.currentTable)).toString()
+            )
+        }
+        onBookListsClick(position)
+        switchBookList()
     }
 
     /** Sets the handlers that automatically modify ui elements as the database changes */
@@ -72,15 +87,10 @@ class FragmentMain : Fragment() {
             if (!dropdownAdapter.isEmpty)
                 dropdownAdapter.clear()
 
-            bookLists.forEach { list -> dropdownAdapter.add(list.name) }
-            dropdownAdapter.notifyDataSetChanged()
-
-            // This is the best way I have found to reliably set up the lazycolumn without anything breaking
-            // FIXME: Fix this monstrosity of an if statement
-            if (firstrun && bookLists.size > 1){
-                switchBookList(1)
-                firstrun = false
+            bookLists.forEach { list ->
+                dropdownAdapter.add(list.name)
             }
+            dropdownAdapter.notifyDataSetChanged()
         })
     }
 
@@ -100,20 +110,6 @@ class FragmentMain : Fragment() {
      * */
     private fun handleBookDialogInit(book: Book?) {
         viewController.initAddFragment(book)
-    }
-
-    /** Modifies and updates the ui given the position in the [dropdownAdapter]
-     * @param position The position of the target [BookList] in the dropdown adapter
-     * */
-    private fun switchBookList(position: Int) {
-        thread {
-            Log.d(
-                "CONTENTS OF CURRENT TABLE",
-                DB.fromBookListSync(BookList(DB.currentTable)).toString()
-            )
-        }
-        onBookListsClick(position)
-        switchBookList()
     }
 
     /**Click handler for the book lists dropdown, changes backend and UI
