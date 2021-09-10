@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import com.cobaltware.webscraper.R
+import com.cobaltware.webscraper.ReaderApplication
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.ReaderApplication.Companion.activity
 import com.cobaltware.webscraper.databinding.FragmentMainBinding
@@ -63,10 +64,9 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
         )
     }
 
-    fun initAddFragment(book: Book?): ModifyBookDialog {
-        val menu = ModifyBookDialog(book)
-        menu.show(activity.supportFragmentManager, "Add or Change Book")
-        return menu
+    /** Initializes the [ModifyBookDialog] when a book needs to be modifed; Note that the fragment is a BottomSheetDialogFragment*/
+    fun initAddFragment(book: Book?): ModifyBookDialog = ModifyBookDialog(book).apply {
+        show(ReaderApplication.activity.supportFragmentManager, "Add or Change Book")
     }
 
 
@@ -108,60 +108,69 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
     fun BookRecycler(
         list: List<Book>,
         textClickHandler: (Book) -> Unit,
-        buttonClickHandler: (Book) -> Unit
+        buttonClickHandler: (Book) -> Unit,
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
         ) {
             items(items = list, itemContent = { item ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(0.dp, 2.dp)
-                        .border(
-                            BorderStroke(
-                                2.dp,
-                                getColor(android.R.attr.textColor),
-                            ),
-                            RoundedCornerShape(10.dp)
-                        )
-                        .padding(0.dp, 5.dp)
-                        .clickable { textClickHandler.invoke(item) }
-                ) {
-                    Button(
-                        onClick = { buttonClickHandler.invoke(item) },
-                        enabled = true,
-                        colors = ButtonDefaults.buttonColors(backgroundColor = getColor(R.attr.colorPrimary)),
-                        modifier = Modifier
-                            .padding(
-                                top = 1.dp,
-                                bottom = 1.dp,
-                                start = 0.dp,
-                                end = 5.dp
-                            )
-                            .width(IntrinsicSize.Min)
-                            .align(Alignment.End)
-                            .clip(RoundedCornerShape(10.dp))
-                    ) {
-                        Icon(
-                            painterResource(id = R.drawable.icon_list),
-                            "Modify the book",
-                            tint = Color.White
-                        )
-                    }
-                    Text(
-                        item.title,
-                        Modifier
-                            .padding(10.dp, 5.dp, 12.dp, 4.dp)
-                            .align(Alignment.Start),
-                        getColor(R.attr.colorOnPrimary),
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
-                    )
-                }
+                BookItem(item, textClickHandler, buttonClickHandler)
             })
+        }
+    }
+
+    @Composable
+    private fun BookItem(
+        item: Book,
+        textClickHandler: (Book) -> Unit,
+        buttonClickHandler: (Book) -> Unit
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(0.dp, 2.dp)
+                .border(
+                    BorderStroke(
+                        2.dp,
+                        getColor(android.R.attr.textColor),
+                    ),
+                    RoundedCornerShape(10.dp)
+                )
+                .padding(0.dp, 5.dp)
+                .clickable { textClickHandler.invoke(item) }
+        ) {
+            Button(
+                onClick = { buttonClickHandler.invoke(item) },
+                enabled = true,
+                colors = ButtonDefaults.buttonColors(backgroundColor = getColor(R.attr.colorPrimary)),
+                modifier = Modifier
+                    .padding(
+                        top = 1.dp,
+                        bottom = 1.dp,
+                        start = 0.dp,
+                        end = 5.dp
+                    )
+                    .width(IntrinsicSize.Min)
+                    .align(Alignment.End)
+                    .clip(RoundedCornerShape(10.dp))
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.icon_list),
+                    "Modify the book",
+                    tint = Color.White
+                )
+            }
+            Text(
+                item.title,
+                Modifier
+                    .padding(10.dp, 5.dp, 12.dp, 4.dp)
+                    .align(Alignment.Start),
+                getColor(R.attr.colorOnPrimary),
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp,
+            )
         }
     }
 }

@@ -8,14 +8,18 @@ import com.cobaltware.webscraper.databinding.FragmentReadBinding
 
 class ReadViewController(val view: FragmentReadBinding) {
 
-    fun setPreferenceUI(preferences: SharedPreferences, themeColor: Int) {
+    /** Handles updates to the ui that have to do with preferences
+     * @param preferences The preferences reference to base the ui off of
+     * @param themeTextColor The color used by the theme for text in the reader
+     * */
+    fun setPreferenceUI(preferences: SharedPreferences, themeTextColor: Int) {
         view.contentView.textSize = preferences.getString("textsize", "22")!!.toFloat()
 
         view.contentView.setTextColor(
             if (preferences.getBoolean("highcontrast", true)) {
-                themeColor
+                themeTextColor
             } else {
-                if (themeColor == Color.WHITE) Color.LTGRAY else Color.GRAY
+                if (themeTextColor == Color.WHITE) Color.LTGRAY else Color.GRAY
             }
         )
 

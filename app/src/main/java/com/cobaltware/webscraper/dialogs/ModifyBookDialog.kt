@@ -23,8 +23,6 @@ import kotlin.concurrent.thread
 class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragment() {
 
 
-    var op: Operations = Operations.Nothing
-    var position: Int = 0
     private var clickListener: () -> Unit = { }
 
     override fun onCreateView(
@@ -64,7 +62,6 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
             v.DelButton.setOnClickListener {
                 if (book != null) {
                     DB.deleteBook(book!!)
-                    op = Operations.Delete
                 }
                 dismiss()
             }
@@ -76,12 +73,11 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
             }
             v.bookLists.setOnItemClickListener { _, _, position, _ ->
                 DB.currentTable = adapter.getItem(position)!!
-                this.position = position
             }
             requireActivity().runOnUiThread {
-                DB.readAllLists().observe(viewLifecycleOwner) { booklists ->
-                    booklists.forEach {
-                        if (booklists.indexOf(it) > 0)
+                DB.readAllLists().observe(viewLifecycleOwner) { bookLists ->
+                    bookLists.forEach {
+                        if (bookLists.indexOf(it) > 0)
                             adapter.add(it.name)
                     }
                     adapter.notifyDataSetChanged()
@@ -106,20 +102,18 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
         if (book == null) {   // Write new line to database
             val newBook = Book(0, titleInput, urlInput, DB.currentTable)
             DB.addBook(newBook)
-            op = Operations.Insert
             // Add to recyclerView list
         } else {   // Modify database
             DB.updateBook(
                 Book(book!!.row_id, titleInput, urlInput, DB.currentTable)
             )
-            op = Operations.Update
         }
         this.dismiss()
     }
 
 
-    /** Makes sure that all inputs are valid; otherwise gives certain errors to the textviews
-     * @return if both name and url's inputs are valid
+    /** Makes sure that all inputs are valid; otherwise gives certain errors to the text views
+     * @return if both name and url inputs are valid
      */
     private fun guaranteeValidInputs(view: MenuAddBookBinding): Boolean {
         if (view.textName.text.toString().replace("\n", "").isEmpty()) {
@@ -131,9 +125,5 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
             return false
         }
         return true
-    }
-
-    fun addDismissListener(lambda: () -> Unit) {
-        clickListener = lambda
     }
 }
