@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -31,6 +32,7 @@ class FragmentMain : Fragment() {
         ArrayAdapter(requireContext(), R.layout.item_dropdown, mutableListOf<String>())
     }
 
+    @ExperimentalMaterialApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -67,6 +69,7 @@ class FragmentMain : Fragment() {
     }
 
     /** Sets the actions to take depending on input from the user*/
+    @ExperimentalMaterialApi
     private fun setListeners(v: FragmentMainBinding) {
         v.addMenuButton.setOnClickListener { viewController.initAddFragment(null) }
         v.changeButton.setOnClickListener { startPopup(DB.currentTable) }
@@ -75,6 +78,7 @@ class FragmentMain : Fragment() {
 
     /**Click handler for the book lists dropdown, changes backend and UI
      * @param position The position of the clicked item */
+    @ExperimentalMaterialApi
     private fun onBookListsClick(position: Int) {
         if (position != viewController.view.bookLists.listSelection) {
             DB.currentTable = dropdownAdapter.getItem(position)!!
@@ -88,6 +92,7 @@ class FragmentMain : Fragment() {
         }
     }
 
+    @ExperimentalMaterialApi
     private fun switchBookList() = requireActivity().runOnUiThread {
         binding.bookLayout.setContent {
             viewController.BookRecycler(
@@ -101,6 +106,7 @@ class FragmentMain : Fragment() {
     /** Modifies and updates the ui given the position in the [dropdownAdapter]
      * @param position The position of the target [BookList] in the dropdown adapter
      * */
+    @ExperimentalMaterialApi
     private fun switchBookList(position: Int) {
         thread {
             Log.d(
@@ -114,6 +120,7 @@ class FragmentMain : Fragment() {
 
     /** Initializes a [ModifyListDialog], used for making and changing lists
      * @param title The title of the bookList for the [ModifyListDialog]*/
+    @ExperimentalMaterialApi
     private fun startPopup(title: String?) {
         val menu = ModifyListDialog(requireContext(), title)
         menu.setOnDismissListener {

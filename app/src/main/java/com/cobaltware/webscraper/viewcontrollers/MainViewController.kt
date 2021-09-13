@@ -4,21 +4,20 @@ import android.util.TypedValue
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -26,7 +25,6 @@ import androidx.lifecycle.LiveData
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
-import com.cobaltware.webscraper.ReaderApplication.Companion.activity
 import com.cobaltware.webscraper.databinding.FragmentMainBinding
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
@@ -64,7 +62,7 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
         )
     }
 
-    /** Initializes the [ModifyBookDialog] when a book needs to be modifed; Note that the fragment is a BottomSheetDialogFragment*/
+    /** Initializes the [ModifyBookDialog] when a book needs to be modified; Note that the fragment is a BottomSheetDialogFragment*/
     fun initAddFragment(book: Book?): ModifyBookDialog = ModifyBookDialog(book).apply {
         show(ReaderApplication.activity.supportFragmentManager, "Add or Change Book")
     }
@@ -92,6 +90,7 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
         return Color(typedValue.data)
     }
 
+    @ExperimentalMaterialApi
     @Composable
     fun BookRecycler(
         data: LiveData<List<Book>>,
@@ -104,6 +103,7 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
         }
     }
 
+    @ExperimentalMaterialApi
     @Composable
     fun BookRecycler(
         list: List<Book>,
@@ -120,57 +120,36 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
         }
     }
 
+    @ExperimentalMaterialApi
     @Composable
     private fun BookItem(
         item: Book,
         textClickHandler: (Book) -> Unit,
-        buttonClickHandler: (Book) -> Unit
+        buttonClickHandler: (Book) -> Unit,
     ) {
-        Column(
+        ListItem(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(0.dp, 2.dp)
-                .border(
-                    BorderStroke(
-                        2.dp,
-                        getColor(android.R.attr.textColor),
-                    ),
-                    RoundedCornerShape(10.dp)
-                )
-                .padding(0.dp, 5.dp)
                 .clickable { textClickHandler.invoke(item) }
-        ) {
-            Button(
-                onClick = { buttonClickHandler.invoke(item) },
-                enabled = true,
-                colors = ButtonDefaults.buttonColors(backgroundColor = getColor(R.attr.colorPrimary)),
-                modifier = Modifier
-                    .padding(
-                        top = 1.dp,
-                        bottom = 1.dp,
-                        start = 0.dp,
-                        end = 5.dp
-                    )
-                    .width(IntrinsicSize.Min)
-                    .align(Alignment.End)
-                    .clip(RoundedCornerShape(10.dp))
-            ) {
+                .padding(top = 5.dp, bottom = 5.dp)
+                .border(
+                    BorderStroke(2.dp, getColor(R.attr.colorOnPrimary)),
+                    RectangleShape
+                ),
+            text = {
+                Text(
+                    item.title,
+                    fontSize = 20.sp,
+                    color = getColor(R.attr.colorOnPrimary),
+                )
+            },
+            trailing = {
                 Icon(
-                    painterResource(id = R.drawable.icon_list),
+                    painterResource(id = R.drawable.icon_menu),
                     "Modify the book",
-                    tint = Color.White
+                    tint = getColor(R.attr.colorPrimary),
+                    modifier = Modifier.clickable { buttonClickHandler.invoke(item) }
                 )
             }
-            Text(
-                item.title,
-                Modifier
-                    .padding(10.dp, 5.dp, 12.dp, 4.dp)
-                    .align(Alignment.Start),
-                getColor(R.attr.colorOnPrimary),
-                textAlign = TextAlign.Center,
-                fontSize = 20.sp,
-            )
-        }
+        )
     }
 }
