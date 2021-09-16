@@ -1,5 +1,6 @@
 package com.cobaltware.webscraper.viewcontrollers
 
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -9,17 +10,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import com.cobaltware.webscraper.R
@@ -27,30 +30,14 @@ import com.cobaltware.webscraper.ReaderApplication
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.databinding.FragmentMainBinding
 import com.cobaltware.webscraper.datahandling.Book
+import com.cobaltware.webscraper.datahandling.BookList
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
+import com.cobaltware.webscraper.dialogs.ModifyListDialog
+import com.cobaltware.webscraper.dialogs.Operations
 import com.cobaltware.webscraper.fragments.FragmentRead
 import com.cobaltware.webscraper.fragments.fragmentTransition
 
 class MainViewController(val view: FragmentMainBinding, private val fragment: Fragment) {
-
-    /**Sets up the book Lists dropdown menu frontend and calls the correct Backend function*/
-    fun setupDropdown(dropdownAdapter: ArrayAdapter<String>) =
-        fragment.requireActivity().runOnUiThread {
-            view.bookLists.setAdapter(dropdownAdapter)
-            modifyDropdown()
-        }
-
-    /** Updates the book Lists dropdown UI
-     * @param selectedItemPosition The position of the selected item in the dropdown
-     * */
-    fun changeDropdownUI(selectedItemPosition: Int) {
-        view.bookLayout.layoutAnimation =
-            AnimationUtils.loadLayoutAnimation(fragment.requireContext(), R.anim.booklist_anim)
-        view.bookLayout.startLayoutAnimation()
-
-        view.listLayout.weightSum = if (selectedItemPosition <= 1) 4f else 5f
-        view.addMenuButton.show()
-    }
 
     /** Initializes a [FragmentRead] for displaying the book in the reader
      * @param book The book to read
@@ -67,22 +54,6 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
         show(ReaderApplication.activity.supportFragmentManager, "Add or Change Book")
     }
 
-
-    /** Modifies the book Lists dropdown menu's gui elements on first run
-     *  Also calls the onClick method as well as sets a few parameters for book Lists
-     * */
-    private fun modifyDropdown() {
-        fragment.requireActivity().runOnUiThread {
-            view.bookLists.let { dropdown ->
-                dropdown.setText(DB.currentTable, false)
-                dropdown.listSelection = 1
-                dropdown.performClick()
-                dropdown.performCompletion()
-            }
-            view.listLayout.weightSum = 4f
-        }
-    }
-
     private fun getColor(res: Int): Color {
         val typedValue = TypedValue()
         val theme = fragment.requireContext().theme
@@ -92,44 +63,14 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
 
     @ExperimentalMaterialApi
     @Composable
-    fun BookRecycler(
-        data: LiveData<List<Book>>,
-        textClickHandler: (Book) -> Unit,
-        buttonClickHandler: (Book) -> Unit
-    ) {
-        val columnData by data.observeAsState()
-        columnData?.let { list ->
-            BookRecycler(list, textClickHandler, buttonClickHandler)
-        }
-    }
-
-    @ExperimentalMaterialApi
-    @Composable
-    fun BookRecycler(
-        list: List<Book>,
-        textClickHandler: (Book) -> Unit,
-        buttonClickHandler: (Book) -> Unit,
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-        ) {
-            items(items = list, itemContent = { item ->
-                BookItem(item, textClickHandler, buttonClickHandler)
-            })
-        }
-    }
-
-    @ExperimentalMaterialApi
-    @Composable
-    private fun BookItem(
-        item: Book,
-        textClickHandler: (Book) -> Unit,
-        buttonClickHandler: (Book) -> Unit,
+    fun BookItem(
+        title: String,
+        textClickHandler: () -> Unit,
+        buttonClickHandler: () -> Unit,
     ) {
         ListItem(
             modifier = Modifier
-                .clickable { textClickHandler.invoke(item) }
+                .clickable { textClickHandler.invoke() }
                 .padding(top = 5.dp, bottom = 5.dp)
                 .border(
                     BorderStroke(2.dp, getColor(R.attr.colorOnPrimary)),
@@ -137,7 +78,7 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
                 ),
             text = {
                 Text(
-                    item.title,
+                    title,
                     fontSize = 20.sp,
                     color = getColor(R.attr.colorOnPrimary),
                 )
@@ -147,8 +88,206 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
                     painterResource(id = R.drawable.icon_menu),
                     "Modify the book",
                     tint = getColor(R.attr.colorPrimary),
-                    modifier = Modifier.clickable { buttonClickHandler.invoke(item) }
+                    modifier = Modifier.clickable { buttonClickHandler.invoke() }
                 )
+            }
+        )
+    }
+
+    @Composable
+    fun ModifyListDialog(
+        /** Initial Title of Book List */
+        title: String,
+        changeList: (String) -> Unit,
+        open: Boolean,
+        dismissState: (Boolean) -> Unit
+    ) {
+
+        if (!open) return
+        if (title.isNotEmpty())
+            ModifyDialogList(title, dismissState, changeList)
+        else
+            AddDialogList(dismissState, changeList)
+    }
+
+    @Composable
+    private fun ModifyDialogList(
+        title: String,
+        dismissState: (Boolean) -> Unit,
+        changeList: (String) -> Unit
+    ) {
+        /** Actual text that gets updated */
+        var text by remember { mutableStateOf(title) }
+
+        AlertDialog(
+            onDismissRequest = {
+                dismissState(false)
+                changeList(title)
+            },
+            title = {
+                Text(text = "Modify $title")
+            },
+            text = {
+                TextField(text, { text = it }, label = { Text(text = "List item")})
+            },
+            buttons = {
+                Column(
+                    Modifier.padding(horizontal = 5.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Row(
+                        Modifier.padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        // Delete List button
+                        Button(
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .fillMaxWidth(.5f),
+                            onClick = {
+                                dismissState(false)
+                                DB.deleteList(BookList(title))
+                                changeList("Books")
+                            }
+                        ) {
+                            Text("Delete $title")
+                        }
+                        // Add List button
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            onClick = {
+                                DB.updateList(text, title)
+                                changeList(text)
+                                dismissState(false)
+                            }
+                        ) {
+                            Text("Modify $title")
+                        }
+                    }
+                    // Cancel Button
+                    Button(
+                        modifier = Modifier
+                            .padding(bottom = 8.dp)
+                            .fillMaxWidth(),
+                        onClick = { dismissState(false); changeList(DB.currentTable) }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            }
+        )
+    }
+
+    @Composable
+    private fun AddDialogList(
+        dismissState: (Boolean) -> Unit,
+        changeList: (String) -> Unit
+    ) {
+        /** Actual text that gets updated */
+        var text by remember { mutableStateOf("") }
+
+        AlertDialog(
+            onDismissRequest = {
+                dismissState(false)
+                changeList(DB.currentTable)
+            },
+            title = {
+                Text(text = "Add a List")
+            },
+            text = {
+                TextField(text, { text = it }, label = { Text(text = "List item")})
+            },
+            buttons = {
+                Column(
+                    Modifier.padding(horizontal = 5.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Row(
+                        Modifier.padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        // Add List button
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            onClick = {
+                                DB.addList(BookList(text))
+                                changeList(text)
+                                dismissState(false)
+                            }
+                        ) {
+                            Text("Add List")
+                        }
+                    }
+                    // Cancel Button
+                    Button(
+                        modifier = Modifier
+                            .padding(bottom = 8.dp)
+                            .fillMaxWidth(),
+                        onClick = { dismissState(false); changeList(DB.currentTable) }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            }
+        )
+    }
+
+}
+
+@Preview
+@Composable
+private fun ModifyListDialog() {
+    val openDialog = remember { mutableStateOf(true) }
+    var text by remember { mutableStateOf("") }
+
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            title = {
+                Text(text = "Add / Modify a List")
+            },
+            text = {
+                Column {
+                    TextField(
+                        value = text,
+                        onValueChange = { text = it }
+                    )
+                }
+            },
+            buttons = {
+                Column(
+                    modifier = Modifier.padding(all = 8.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Row(
+                        modifier = Modifier.padding(all = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            modifier = Modifier.fillMaxWidth(.5f),
+                            onClick = { openDialog.value = false }
+                        ) {
+                            Text("Delete a Book")
+                        }
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { openDialog.value = false }
+                        ) {
+                            Text("Add a Book")
+                        }
+                    }
+
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { openDialog.value = false }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
             }
         )
     }

@@ -1,23 +1,31 @@
 package com.cobaltware.webscraper.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.MenuOpen
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.databinding.FragmentMainBinding
+import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.BookList
-import com.cobaltware.webscraper.datahandling.BookViewModel
 import com.cobaltware.webscraper.dialogs.ModifyListDialog
 import com.cobaltware.webscraper.dialogs.Operations
-import com.cobaltware.webscraper.viewcontrollers.MainViewController
+import com.cobaltware.webscraper.viewcontrollers.*
 import kotlin.concurrent.thread
 
 
@@ -37,103 +45,113 @@ class FragmentMain : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         // Inflate the layout for this fragment
         binding = FragmentMainBinding.inflate(inflater)
         thread {
-            viewController.setupDropdown(dropdownAdapter)
-            setObservers()
-            setListeners(binding)
-            switchBookList()
+            //viewController.setupDropdown(dropdownAdapter)
+            //setObservers()
+            //setListeners(binding)
         }
 
-        return binding.root.apply {
-            binding.bookLayout.apply {
-                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        return ComposeView(requireContext()).apply {
+            setContent {
+                var selectedItem by remember { mutableStateOf(DB.currentTable) }
+                // Modify list open items
+                var title by remember {mutableStateOf("")}
+                val (modifyListOpen, setModifyListOpen) = remember { mutableStateOf(false) }
+
+                viewController.ModifyListDialog(title,
+                    changeList = {selectedItem = it; DB.currentTable = it; title = selectedItem},
+                    open = modifyListOpen,  dismissState = setModifyListOpen)
+                Column() {
+                    LiveDropdown(items = DB.readAllLists){ items ->
+                        var expanded by remember { mutableStateOf(false) }
+
+                        Box {
+                            // Top row
+                            Row(Modifier.fillMaxWidth()){
+                                Row(
+                                    Modifier
+                                        .padding(5.dp, 0.dp)
+                                        .fillMaxWidth(.85f)
+                                        .clickable { // Anchor view
+                                            expanded = !expanded
+                                        }) { // Anchor view
+                                    Text(selectedItem.toString(), Modifier, getColor(R.attr.colorOnPrimary, context), 20.sp)
+                                    Icon(
+                                        imageVector = Icons.Filled.ArrowDropDown,
+                                        null,
+                                        tint = getColor(R.attr.colorOnPrimary, context)
+                                    )
+                                }
+                                if (items.indexOf(BookList(selectedItem)) > 1) {
+                                    Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                                        setModifyListOpen(true)
+                                    }) {
+                                        Icon(imageVector = Icons.Filled.MenuOpen, null, tint = getColor(R.attr.colorOnPrimary, context))
+                                    }
+                                }
+                            }
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = {expanded = !expanded}) {
+                                items.forEach {
+                                    DropdownMenuItem(onClick = {
+                                        // Handle On Click when dropdown item is pressed
+                                        if (items.indexOf(it) == 0) {
+                                            title = ""
+                                            setModifyListOpen(true)
+                                        }
+                                        else {
+                                            selectedItem = it.name
+                                            title = selectedItem
+                                            DB.currentTable = selectedItem
+                                        }
+                                        expanded = !expanded
+                                    }) {
+                                        DropdownItem(it, selectedItem)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    LiveRecycler(DB.readAllFromBookList(selectedItem)){ list: List<Book> ->
+                        items(list) { book ->
+                            viewController.BookItem(
+                                book.title,
+                                {viewController.initReadFragment(book)},
+                                {viewController.initAddFragment(book)}
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 
-
-    /** Sets the handlers that automatically modify ui elements as the database changes */
-    private fun setObservers() = requireActivity().runOnUiThread {
-        val listViewModel: BookViewModel =
-            ViewModelProvider(this).get(BookViewModel::class.java)
-        listViewModel.readAllLists().observe(viewLifecycleOwner, { bookLists ->
-            if (!dropdownAdapter.isEmpty)
-                dropdownAdapter.clear()
-
-            bookLists.forEach { list -> dropdownAdapter.add(list.name) }
-            dropdownAdapter.notifyDataSetChanged()
-        })
-    }
-
-    /** Sets the actions to take depending on input from the user*/
-    @ExperimentalMaterialApi
-    private fun setListeners(v: FragmentMainBinding) {
-        v.addMenuButton.setOnClickListener { viewController.initAddFragment(null) }
-        v.changeButton.setOnClickListener { startPopup(DB.currentTable) }
-        v.bookLists.setOnItemClickListener { _, _, position, _ -> switchBookList(position) }
-    }
-
-    /**Click handler for the book lists dropdown, changes backend and UI
-     * @param position The position of the clicked item */
-    @ExperimentalMaterialApi
-    private fun onBookListsClick(position: Int) {
-        if (position != viewController.view.bookLists.listSelection) {
-            DB.currentTable = dropdownAdapter.getItem(position)!!
-
-            if (position == 0) { // if the selected item is the add book item
-                startPopup(null)
-                return
-            }
-
-            viewController.changeDropdownUI(position)
-        }
-    }
-
-    @ExperimentalMaterialApi
-    private fun switchBookList() = requireActivity().runOnUiThread {
-        binding.bookLayout.setContent {
-            viewController.BookRecycler(
-                DB.readAllBooks,
-                textClickHandler = { viewController.initReadFragment(it) },
-                buttonClickHandler = { viewController.initAddFragment(it) })
-        }
-    }
-
-
-    /** Modifies and updates the ui given the position in the [dropdownAdapter]
-     * @param position The position of the target [BookList] in the dropdown adapter
-     * */
-    @ExperimentalMaterialApi
-    private fun switchBookList(position: Int) {
-        thread {
-            Log.d(
-                "CONTENTS OF CURRENT TABLE",
-                DB.fromBookListSync(BookList(DB.currentTable)).toString()
-            )
-        }
-        onBookListsClick(position)
-        switchBookList()
+    @Composable
+    private fun ComposeView.DropdownItem(
+        item: BookList,
+        selectedItem: String
+    ) {
+        Text(
+            item.toString(),
+            Modifier,
+            if (item.name == selectedItem) getColor(
+                R.attr.colorPrimaryVariant,
+                context
+            ) else getColor(R.attr.colorOnPrimary, context)
+        )
     }
 
     /** Initializes a [ModifyListDialog], used for making and changing lists
      * @param title The title of the bookList for the [ModifyListDialog]*/
-    @ExperimentalMaterialApi
-    private fun startPopup(title: String?) {
+    private fun startPopup(title: String?, onDismiss: (Operations) -> Unit = {}) {
         val menu = ModifyListDialog(requireContext(), title)
         menu.setOnDismissListener {
-            val currentPos = dropdownAdapter.getPosition(DB.currentTable)
             // Navigates to relevant bookLists depending on the operation executed by the menu
-            when (menu.op) {
-                Operations.Delete, Operations.Nothing -> {
-                    switchBookList(1)
-                }
-                Operations.Insert, Operations.Update -> {
-                    switchBookList(currentPos)
-                }
-            }
+            onDismiss(menu.op)
         }
         menu.show()
     }

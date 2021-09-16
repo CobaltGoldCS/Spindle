@@ -38,4 +38,9 @@ data class Config(
 data class BookList(
     @PrimaryKey
     var name: String
-)
+
+){
+    override fun toString(): String {
+        return name
+    }
+}

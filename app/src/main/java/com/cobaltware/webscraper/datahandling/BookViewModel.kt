@@ -53,7 +53,7 @@ class BookViewModel(application: Application) :
         }
     }
 
-    private fun readAllFromBookList(list: String): LiveData<List<Book>> {
+    fun readAllFromBookList(list: String): LiveData<List<Book>> {
         return repository.readAllFromBookList(list)
     }
 

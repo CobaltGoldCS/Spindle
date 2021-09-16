@@ -3,6 +3,7 @@ package com.cobaltware.webscraper.dialogs
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
 import android.view.LayoutInflater
 import android.view.Window
 import android.widget.TextView
@@ -24,16 +25,14 @@ class ModifyListDialog(
 ) : Dialog(thisContext) {
     /** Operation used to determine what the [ModifyListDialog] did */
     var op: Operations = Operations.Nothing
-    val view by lazy{
-        MenuAddListBinding.inflate(LayoutInflater.from(thisContext))
-    }
+    val view by lazy{ MenuAddListBinding.inflate(LayoutInflater.from(thisContext)) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.menu_add_list)
         if (title != null)
-            view.domainUrlInput.setText(title, TextView.BufferType.EDITABLE)
+            view.textName.setText(title)
         view.deleteButton.setOnClickListener { this.onDeleteClick() }
         view.actionButton.setOnClickListener { this.onActionClick() }
         view.cancelButton.setOnClickListener { dismiss() }
@@ -42,8 +41,8 @@ class ModifyListDialog(
     /** Handles when the action button is clicked by either modifying or adding a book list **/
     private fun onActionClick() {
 
-        if (view.domainUrlInput.text.isEmpty()) return
-        val bookListName = view.domainUrlInput.text.toString()
+        if (view.textName.text.isEmpty()) return
+        val bookListName = view.textName.text.toString()
 
 
         op = when (title != null) { // Checks if list needs to be updated
