@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -37,7 +39,7 @@ import com.cobaltware.webscraper.dialogs.Operations
 import com.cobaltware.webscraper.fragments.FragmentRead
 import com.cobaltware.webscraper.fragments.fragmentTransition
 
-class MainViewController(val view: FragmentMainBinding, private val fragment: Fragment) {
+class MainViewController(private val fragment: Fragment) {
 
     /** Initializes a [FragmentRead] for displaying the book in the reader
      * @param book The book to read
@@ -68,26 +70,27 @@ class MainViewController(val view: FragmentMainBinding, private val fragment: Fr
         textClickHandler: () -> Unit,
         buttonClickHandler: () -> Unit,
     ) {
+        val colorPrimary = getColor(R.attr.colorOnPrimary)
         ListItem(
             modifier = Modifier
                 .clickable { textClickHandler.invoke() }
-                .padding(top = 5.dp, bottom = 5.dp)
+                .padding(all = 5.dp)
                 .border(
-                    BorderStroke(2.dp, getColor(R.attr.colorOnPrimary)),
+                    BorderStroke(2.dp, colorPrimary),
                     RectangleShape
                 ),
             text = {
                 Text(
                     title,
                     fontSize = 20.sp,
-                    color = getColor(R.attr.colorOnPrimary),
+                    color = colorPrimary,
                 )
             },
             trailing = {
                 Icon(
-                    painterResource(id = R.drawable.icon_menu),
+                    imageVector = Icons.Filled.Menu,
                     "Modify the book",
-                    tint = getColor(R.attr.colorPrimary),
+                    tint = colorPrimary,
                     modifier = Modifier.clickable { buttonClickHandler.invoke() }
                 )
             }

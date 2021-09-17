@@ -1,23 +1,18 @@
 package com.cobaltware.webscraper.viewcontrollers
 
 
-import android.content.Context
-import android.util.TypedValue
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import android.annotation.SuppressLint
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.runtime.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
-import com.cobaltware.webscraper.R
 
 @Composable
 fun <T> LiveRecycler(
@@ -36,19 +31,10 @@ private fun <T> BaseRecycler(
     content: LazyListScope.(List<T>) -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(.99f),
         content = {
             content.invoke(this, data)
         }
     )
-}
-
-fun getColor(res: Int, context: Context): Color {
-    val typedValue = TypedValue()
-    val theme = context.theme
-    theme.resolveAttribute(res, typedValue, true)
-    return Color(typedValue.data)
 }
 
 @Composable
@@ -64,3 +50,45 @@ fun <T> LiveDropdown(items: LiveData<List<T>>, content: @Composable (List<T>) ->
 fun <T> ThemedDropdown(items: List<T>, content: @Composable (List<T>) -> Unit) {
     content.invoke(items)
 }
+
+private val darkBackground = Color(0xff1e2127)
+private val darkSecond = Color(0xFFFF6B6B)
+
+@SuppressLint("ConflictingOnColor")
+val darkColors = darkColors(
+    primary = Color(0xFF5DB7DE),
+    primaryVariant = Color(0xFF1F7498),
+    onPrimary = Color.White,
+    background = darkBackground,
+    onBackground = Color.White,
+    surface = darkBackground,
+    secondary = darkSecond,
+    secondaryVariant = Color(0xFFFFE66D),
+    onSecondary = Color.White,
+    error = darkSecond,
+    onError = Color.White
+)
+
+private val dimGray = Color(0xFF222222)
+private val secondVar = Color(0xFFE94957)
+val lightColors = lightColors(
+    primary = Color(0xFF79ADDC),
+    primaryVariant = Color(0xFFCD700A),
+    onPrimary = dimGray,
+    background = Color.White,
+    surface = Color.White,
+    secondary = Color(0xFFEE901A),
+    secondaryVariant = secondVar,
+    onSecondary = Color.White,
+    error = secondVar,
+    onError = Color.White
+)
+
+@Composable
+fun WebscraperTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colors = if (isSystemInDarkTheme()) darkColors else lightColors,
+        content = content
+    )
+}
+
