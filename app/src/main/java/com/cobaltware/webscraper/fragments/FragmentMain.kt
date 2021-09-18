@@ -18,7 +18,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,65 +52,92 @@ class FragmentMain : Fragment() {
             setContent {
                 var selectedItem by remember { mutableStateOf(DB.currentTable) }
                 // Modify list open items
-                var title by remember { mutableStateOf("") }
                 val (modifyListOpen, setModifyListOpen) = remember { mutableStateOf(false) }
+                var modifyListText by remember { mutableStateOf<String?>(selectedItem) }
+
 
                 WebscraperTheme {
-                    viewController.ModifyListDialog(title,
-                        changeList = {selectedItem = it; DB.currentTable = it; title = selectedItem},
+                    viewController.ModifyListDialog(modifyListText,
+                        changeList = {selectedItem = it; DB.currentTable = it; modifyListText = selectedItem},
                         open = modifyListOpen,  dismissState = setModifyListOpen)
                     Column {
                         LiveDropdown(items = DB.readAllLists){ items ->
+
                             var expanded by remember { mutableStateOf(false) }
-                            Box {
+                            var dropDownWidth by remember { mutableStateOf(0) }
+                            var dropDownHeight by remember { mutableStateOf(0)}
+
+                            Column(Modifier,  horizontalAlignment = Alignment.CenterHorizontally) {
                                 Row(
                                     Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
-                                ){
-                                    Row(
-                                        Modifier
-                                            .padding(horizontal = 5.dp)
-                                            .fillMaxWidth(if (items.indexOf(BookList(selectedItem)) > 1) .85f else 1f)
+                                ) {
+
+                                    OutlinedTextField(value = selectedItem.toString(),
+                                        onValueChange = {},
+                                        readOnly = true,
+                                        modifier = Modifier.fillMaxWidth(
+                                            if (items.indexOf(
+                                                    BookList(
+                                                        selectedItem
+                                                    )
+                                                ) > 1
+                                            ) .85f else 1f
+                                        ).padding(start = 5.dp, end = 5.dp)
+                                            .onSizeChanged {
+                                                dropDownWidth = it.width
+                                                dropDownHeight = it.height
+                                            }
                                             .clickable { // Anchor view
                                                 expanded = !expanded
                                             },
-                                        horizontalArrangement = Arrangement.Center
-                                    ) { // Anchor view
-                                        Text(selectedItem.toString(), Modifier.align(Alignment.CenterVertically), fontSize =  30.sp, color = MaterialTheme.colors.onPrimary)
-                                        Icon(
-                                            imageVector = Icons.Filled.ArrowDropDown,
-                                            null,
-                                            modifier = Modifier.align(Alignment.CenterVertically),
-                                            tint = MaterialTheme.colors.onPrimary
-                                        )
-                                    }
-                                    if (items.indexOf(BookList(selectedItem)) > 1) {
-                                        OutlinedButton(modifier = Modifier.fillMaxWidth().padding(all = 2.dp), onClick = {
-                                            setModifyListOpen(true)
-                                        }) {
+                                        label = {
+                                            Text("Book Lists",modifier = Modifier
+                                                .clickable { expanded = !expanded })
+                                        },
+                                        trailingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Filled.ArrowDropDown,
+                                                null,
+                                                modifier = Modifier
+                                                    .clickable { expanded = !expanded }
+                                                    .align(Alignment.CenterVertically),
+                                                tint = MaterialTheme.colors.onPrimary
+                                            )
+                                        }
+                                    )
+                                    if (items.indexOf(BookList(selectedItem)) > 1)
+                                        OutlinedButton(onClick = { setModifyListOpen(true) }, modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 8.dp, end = 5.dp)
+                                            .height(with(LocalDensity.current){dropDownHeight.toDp() - 8.dp})
+                                        ) {
                                             Icon(imageVector = Icons.Filled.MenuOpen, null)
                                         }
-                                    }
                                 }
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = {expanded = !expanded},
-                                    modifier = Modifier.align(Alignment.TopCenter)) {
-                                    items.forEach {
-                                        DropdownMenuItem(onClick = {
-                                            // Handle On Click when dropdown item is pressed
-                                            if (items.indexOf(it) == 0) {
-                                                title = ""
-                                                setModifyListOpen(true)
+                                Spacer(Modifier.height(10.dp))
+                                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                    DropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = {expanded = !expanded},
+                                        modifier = Modifier.width(with(LocalDensity.current){dropDownWidth.toDp()})
+                                    ) {
+                                        items.forEach {
+                                            DropdownMenuItem(onClick = {
+                                                // Handle On Click when dropdown item is pressed
+                                                if (items.indexOf(it) == 0) {
+                                                    modifyListText = null
+                                                    setModifyListOpen(true)
+                                                }
+                                                else {
+                                                    selectedItem = it.name
+                                                    modifyListText = selectedItem
+                                                    DB.currentTable = selectedItem
+                                                }
+                                                expanded = !expanded
+                                            }, modifier = Modifier.fillMaxWidth()) {
+                                                DropdownItem(it, selectedItem)
                                             }
-                                            else {
-                                                selectedItem = it.name
-                                                title = selectedItem
-                                                DB.currentTable = selectedItem
-                                            }
-                                            expanded = !expanded
-                                        }) {
-                                            DropdownItem(it, selectedItem)
                                         }
                                     }
                                 }
@@ -147,12 +176,13 @@ class FragmentMain : Fragment() {
     @Composable
     private fun ComposeView.DropdownItem(
         item: BookList,
-        selectedItem: String
+        selectedItem: String,
+        modifier: Modifier = Modifier
     ) {
         WebscraperTheme {
             Text(
                 item.toString(),
-                Modifier,
+                modifier,
                 if (item.toString() == selectedItem) {
                     MaterialTheme.colors.primary
                 } else{ MaterialTheme.colors.onPrimary }

@@ -36,6 +36,7 @@ import com.cobaltware.webscraper.datahandling.BookList
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
 import com.cobaltware.webscraper.dialogs.ModifyListDialog
 import com.cobaltware.webscraper.dialogs.Operations
+import com.cobaltware.webscraper.fragments.FragmentMain
 import com.cobaltware.webscraper.fragments.FragmentRead
 import com.cobaltware.webscraper.fragments.fragmentTransition
 
@@ -100,14 +101,14 @@ class MainViewController(private val fragment: Fragment) {
     @Composable
     fun ModifyListDialog(
         /** Initial Title of Book List */
-        title: String,
+        title: String?,
         changeList: (String) -> Unit,
         open: Boolean,
         dismissState: (Boolean) -> Unit
     ) {
 
         if (!open) return
-        if (title.isNotEmpty())
+        if (title != null)
             ModifyDialogList(title, dismissState, changeList)
         else
             AddDialogList(dismissState, changeList)
