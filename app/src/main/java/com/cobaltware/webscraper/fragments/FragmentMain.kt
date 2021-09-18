@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
@@ -72,24 +73,17 @@ class FragmentMain : Fragment() {
                                     Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-
                                     OutlinedTextField(value = selectedItem.toString(),
                                         onValueChange = {},
                                         readOnly = true,
-                                        modifier = Modifier.fillMaxWidth(
-                                            if (items.indexOf(
-                                                    BookList(
-                                                        selectedItem
-                                                    )
-                                                ) > 1
-                                            ) .85f else 1f
-                                        ).padding(start = 5.dp, end = 5.dp)
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(textColor = MaterialTheme.colors.onPrimary),
+                                        modifier = Modifier
+                                            .fillMaxWidth(if (items.indexOf(BookList(selectedItem)) > 1) .85f else 1f)
+                                            .padding(start = 5.dp, end = 5.dp)
                                             .onSizeChanged {
+                                                // Workaround to get exact height and width of dropdown at runtime
                                                 dropDownWidth = it.width
                                                 dropDownHeight = it.height
-                                            }
-                                            .clickable { // Anchor view
-                                                expanded = !expanded
                                             },
                                         label = {
                                             Text("Book Lists",modifier = Modifier
@@ -110,7 +104,7 @@ class FragmentMain : Fragment() {
                                         OutlinedButton(onClick = { setModifyListOpen(true) }, modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(top = 8.dp, end = 5.dp)
-                                            .height(with(LocalDensity.current){dropDownHeight.toDp() - 8.dp})
+                                            .height(with(LocalDensity.current) { dropDownHeight.toDp() - 8.dp })
                                         ) {
                                             Icon(imageVector = Icons.Filled.MenuOpen, null)
                                         }
