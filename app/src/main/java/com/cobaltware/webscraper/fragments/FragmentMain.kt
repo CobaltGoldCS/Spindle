@@ -14,15 +14,20 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.MenuOpen
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -65,38 +70,36 @@ class FragmentMain : Fragment() {
                         LiveDropdown(items = DB.readAllLists){ items ->
 
                             var expanded by remember { mutableStateOf(false) }
-                            var dropDownWidth by remember { mutableStateOf(0) }
-                            var dropDownHeight by remember { mutableStateOf(0)}
+                            var dropDownSize by remember { mutableStateOf(IntSize(0, 0)) }
 
                             Column(Modifier,  horizontalAlignment = Alignment.CenterHorizontally) {
                                 Row(
                                     Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
+                                    val onPrimary = MaterialTheme.colors.onPrimary
+
                                     OutlinedTextField(value = selectedItem.toString(),
                                         onValueChange = {},
-                                        readOnly = true,
-                                        colors = TextFieldDefaults.outlinedTextFieldColors(textColor = MaterialTheme.colors.onPrimary),
+                                        enabled = false,
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            disabledTextColor = onPrimary,
+                                            unfocusedBorderColor =  MaterialTheme.colors.primary),
                                         modifier = Modifier
                                             .fillMaxWidth(if (items.indexOf(BookList(selectedItem)) > 1) .85f else 1f)
                                             .padding(start = 5.dp, end = 5.dp)
-                                            .onSizeChanged {
-                                                // Workaround to get exact height and width of dropdown at runtime
-                                                dropDownWidth = it.width
-                                                dropDownHeight = it.height
-                                            },
+                                            // Workaround to get exact height and width of dropdown at runtime
+                                            .onSizeChanged { dropDownSize = it }
+                                            .clickable { expanded = !expanded },
                                         label = {
-                                            Text("Book Lists",modifier = Modifier
-                                                .clickable { expanded = !expanded })
+                                            Text("Book Lists", color = onPrimary)
                                         },
                                         trailingIcon = {
                                             Icon(
-                                                imageVector = Icons.Filled.ArrowDropDown,
+                                                imageVector = if(!expanded) Icons.Filled.ArrowDropDown else Icons.Filled.ArrowDropUp,
                                                 null,
-                                                modifier = Modifier
-                                                    .clickable { expanded = !expanded }
-                                                    .align(Alignment.CenterVertically),
-                                                tint = MaterialTheme.colors.onPrimary
+                                                modifier = Modifier.align(Alignment.CenterVertically),
+                                                tint = onPrimary
                                             )
                                         }
                                     )
@@ -104,7 +107,7 @@ class FragmentMain : Fragment() {
                                         OutlinedButton(onClick = { setModifyListOpen(true) }, modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(top = 8.dp, end = 5.dp)
-                                            .height(with(LocalDensity.current) { dropDownHeight.toDp() - 8.dp })
+                                            .height(with(LocalDensity.current) { dropDownSize.height.toDp() - 8.dp })
                                         ) {
                                             Icon(imageVector = Icons.Filled.MenuOpen, null)
                                         }
@@ -114,7 +117,8 @@ class FragmentMain : Fragment() {
                                     DropdownMenu(
                                         expanded = expanded,
                                         onDismissRequest = {expanded = !expanded},
-                                        modifier = Modifier.width(with(LocalDensity.current){dropDownWidth.toDp()})
+                                        modifier = Modifier
+                                            .width(with(LocalDensity.current){dropDownSize.width.toDp()})
                                     ) {
                                         items.forEach {
                                             DropdownMenuItem(onClick = {
@@ -145,7 +149,7 @@ class FragmentMain : Fragment() {
                                         viewController.BookItem(
                                             book.title,
                                             { viewController.initReadFragment(book) },
-                                            { viewController.initAddFragment(book) }
+                                            { viewController.initAddFragment(book) },
                                         )
                                     }
                                 }

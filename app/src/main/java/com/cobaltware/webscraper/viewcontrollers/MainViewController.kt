@@ -16,11 +16,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -70,6 +75,7 @@ class MainViewController(private val fragment: Fragment) {
         title: String,
         textClickHandler: () -> Unit,
         buttonClickHandler: () -> Unit,
+        iconModifier: Modifier = Modifier
     ) {
         val colorPrimary = getColor(R.attr.colorOnPrimary)
         ListItem(
@@ -88,12 +94,19 @@ class MainViewController(private val fragment: Fragment) {
                 )
             },
             trailing = {
-                Icon(
-                    imageVector = Icons.Filled.Menu,
-                    "Modify the book",
-                    tint = colorPrimary,
-                    modifier = Modifier.clickable { buttonClickHandler.invoke() }
-                )
+                Box(
+                    modifier = Modifier
+                        .size(40.dp, 40.dp)
+                        .clickable { buttonClickHandler.invoke() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Menu,
+                        "Modify the book",
+                        tint = colorPrimary,
+                        modifier = iconModifier
+                            .align(Alignment.Center)
+                    )
+                }
             }
         )
     }
@@ -132,7 +145,7 @@ class MainViewController(private val fragment: Fragment) {
                 Text(text = "Modify $title")
             },
             text = {
-                TextField(text, { text = it }, label = { Text(text = "List item")})
+                TextField(text, { text = it }, label = { Text(text = "List item") })
             },
             buttons = {
                 Column(
@@ -200,7 +213,7 @@ class MainViewController(private val fragment: Fragment) {
                 Text(text = "Add a List")
             },
             text = {
-                TextField(text, { text = it }, label = { Text(text = "List item")})
+                TextField(text, { text = it }, label = { Text(text = "List item") })
             },
             buttons = {
                 Column(
