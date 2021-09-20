@@ -5,32 +5,38 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 
 @Composable
 fun <T> LiveRecycler(
     data: LiveData<List<T>>,
-    content: LazyListScope.(List<T>) -> Unit
+    state: LazyListState = rememberLazyListState(),
+    content: LazyListScope.(List<T>) -> Unit,
 ) {
     val columnData by data.observeAsState()
     columnData?.let { list ->
-        BaseRecycler(list, content)
+        BaseRecycler(list, content, state)
     }
 }
 
 @Composable
 private fun <T> BaseRecycler(
     data: List<T>,
-    content: LazyListScope.(List<T>) -> Unit
+    content: LazyListScope.(List<T>) -> Unit,
+    state: LazyListState
 ) {
     LazyColumn(
+        state = state,
         content = {
             content.invoke(this, data)
         }

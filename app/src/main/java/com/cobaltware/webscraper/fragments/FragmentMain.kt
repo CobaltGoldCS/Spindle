@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -39,6 +40,7 @@ import com.cobaltware.webscraper.datahandling.BookList
 import com.cobaltware.webscraper.dialogs.ModifyListDialog
 import com.cobaltware.webscraper.dialogs.Operations
 import com.cobaltware.webscraper.viewcontrollers.*
+import kotlinx.coroutines.launch
 import kotlin.concurrent.thread
 
 
@@ -67,6 +69,7 @@ class FragmentMain : Fragment() {
                         changeList = {selectedItem = it; DB.currentTable = it; modifyListText = selectedItem},
                         open = modifyListOpen,  dismissState = setModifyListOpen)
                     Column {
+                        val recyclerState = rememberLazyListState()
                         LiveDropdown(items = DB.readAllLists){ items ->
 
                             var expanded by remember { mutableStateOf(false) }
@@ -120,19 +123,23 @@ class FragmentMain : Fragment() {
                                         modifier = Modifier
                                             .width(with(LocalDensity.current){dropDownSize.width.toDp()})
                                     ) {
+                                        val coroutine = rememberCoroutineScope()
                                         items.forEach {
                                             DropdownMenuItem(onClick = {
                                                 // Handle On Click when dropdown item is pressed
-                                                if (items.indexOf(it) == 0) {
-                                                    modifyListText = null
-                                                    setModifyListOpen(true)
+                                                coroutine.launch {
+                                                    if (items.indexOf(it) == 0) {
+                                                        modifyListText = null
+                                                        setModifyListOpen(true)
+                                                    }
+                                                    else {
+                                                        selectedItem = it.name
+                                                        modifyListText = selectedItem
+                                                        DB.currentTable = selectedItem
+                                                        recyclerState.scrollToItem(0)
+                                                    }
+                                                    expanded = !expanded
                                                 }
-                                                else {
-                                                    selectedItem = it.name
-                                                    modifyListText = selectedItem
-                                                    DB.currentTable = selectedItem
-                                                }
-                                                expanded = !expanded
                                             }, modifier = Modifier.fillMaxWidth()) {
                                                 DropdownItem(it, selectedItem)
                                             }
@@ -144,7 +151,7 @@ class FragmentMain : Fragment() {
                         // This is the main content
                         Scaffold(
                             content = {
-                                LiveRecycler(DB.readAllFromBookList(selectedItem)) { list: List<Book> ->
+                                LiveRecycler(DB.readAllFromBookList(selectedItem), recyclerState) { list: List<Book> ->
                                     items(list) { book ->
                                         viewController.BookItem(
                                             book.title,
@@ -156,13 +163,14 @@ class FragmentMain : Fragment() {
                             },
                             floatingActionButtonPosition = FabPosition.End,
                             floatingActionButton = {
-                                FloatingActionButton(
-                                    modifier = Modifier.padding(end = 300.dp),
-                                    onClick = { viewController.initAddFragment(null) },
-                                    content = { Icon(imageVector = Icons.Filled.Add, null) },
-                                    backgroundColor = MaterialTheme.colors.primary,
-                                    contentColor = MaterialTheme.colors.onSecondary
-                                )
+                                if (!(recyclerState.firstVisibleItemIndex > 0))
+                                    FloatingActionButton(
+                                        modifier = Modifier.padding(end = 300.dp),
+                                        onClick = { viewController.initAddFragment(null) },
+                                        content = { Icon(imageVector = Icons.Filled.Add, null) },
+                                        backgroundColor = MaterialTheme.colors.primary,
+                                        contentColor = MaterialTheme.colors.onSecondary
+                                    )
                             },
                         )
                     }

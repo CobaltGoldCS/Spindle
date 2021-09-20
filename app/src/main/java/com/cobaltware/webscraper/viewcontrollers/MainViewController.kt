@@ -1,47 +1,30 @@
 package com.cobaltware.webscraper.viewcontrollers
 
-import android.util.Log
+import android.annotation.SuppressLint
 import android.util.TypedValue
 import android.view.View
-import android.view.animation.AnimationUtils
-import android.widget.ArrayAdapter
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.ReaderApplication
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
-import com.cobaltware.webscraper.databinding.FragmentMainBinding
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.BookList
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
-import com.cobaltware.webscraper.dialogs.ModifyListDialog
-import com.cobaltware.webscraper.dialogs.Operations
-import com.cobaltware.webscraper.fragments.FragmentMain
 import com.cobaltware.webscraper.fragments.FragmentRead
 import com.cobaltware.webscraper.fragments.fragmentTransition
 
@@ -69,6 +52,7 @@ class MainViewController(private val fragment: Fragment) {
         return Color(typedValue.data)
     }
 
+    @SuppressLint("ModifierParameter")
     @ExperimentalMaterialApi
     @Composable
     fun BookItem(
