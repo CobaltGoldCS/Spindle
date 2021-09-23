@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.style.TextAlign
@@ -49,35 +50,12 @@ class FragmentConfig : Fragment() {
                         floatingActionButtonPosition = FabPosition.Center,
                         content = {
                             LiveRecycler(data = DB.readAllConfigs) { list: List<Config> ->
-                                items(items = list) { item ->
-                                    Text(
-                                        text = item.domain,
-                                        modifier = Modifier
-                                            .clickable(onClick = {
-                                                val neededConfig =
-                                                    DB.readItemFromConfigs(item.row_id)
-                                                addOrChangeConfigDialog(neededConfig)
-                                            })
-                                            .fillMaxWidth()
-                                            .padding(5.dp, 2.dp)
-                                            .border(
-                                                BorderStroke(
-                                                    2.dp,
-                                                    MaterialTheme.colors.onPrimary,
-                                                ),
-                                                RoundedCornerShape(10.dp)
-                                            )
-                                            .padding(10.dp, 5.dp),
-                                        MaterialTheme.colors.onPrimary,
-                                        textAlign = TextAlign.Center,
-                                        fontSize = 20.sp,
-                                    )
-                                }
+                                items(items = list) { item -> ConfigItem(item = item) }
                             }
                         },
 
                         floatingActionButton = {
-                            if (recyclerState.firstVisibleItemIndex <= 0)
+                            if (recyclerState.firstVisibleItemIndex <= 0) {
                                 FloatingActionButton(
                                     onClick = { addOrChangeConfigDialog(null) },
                                     content = { Icon(imageVector = Icons.Filled.Add, null) },
@@ -88,9 +66,14 @@ class FragmentConfig : Fragment() {
                                         0.dp
                                     )
                                 )
+                            }
+
                         }
+
                     )
+                    // End of Webscraper theme
                 }
+                // End of set content
             }
         }
     }
@@ -100,5 +83,31 @@ class FragmentConfig : Fragment() {
     private fun addOrChangeConfigDialog(config: Config?) {
         val dialog = ConfigDialog(config)
         dialog.show(requireActivity().supportFragmentManager, "Add New Config")
+    }
+
+    @Composable
+    fun ConfigItem(item: Config) {
+        Text(
+            text = item.domain,
+            modifier = Modifier
+                .clickable(onClick = {
+                    val neededConfig =
+                        DB.readItemFromConfigs(item.row_id)
+                    addOrChangeConfigDialog(neededConfig)
+                })
+                .fillMaxWidth()
+                .padding(5.dp, 2.dp)
+                .border(
+                    BorderStroke(
+                        2.dp,
+                        MaterialTheme.colors.onPrimary,
+                    ),
+                    RoundedCornerShape(10.dp)
+                )
+                .padding(10.dp, 5.dp),
+            MaterialTheme.colors.onPrimary,
+            textAlign = TextAlign.Center,
+            fontSize = 20.sp,
+        )
     }
 }

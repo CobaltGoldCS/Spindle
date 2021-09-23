@@ -164,6 +164,7 @@ class FragmentMain : Fragment() {
                         )
 
                     }
+                    // End of composable functions in setScreen
                 }
             }
         }
