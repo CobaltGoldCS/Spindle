@@ -80,8 +80,7 @@ class BookViewModel(application: Application) :
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateList(newName, oldName)
             fromBookListSync(BookList(oldName)).forEach {
-                it.bookList = newName
-                repository.updateBook(it)
+                repository.updateBook(it.copy(bookList = newName))
             }
         }
         currentTable = newName

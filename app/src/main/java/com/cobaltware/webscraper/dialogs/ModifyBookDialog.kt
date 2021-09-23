@@ -67,6 +67,7 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
             }
             v.title.setNavigationOnClickListener {
                 fragmentTransition(
+                    requireContext(),
                     FragmentMain(),
                     View.VISIBLE
                 )

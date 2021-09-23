@@ -26,7 +26,7 @@ import com.cobaltware.webscraper.viewcontrollers.ReadViewController
 import kotlin.concurrent.thread
 
 
-class FragmentRead(private val book: Book) : Fragment() {
+class FragmentRead(private var book: Book) : Fragment() {
 
     private lateinit var viewController: ReadViewController
 
@@ -172,7 +172,7 @@ class FragmentRead(private val book: Book) : Fragment() {
         // Since the visibility is already changed, we don't have to check again
         if (view.prevButton.isVisible) prevHandler.prepPageChange(prevUrl!!)
         if (view.nextButton.isVisible) nextHandler.prepPageChange(nextUrl!!)
-        book.url = current!!
+        book = book.copy(url = current!!)
         DB.updateBook(book)
     }
 
@@ -203,7 +203,7 @@ class FragmentRead(private val book: Book) : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            fragmentTransition(FragmentMain(), View.VISIBLE)
+            fragmentTransition(requireContext(), FragmentMain(), View.VISIBLE)
 
         } catch (e: Exception) {
         }

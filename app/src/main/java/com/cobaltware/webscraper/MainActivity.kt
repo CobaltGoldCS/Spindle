@@ -8,7 +8,6 @@ import com.chaquo.python.android.AndroidPlatform
 import com.cobaltware.webscraper.fragments.FragmentConfig
 import com.cobaltware.webscraper.fragments.FragmentMain
 import com.cobaltware.webscraper.fragments.FragmentSettings
-import com.cobaltware.webscraper.ReaderApplication.Companion.activity
 import com.cobaltware.webscraper.databinding.ActivityMainBinding
 
 
@@ -21,7 +20,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // Create and setup various background processes
         if (!Python.isStarted()) Python.start(AndroidPlatform(this))
-        activity = this
         setContentView(view.root)
         setNavTransitions()
         activityFragmentSwitch(FragmentMain())

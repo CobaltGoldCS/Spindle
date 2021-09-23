@@ -13,7 +13,6 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 
@@ -57,43 +56,45 @@ fun <T> ThemedDropdown(items: List<T>, content: @Composable (List<T>) -> Unit) {
     content.invoke(items)
 }
 
-private val darkBackground = Color(0xff1e2127)
-private val darkSecond = Color(0xFFFF6B6B)
+private object WebscraperThemeColors {
+    private val darkBackground = Color(0xff1e2127)
+    private val darkSecond = Color(0xFFFF6B6B)
 
-@SuppressLint("ConflictingOnColor")
-val darkColors = darkColors(
-    primary = Color(0xFF5DB7DE),
-    primaryVariant = Color(0xFF1F7498),
-    onPrimary = Color.White,
-    background = darkBackground,
-    onBackground = Color.White,
-    surface = darkBackground,
-    secondary = darkSecond,
-    secondaryVariant = Color(0xFFFFE66D),
-    onSecondary = Color.White,
-    error = darkSecond,
-    onError = Color.White
-)
+    @SuppressLint("ConflictingOnColor")
+    val dark = darkColors(
+        primary = Color(0xFF5DB7DE),
+        primaryVariant = Color(0xFF1F7498),
+        onPrimary = Color.White,
+        background = darkBackground,
+        onBackground = Color.White,
+        surface = darkBackground,
+        secondary = darkSecond,
+        secondaryVariant = Color(0xFFFFE66D),
+        onSecondary = Color.White,
+        error = darkSecond,
+        onError = Color.White
+    )
 
-private val dimGray = Color(0xFF222222)
-private val secondVar = Color(0xFFE94957)
-val lightColors = lightColors(
-    primary = Color(0xFF79ADDC),
-    primaryVariant = Color(0xFFCD700A),
-    onPrimary = dimGray,
-    background = Color.White,
-    surface = Color.White,
-    secondary = Color(0xFFEE901A),
-    secondaryVariant = secondVar,
-    onSecondary = Color.White,
-    error = secondVar,
-    onError = Color.White
-)
+    private val dimGray = Color(0xFF222222)
+    private val secondVar = Color(0xFFE94957)
+    val light = lightColors(
+        primary = Color(0xFF79ADDC),
+        primaryVariant = Color(0xFFCD700A),
+        onPrimary = dimGray,
+        background = Color.White,
+        surface = Color.White,
+        secondary = Color(0xFFEE901A),
+        secondaryVariant = secondVar,
+        onSecondary = Color.White,
+        error = secondVar,
+        onError = Color.White
+    )
+}
 
 @Composable
 fun WebscraperTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colors = if (isSystemInDarkTheme()) darkColors else lightColors,
+        colors = if (isSystemInDarkTheme()) WebscraperThemeColors.dark else WebscraperThemeColors.light,
         content = content
     )
 }

@@ -14,8 +14,8 @@ data class Book(
     @PrimaryKey(autoGenerate = true)
     val row_id: Int,
     val title: String,
-    var url: String,
-    var bookList: String
+    val url: String,
+    val bookList: String
 )
 
 /**The container for a Configuration, corresponds to SQLITE Config Table format
@@ -37,7 +37,7 @@ data class Config(
 @Entity(tableName = "Lists")
 data class BookList(
     @PrimaryKey
-    var name: String
+    val name: String
 
 ){
     override fun toString(): String {

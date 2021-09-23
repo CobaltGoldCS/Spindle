@@ -6,7 +6,6 @@ import com.cobaltware.webscraper.datahandling.BookViewModel
 class ReaderApplication : Application() {
     companion object {
         lateinit var DB: BookViewModel
-        lateinit var activity: MainActivity
     }
 
     override fun onCreate() {
