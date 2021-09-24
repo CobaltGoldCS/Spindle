@@ -7,8 +7,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +15,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.style.TextAlign
@@ -44,34 +44,50 @@ class FragmentConfig : Fragment() {
         viewer.addActionButton.setOnClickListener { addOrChangeConfigDialog(null) }
         return ComposeView(requireContext()).apply {
             setContent {
-                val recyclerState = rememberLazyListState()
                 WebscraperTheme {
-                    Scaffold(
-                        floatingActionButtonPosition = FabPosition.Center,
-                        content = {
-                            LiveRecycler(data = DB.readAllConfigs) { list: List<Config> ->
-                                items(items = list) { item -> ConfigItem(item = item) }
-                            }
-                        },
+                    val recyclerState = rememberLazyListState()
+                    Column(Modifier.fillMaxSize()) {
+                        Text(
+                            text = "Add or Change Configurations",
+                            style = MaterialTheme.typography.h6,
+                            color = MaterialTheme.colors.onPrimary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .padding(horizontal = 5.dp, vertical = 2.dp),
+                        )
+                        Spacer(Modifier.padding(vertical = 5.dp))
+                        Scaffold(
+                            floatingActionButtonPosition = FabPosition.Center,
+                            content = {
+                                LiveRecycler(
+                                    DB.readAllConfigs,
+                                    recyclerState
+                                ) { list: List<Config> ->
+                                    items(items = list) { item -> ConfigItem(item = item) }
+                                }
+                            },
 
-                        floatingActionButton = {
-                            if (recyclerState.firstVisibleItemIndex <= 0) {
-                                FloatingActionButton(
-                                    onClick = { addOrChangeConfigDialog(null) },
-                                    content = { Icon(imageVector = Icons.Filled.Add, null) },
-                                    backgroundColor = MaterialTheme.colors.primary,
-                                    contentColor = MaterialTheme.colors.onSecondary,
-                                    elevation = FloatingActionButtonDefaults.elevation(
-                                        10.dp,
-                                        0.dp
+                            floatingActionButton = {
+                                if (recyclerState.firstVisibleItemIndex == 0) {
+                                    FloatingActionButton(
+                                        onClick = { addOrChangeConfigDialog(null) },
+                                        content = { Icon(imageVector = Icons.Filled.Add, null) },
+                                        backgroundColor = MaterialTheme.colors.primary,
+                                        contentColor = MaterialTheme.colors.onSecondary,
+                                        elevation = FloatingActionButtonDefaults.elevation(
+                                            10.dp,
+                                            0.dp
+                                        )
                                     )
-                                )
+                                }
+
                             }
 
-                        }
-
-                    )
-                    // End of Webscraper theme
+                        )
+                        // End of Column
+                    }
                 }
                 // End of set content
             }

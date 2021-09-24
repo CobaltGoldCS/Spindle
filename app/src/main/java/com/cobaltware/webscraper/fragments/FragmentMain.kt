@@ -22,10 +22,12 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import com.cobaltware.webscraper.MainActivity
 import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.BookList
@@ -33,7 +35,7 @@ import com.cobaltware.webscraper.dialogs.ModifyBookDialog
 import com.cobaltware.webscraper.viewcontrollers.LiveDropdown
 import com.cobaltware.webscraper.viewcontrollers.LiveRecycler
 import com.cobaltware.webscraper.viewcontrollers.WebscraperTheme
-import com.google.android.material.tabs.TabLayout
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -80,7 +82,7 @@ class FragmentMain : Fragment() {
                                         text = selectedItem, expanded = expanded,
                                         modifier = Modifier
                                             .fillMaxWidth(if (items.indexOf(BookList(selectedItem)) > 1) .85f else 1f)
-                                            .padding(start = 5.dp, end = 5.dp)
+                                            .padding(horizontal = 5.dp)
                                             // Workaround to get exact height and width of dropdown at runtime
                                             .onSizeChanged { dropDownSize = it }
                                             .clickable { expanded = !expanded },
@@ -99,7 +101,11 @@ class FragmentMain : Fragment() {
                                 }
                                 Spacer(Modifier.height(10.dp))
 
-                                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                Box(
+                                    Modifier
+                                        .padding(horizontal = 5.dp)
+                                        .fillMaxWidth(), contentAlignment = Alignment.Center
+                                ) {
                                     DropdownMenu(
                                         expanded = expanded,
                                         onDismissRequest = { expanded = !expanded },
@@ -108,21 +114,27 @@ class FragmentMain : Fragment() {
                                     ) {
                                         val coroutine = rememberCoroutineScope()
                                         items.forEach {
-                                            DropdownMenuItem(onClick = {
-                                                // Handle On Click when dropdown item is pressed
-                                                coroutine.launch {
-                                                    if (items.indexOf(it) == 0) {
-                                                        modifyListText = null
-                                                        setModifyListOpen(true)
-                                                    } else {
-                                                        selectedItem = it.name
-                                                        modifyListText = selectedItem
-                                                        DB.currentTable = selectedItem
-                                                        recyclerState.scrollToItem(0)
+                                            DropdownMenuItem(
+                                                onClick = {
+                                                    // Handle On Click when dropdown item is pressed
+                                                    coroutine.launch {
+                                                        if (items.indexOf(it) == 0) {
+                                                            // This opens the add book list menu
+                                                            modifyListText = null
+                                                            setModifyListOpen(true)
+                                                        } else {
+                                                            selectedItem = it.name
+                                                            modifyListText = selectedItem
+                                                            DB.currentTable = selectedItem
+                                                            recyclerState.scrollToItem(0)
+                                                        }
+                                                        expanded = !expanded
                                                     }
-                                                    expanded = !expanded
-                                                }
-                                            }, modifier = Modifier.fillMaxWidth()) {
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 5.dp)
+                                            ) {
                                                 DropdownItem(it, selectedItem)
                                             }
                                         }
@@ -146,7 +158,7 @@ class FragmentMain : Fragment() {
                                     }
                                 }
                             },
-                            floatingActionButtonPosition = FabPosition.End,
+                            floatingActionButtonPosition = FabPosition.Center,
                             floatingActionButton = {
                                 if (recyclerState.firstVisibleItemIndex <= 0)
                                     FloatingActionButton(
@@ -171,8 +183,10 @@ class FragmentMain : Fragment() {
     }
 
 
-    private fun initAddFragment(book: Book?): ModifyBookDialog = ModifyBookDialog(book).apply {
-        show(requireActivity().supportFragmentManager, "Add or Change Book")
+    private fun initAddFragment(book: Book?): ModifyBookDialog {
+        val dialog = ModifyBookDialog(book)
+        dialog.show(requireActivity().supportFragmentManager, "Add or Change Book")
+        return dialog
     }
 
 
@@ -282,10 +296,10 @@ class FragmentMain : Fragment() {
     }
 
     /** This is the only Modify List Variant that should be called
-     * @param bookTitle
-     * @param changeList
-     * @param open
-     * @param dismissState
+     * @param bookTitle The initial name of the book List
+     * @param changeList Change the current book list to be displayed
+     * @param open If the dropdown menu is open or not
+     * @param dismissState A lambda containing the ability to switch [open] from true to false
      * */
     @Composable
     fun ModifyListDialog(
