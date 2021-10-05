@@ -5,18 +5,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
@@ -32,15 +36,14 @@ import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.BookList
 import com.cobaltware.webscraper.dialogs.ModifyBookDialog
-import com.cobaltware.webscraper.viewcontrollers.LiveDropdown
-import com.cobaltware.webscraper.viewcontrollers.LiveRecycler
-import com.cobaltware.webscraper.viewcontrollers.WebscraperTheme
+import com.cobaltware.webscraper.viewcontrollers.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
 class FragmentMain : Fragment() {
 
+    @ExperimentalAnimationApi
     @ExperimentalMaterialApi
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -160,18 +163,10 @@ class FragmentMain : Fragment() {
                             },
                             floatingActionButtonPosition = FabPosition.Center,
                             floatingActionButton = {
-                                if (recyclerState.firstVisibleItemIndex <= 0)
-                                    FloatingActionButton(
-                                        modifier = Modifier.padding(end = 300.dp),
-                                        onClick = { initAddFragment(null) },
-                                        content = { Icon(imageVector = Icons.Filled.Add, null) },
-                                        backgroundColor = MaterialTheme.colors.primary,
-                                        contentColor = MaterialTheme.colors.onSecondary,
-                                        elevation = FloatingActionButtonDefaults.elevation(
-                                            10.dp,
-                                            0.dp
-                                        )
-                                    )
+                                HidingFAB(
+                                    visibility = recyclerState.firstVisibleItemIndex <= 0,
+                                    modifier = Modifier.padding(end = 300.dp),
+                                    onClick = { initAddFragment(null) })
                             },
                         )
 
@@ -260,39 +255,42 @@ class FragmentMain : Fragment() {
         title: String,
         textClickHandler: () -> Unit,
         buttonClickHandler: () -> Unit,
-        iconModifier: Modifier = Modifier
     ) {
-        ListItem(
+
+        Card(
             modifier = Modifier
-                .clickable { textClickHandler.invoke() }
-                .padding(all = 5.dp)
-                .border(
-                    BorderStroke(2.dp, MaterialTheme.colors.onPrimary),
-                    RectangleShape
-                ),
-            text = {
+                .padding(5.dp)
+                .clickable { textClickHandler.invoke() },
+            elevation = 10.dp,
+            shape = RectangleShape,
+            // This color is hardcoded because of a weird bug where android lightens surface color
+            backgroundColor = Color(0xff24282D),
+        ) {
+            Column(Modifier.fillMaxSize()) {
                 Text(
                     title,
+                    modifier = Modifier.padding(5.dp),
                     fontSize = 20.sp,
                     color = MaterialTheme.colors.onPrimary,
                 )
-            },
-            trailing = {
-                Box(
+                Divider(color = MaterialTheme.colors.onPrimary.copy(1f, 0.7f, 0.7f, 0.7f))
+                Button(
                     modifier = Modifier
-                        .size(40.dp, 40.dp)
-                        .clickable { buttonClickHandler.invoke() }
+                        .size(60.dp, 40.dp)
+                        .align(Alignment.End)
+                        .padding(5.dp)
+                        .clip(RoundedCornerShape(10.dp)),
+                    onClick = { buttonClickHandler.invoke() }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Menu,
                         "Modify the book",
                         tint = MaterialTheme.colors.onPrimary,
-                        modifier = iconModifier
-                            .align(Alignment.Center)
+                        modifier = Modifier.fillMaxSize(0.9f)
                     )
                 }
             }
-        )
+        }
     }
 
     /** This is the only Modify List Variant that should be called

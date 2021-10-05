@@ -2,18 +2,23 @@ package com.cobaltware.webscraper.viewcontrollers
 
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.*
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 
 @Composable
@@ -56,23 +61,45 @@ fun <T> ThemedDropdown(items: List<T>, content: @Composable (List<T>) -> Unit) {
     content.invoke(items)
 }
 
-private object WebscraperThemeColors {
-    private val darkBackground = Color(0xff1e2127)
-    private val darkSecond = Color(0xFFFF6B6B)
+@ExperimentalAnimationApi
+@Composable
+fun HidingFAB(visibility: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    AnimatedVisibility(
+        visible = visibility,
+        enter = slideInHorizontally(),
+        exit = slideOutHorizontally()
+    ) {
+        FloatingActionButton(
+            onClick = onClick,
+            modifier = modifier,
+            content = { Icon(imageVector = Icons.Filled.Add, null) },
+            backgroundColor = MaterialTheme.colors.secondary,
+            contentColor = MaterialTheme.colors.onSecondary,
+            elevation = FloatingActionButtonDefaults.elevation(
+                10.dp,
+                0.dp
+            )
+        )
+    }
+}
+
+object WebscraperThemeColors {
+    val darkSecond = Color(0xFFFB3640)
+    val platinum = Color(0xFFE2E2E2)
 
     @SuppressLint("ConflictingOnColor")
     val dark = darkColors(
-        primary = Color(0xFF5DB7DE),
-        primaryVariant = Color(0xFF1F7498),
-        onPrimary = Color.White,
-        background = darkBackground,
-        onBackground = Color.White,
-        surface = darkBackground,
+        primary = Color(0xFF87C0BD),
+        primaryVariant = Color(0xFF4B8F8C),
+        onPrimary = platinum,
+        background = Color(0xff1e2127),
+        onBackground = platinum,
+        surface = Color(0xff24282E),
         secondary = darkSecond,
         secondaryVariant = Color(0xFFFFE66D),
-        onSecondary = Color.White,
+        onSecondary = platinum,
         error = darkSecond,
-        onError = Color.White
+        onError = platinum
     )
 
     private val dimGray = Color(0xFF222222)
@@ -82,7 +109,7 @@ private object WebscraperThemeColors {
         primaryVariant = Color(0xFFCD700A),
         onPrimary = dimGray,
         background = Color.White,
-        surface = Color.White,
+        surface = platinum,
         secondary = Color(0xFFEE901A),
         secondaryVariant = secondVar,
         onSecondary = Color.White,

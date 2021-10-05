@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.databinding.FragmentConfigBinding
 import com.cobaltware.webscraper.datahandling.Config
 import com.cobaltware.webscraper.dialogs.ConfigDialog
+import com.cobaltware.webscraper.viewcontrollers.HidingFAB
 import com.cobaltware.webscraper.viewcontrollers.LiveRecycler
 import com.cobaltware.webscraper.viewcontrollers.WebscraperTheme
 
@@ -35,6 +37,7 @@ import com.cobaltware.webscraper.viewcontrollers.WebscraperTheme
  * Used for setting up configurations
  */
 class FragmentConfig : Fragment() {
+    @ExperimentalAnimationApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -70,19 +73,9 @@ class FragmentConfig : Fragment() {
                             },
 
                             floatingActionButton = {
-                                if (recyclerState.firstVisibleItemIndex == 0) {
-                                    FloatingActionButton(
-                                        onClick = { addOrChangeConfigDialog(null) },
-                                        content = { Icon(imageVector = Icons.Filled.Add, null) },
-                                        backgroundColor = MaterialTheme.colors.primary,
-                                        contentColor = MaterialTheme.colors.onSecondary,
-                                        elevation = FloatingActionButtonDefaults.elevation(
-                                            10.dp,
-                                            0.dp
-                                        )
-                                    )
-                                }
-
+                                HidingFAB(
+                                    visibility = recyclerState.firstVisibleItemIndex == 0,
+                                    onClick = { addOrChangeConfigDialog(null) })
                             }
 
                         )
