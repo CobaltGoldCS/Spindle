@@ -1,4 +1,4 @@
-package com.cobaltware.webscraper.fragments
+package com.cobaltware.webscraper.screens.readScreen
 
 import android.accounts.NetworkErrorException
 import android.content.Context
@@ -16,19 +16,26 @@ import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.chaquo.python.Python
 import com.cobaltware.webscraper.R
-import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.databinding.FragmentReadBinding
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.Config
+import com.cobaltware.webscraper.datahandling.Response
+import com.cobaltware.webscraper.datahandling.useCases.ReadUseCase
 import com.cobaltware.webscraper.datahandling.webhandlers.webdata
-import com.cobaltware.webscraper.viewcontrollers.ChapterChangeHandler
-import com.cobaltware.webscraper.viewcontrollers.ReadViewController
+import com.cobaltware.webscraper.screens.settingsScreen.fragmentTransition
+import com.cobaltware.webscraper.screens.mainScreen.FragmentMain
+import kotlinx.coroutines.*
 import kotlin.concurrent.thread
 
 
 class FragmentRead(private var book: Book) : Fragment() {
 
     private lateinit var viewController: ReadViewController
+
+    private val dataHandler: ReadUseCase by lazy { ReadUseCase(requireContext()) }
+
+    @ObsoleteCoroutinesApi
+    private val coroutineContext = CoroutineScope(newSingleThreadContext("networkQuery"))
 
     private val nextHandler = ChapterChangeHandler(this)
     private val prevHandler = ChapterChangeHandler(this)
@@ -54,23 +61,19 @@ class FragmentRead(private var book: Book) : Fragment() {
         thread {
             vibrate(100)
             Log.i("data", "Obtaining data")
-            val data: List<String?> = getUrlInfo(book.url)
-
-            if (data.isNullOrEmpty()) {
-                // Error handling
-                Log.e("Domain Error", "Domain may not be properly supported; exiting")
-                quit("This domain / url is not properly supported in the configs; or it may not exist anymore")
-                return@thread
-            }
-
-            // Update the gui
-            Log.i("GUI", "Update UI from asyncUrlLoad")
-            try {
-                requireActivity().runOnUiThread {
-                    updateUi(data[0]!!, data[1]!!, data[2], data[3], data[4])
+            runBlocking {
+                val data: Response = getUrlInfo(book.url)
+                if (data is Response.Success) {
+                    updateUi(
+                        data.data[0]!!,
+                        data.data[1]!!,
+                        data.data[2],
+                        data.data[3],
+                        data.data[4]
+                    )
+                } else {
+                    quit((data as Response.Failure).failureMessage)
                 }
-            } catch (e: Exception) {
-                Log.i("FragmentRead", "This fragment should not exist")
             }
             vibrate(150)
         }
@@ -103,20 +106,20 @@ class FragmentRead(private var book: Book) : Fragment() {
      * @param url The url to obtain data from
      * @param data The configuration information for data collection
      * @return A list containing (title, main text content, previous url, next url, current url) */
-    private fun readBookFromConfig(url: String, data: Config): List<String?> {
+    private fun readBookFromConfig(url: String, data: Config): Response {
         return try {
             // Error handling in case of networking error of some sort
             webdata(url, data.mainXPath, data.prevXPath, data.nextXPath)
         } catch (e: NetworkErrorException) {
             quit(e.message)
-            emptyList()
+            Response.Failure("Could not get data from url")
         }
     }
 
     /** Reads a book using "UrlReading" defined in python/webdata.py
      * @param url The url to obtain data from
      * @return A list containing (title, main text content, previous url, next url, current url) */
-    private fun readBookWithPython(url: String): List<String> {
+    private fun readBookWithPython(url: String): Response {
         // Set up python stuff, and call UrlReading Class with a Url
         val inst = Python.getInstance()
         val webpack = inst.getModule("webdata")
@@ -132,20 +135,20 @@ class FragmentRead(private var book: Book) : Fragment() {
                 this.add(instance["next"].toString())
                 this.add(url)
             }
-            returnList
+            Response.Success(returnList)
 
         } catch (e: Exception) {
-            emptyList()
+            Response.Failure("There is no configuration to access this url")
         }
     }
 
     /** Returns data required to change pages from a sample Url, using either the configs or python bindings
      * @param url The url to obtain data from
      * @return Either an [emptyList] if invalid, or a list in the order [title, content, prevUrl, nextUrl, currentUrl]*/
-    fun getUrlInfo(url: String): List<String?> {
+    fun getUrlInfo(url: String): Response {
         // Integration with Config table and Configurations
         val domain = url.split("/")[2].replace("www.", "")
-        val data = DB.readItemFromConfigs(domain)
+        val data = dataHandler.readItemFromConfigs(domain)
         return if (data != null) {
             // Prefers user inputted configs
             readBookFromConfig(url, data)
@@ -157,23 +160,23 @@ class FragmentRead(private var book: Book) : Fragment() {
      *  @param content Content of the chapter
      *  @param prevUrl The url to the previous chapter
      *  @param nextUrl The url to the next chapter*/
-    fun updateUi(
+    suspend fun updateUi(
         title: String,
         content: String,
         prevUrl: String?,
         nextUrl: String?,
         current: String?
-    ) {
-        requireActivity().runOnUiThread {
-            viewController.updateUi(title, content, prevUrl, nextUrl)
-        }
+    ) = withContext(Dispatchers.Main) {
+        viewController.updateUi(title, content, prevUrl, nextUrl)
 
-        val view = viewController.view
-        // Since the visibility is already changed, we don't have to check again
-        if (view.prevButton.isVisible) prevHandler.prepPageChange(prevUrl!!)
-        if (view.nextButton.isVisible) nextHandler.prepPageChange(nextUrl!!)
-        book = book.copy(url = current!!)
-        DB.updateBook(book)
+        thread {
+            val view = viewController.view
+            // Since the visibility is already changed, we don't have to check again
+            if (view.prevButton.isVisible) prevHandler.prepPageChange(prevUrl!!)
+            if (view.nextButton.isVisible) nextHandler.prepPageChange(nextUrl!!)
+            book = book.copy(url = current!!)
+            dataHandler.updateBook(book)
+        }
     }
 
     /**A simple function to call to vibrate the phone

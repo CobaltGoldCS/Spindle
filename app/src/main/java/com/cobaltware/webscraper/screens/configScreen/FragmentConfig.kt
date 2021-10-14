@@ -1,5 +1,6 @@
-package com.cobaltware.webscraper.fragments
+package com.cobaltware.webscraper.screens.configScreen
 
+import android.app.Application
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,8 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,13 +22,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.databinding.FragmentConfigBinding
 import com.cobaltware.webscraper.datahandling.Config
-import com.cobaltware.webscraper.dialogs.ConfigDialog
-import com.cobaltware.webscraper.viewcontrollers.HidingFAB
-import com.cobaltware.webscraper.viewcontrollers.LiveRecycler
-import com.cobaltware.webscraper.viewcontrollers.WebscraperTheme
+import com.cobaltware.webscraper.datahandling.useCases.ConfigUseCase
+import com.cobaltware.webscraper.general.HidingFAB
+import com.cobaltware.webscraper.general.LiveRecycler
+import com.cobaltware.webscraper.general.WebscraperTheme
 
 
 /**
@@ -37,6 +35,8 @@ import com.cobaltware.webscraper.viewcontrollers.WebscraperTheme
  * Used for setting up configurations
  */
 class FragmentConfig : Fragment() {
+    private val dataHandler: ConfigUseCase by lazy { ConfigUseCase(requireContext()) }
+
     @ExperimentalAnimationApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,7 +65,7 @@ class FragmentConfig : Fragment() {
                             floatingActionButtonPosition = FabPosition.Center,
                             content = {
                                 LiveRecycler(
-                                    DB.readAllConfigs,
+                                    dataHandler.readAllConfigs,
                                     recyclerState
                                 ) { list: List<Config> ->
                                     items(items = list) { item -> ConfigItem(item = item) }
@@ -101,7 +101,7 @@ class FragmentConfig : Fragment() {
             modifier = Modifier
                 .clickable(onClick = {
                     val neededConfig =
-                        DB.readItemFromConfigs(item.row_id)
+                        dataHandler.readItemFromConfigs(item.row_id)
                     addOrChangeConfigDialog(neededConfig)
                 })
                 .fillMaxWidth()

@@ -1,6 +1,7 @@
-package com.cobaltware.webscraper.dialogs
+package com.cobaltware.webscraper.screens.mainScreen
 
 
+import android.app.Application
 import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
@@ -11,16 +12,18 @@ import android.webkit.URLUtil
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.cobaltware.webscraper.R
-import com.cobaltware.webscraper.ReaderApplication.Companion.DB
+import com.cobaltware.webscraper.ReaderApplication.Companion.currentTable
 import com.cobaltware.webscraper.databinding.MenuAddBookBinding
 import com.cobaltware.webscraper.datahandling.Book
-import com.cobaltware.webscraper.fragments.FragmentMain
-import com.cobaltware.webscraper.fragments.fragmentTransition
+import com.cobaltware.webscraper.datahandling.useCases.ModifyBookDialogUseCase
+import com.cobaltware.webscraper.screens.settingsScreen.fragmentTransition
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlin.concurrent.thread
 
 
 class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragment() {
+
+    private val dataHandler: ModifyBookDialogUseCase by lazy { ModifyBookDialogUseCase(requireContext()) }
 
 
     private var clickListener: () -> Unit = { }
@@ -37,7 +40,7 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
         clickListener.invoke()
-        Log.d("Current Table should be ", DB.currentTable)
+        Log.d("Current Table should be ", currentTable)
     }
 
     /**
@@ -61,7 +64,7 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
             }
             v.DelButton.setOnClickListener {
                 if (book != null) {
-                    DB.deleteBook(book!!)
+                    dataHandler.deleteBook(book!!)
                 }
                 dismiss()
             }
@@ -73,10 +76,10 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
                 )
             }
             v.bookLists.setOnItemClickListener { _, _, position, _ ->
-                DB.currentTable = adapter.getItem(position)!!
+                currentTable = adapter.getItem(position)!!
             }
             requireActivity().runOnUiThread {
-                DB.readAllLists().observe(viewLifecycleOwner) { bookLists ->
+                dataHandler.readAllLists().observe(viewLifecycleOwner) { bookLists ->
                     bookLists.forEach {
                         if (bookLists.indexOf(it) > 0)
                             adapter.add(it.name)
@@ -85,8 +88,8 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
                 }
                 v.bookLists.setAdapter(adapter)
                 // Set item in dropdown
-                v.bookLists.setText(DB.currentTable, false)
-                v.bookLists.listSelection = adapter.getPosition(DB.currentTable)
+                v.bookLists.setText(currentTable, false)
+                v.bookLists.listSelection = adapter.getPosition(currentTable)
                 v.bookLists.performClick()
                 v.bookLists.performCompletion()
             }
@@ -101,12 +104,12 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
         if (!guaranteeValidInputs(v))
             return
         if (book == null) {   // Write new line to database
-            val newBook = Book(0, titleInput, urlInput, DB.currentTable)
-            DB.addBook(newBook)
+            val newBook = Book(0, titleInput, urlInput, currentTable)
+            dataHandler.addBook(newBook)
             // Add to recyclerView list
         } else {   // Modify database
-            DB.updateBook(
-                Book(book!!.row_id, titleInput, urlInput, DB.currentTable)
+            dataHandler.updateBook(
+                Book(book!!.row_id, titleInput, urlInput, currentTable)
             )
         }
         this.dismiss()

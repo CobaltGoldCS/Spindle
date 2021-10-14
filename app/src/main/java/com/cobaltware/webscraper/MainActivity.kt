@@ -5,9 +5,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
-import com.cobaltware.webscraper.fragments.FragmentConfig
-import com.cobaltware.webscraper.fragments.FragmentMain
-import com.cobaltware.webscraper.fragments.FragmentSettings
+import com.cobaltware.webscraper.screens.configScreen.FragmentConfig
+import com.cobaltware.webscraper.screens.mainScreen.FragmentMain
+import com.cobaltware.webscraper.screens.settingsScreen.FragmentSettings
 import com.cobaltware.webscraper.databinding.ActivityMainBinding
 
 

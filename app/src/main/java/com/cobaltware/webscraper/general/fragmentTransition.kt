@@ -1,4 +1,4 @@
-package com.cobaltware.webscraper.fragments
+package com.cobaltware.webscraper.screens.settingsScreen
 
 import android.content.Context
 import androidx.fragment.app.Fragment

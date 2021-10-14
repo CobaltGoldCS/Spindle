@@ -15,9 +15,6 @@ interface BookDao {
     @Delete
     suspend fun deleteBook(book: Book)
 
-    @Query("SELECT * FROM Books WHERE bookList = :name")
-    fun readAllFromBookList(name: String): LiveData<List<Book>>
-
     @Query("SELECT * FROM Books")
     fun readAllFromBookListSync(): List<Book>
 
@@ -32,23 +29,6 @@ interface BookDao {
 
     @Query("SELECT row_id FROM Books WHERE title = :title AND url = :url")
     fun readIdFromTitleAndUrl(title: String, url: String): Int?
-
-    // Book List stuff
-    @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun addList(list: BookList)
-
-    @Query("UPDATE Lists SET name= :newName WHERE name = :oldName")
-    suspend fun updateList(newName: String, oldName: String)
-
-    @Delete
-    suspend fun deleteList(list: BookList)
-
-    @Query("SELECT * FROM Lists WHERE name = :name")
-    fun readList(name: String): BookList
-
-    @Query("SELECT * FROM Lists")
-    fun readAllLists(): LiveData<List<BookList>>
-
 
 }
 
@@ -71,4 +51,25 @@ interface ConfigDao {
 
     @Query("SELECT * FROM CONFIG WHERE domain = :domain")
     fun readItemFromConfigs(domain: String): List<Config>
+}
+
+@Dao
+interface BookListDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun addList(list: BookList)
+
+    @Query("UPDATE Lists SET name= :newName WHERE name = :oldName")
+    suspend fun updateList(newName: String, oldName: String)
+
+    @Delete
+    suspend fun deleteList(list: BookList)
+
+    @Query("SELECT * FROM Lists WHERE name = :name")
+    fun readList(name: String): BookList
+
+    @Query("SELECT * FROM Lists")
+    fun readAllLists(): LiveData<List<BookList>>
+
+    @Query("SELECT * FROM Books WHERE bookList = :name")
+    fun readAllFromBookList(name: String): LiveData<List<Book>>
 }

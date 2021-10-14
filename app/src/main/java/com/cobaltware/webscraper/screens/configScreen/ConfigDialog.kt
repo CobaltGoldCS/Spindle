@@ -1,15 +1,19 @@
-package com.cobaltware.webscraper.dialogs
+package com.cobaltware.webscraper.screens.configScreen
 
+import android.app.Application
 import android.os.Bundle
 import android.view.*
-import com.cobaltware.webscraper.ReaderApplication.Companion.DB
 import com.cobaltware.webscraper.databinding.MenuConfigBinding
 import com.cobaltware.webscraper.datahandling.Config
+import com.cobaltware.webscraper.datahandling.useCases.ConfigDialogUseCase
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlin.concurrent.thread
 
 class ConfigDialog(private val config: Config?) :
     BottomSheetDialogFragment() {
+
+    private val dataHandler: ConfigDialogUseCase by lazy { ConfigDialogUseCase(requireContext()) }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -24,6 +28,7 @@ class ConfigDialog(private val config: Config?) :
 
         return view.root
     }
+
 
     /**Modifies the given [config] if there is one, or creates a new config and adds it to the database. Also makes sure all fields are valid using [guaranteeAllFields]
      * @see guaranteeAllFields*/
@@ -42,8 +47,8 @@ class ConfigDialog(private val config: Config?) :
         )
 
         when (modify) {
-            true -> DB.updateConfig(insertArg)
-            false -> DB.addConfig(insertArg)
+            true -> dataHandler.updateConfig(insertArg)
+            false -> dataHandler.addConfig(insertArg)
         }
         dismiss()
     }
@@ -52,7 +57,7 @@ class ConfigDialog(private val config: Config?) :
     private fun onDelete() {
         thread {
             if (config != null) {
-                DB.deleteConfig(config)
+                dataHandler.deleteConfig(config)
             }
             dismiss()
         }

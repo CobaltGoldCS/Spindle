@@ -1,13 +1,12 @@
-package com.cobaltware.webscraper.fragments
+package com.cobaltware.webscraper.screens.mainScreen
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
@@ -26,22 +25,23 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import com.cobaltware.webscraper.MainActivity
-import com.cobaltware.webscraper.ReaderApplication.Companion.DB
+import com.cobaltware.webscraper.ReaderApplication.Companion.currentTable
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.BookList
-import com.cobaltware.webscraper.dialogs.ModifyBookDialog
-import com.cobaltware.webscraper.viewcontrollers.*
-import kotlinx.coroutines.coroutineScope
+import com.cobaltware.webscraper.datahandling.useCases.MainUseCase
+import com.cobaltware.webscraper.screens.readScreen.FragmentRead
+import com.cobaltware.webscraper.screens.settingsScreen.fragmentTransition
+import com.cobaltware.webscraper.general.*
 import kotlinx.coroutines.launch
 
 
 class FragmentMain : Fragment() {
+
+    private val mainUseCase by lazy { MainUseCase(requireContext()) }
 
     @ExperimentalAnimationApi
     @ExperimentalMaterialApi
@@ -52,7 +52,7 @@ class FragmentMain : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                var selectedItem by remember { mutableStateOf(DB.currentTable) }
+                var selectedItem by remember { mutableStateOf(currentTable) }
                 // Modify list open items
                 val (modifyListOpen, setModifyListOpen) = remember { mutableStateOf(false) }
                 var modifyListText by remember { mutableStateOf<String?>(selectedItem) }
@@ -63,14 +63,14 @@ class FragmentMain : Fragment() {
                         modifyListText,
                         changeList = {
                             selectedItem = it
-                            DB.currentTable = it
+                            currentTable = it
                             modifyListText = selectedItem
                         },
                         open = modifyListOpen, dismissState = setModifyListOpen
                     )
                     Column {
                         val recyclerState = rememberLazyListState()
-                        LiveDropdown(items = DB.readAllLists) { items ->
+                        LiveDropdown(items = mainUseCase.readAllLists()) { items ->
 
                             var expanded by remember { mutableStateOf(false) }
                             var dropDownSize by remember { mutableStateOf(IntSize(0, 0)) }
@@ -128,7 +128,7 @@ class FragmentMain : Fragment() {
                                                         } else {
                                                             selectedItem = it.name
                                                             modifyListText = selectedItem
-                                                            DB.currentTable = selectedItem
+                                                            currentTable = selectedItem
                                                             recyclerState.scrollToItem(0)
                                                         }
                                                         expanded = !expanded
@@ -149,7 +149,7 @@ class FragmentMain : Fragment() {
                         Scaffold(
                             content = {
                                 LiveRecycler(
-                                    DB.readAllFromBookList(selectedItem),
+                                    mainUseCase.readAllFromBookList(selectedItem),
                                     recyclerState
                                 ) { list: List<Book> ->
                                     items(list) { book ->
@@ -352,7 +352,7 @@ class FragmentMain : Fragment() {
                                 .fillMaxWidth(.5f),
                             onClick = {
                                 dismissState(false)
-                                DB.deleteList(BookList(bookTitle))
+                                mainUseCase.deleteList(BookList(bookTitle))
                                 changeList("Books")
                             }
                         ) {
@@ -363,7 +363,7 @@ class FragmentMain : Fragment() {
                             modifier = Modifier
                                 .fillMaxWidth(),
                             onClick = {
-                                DB.updateList(text, bookTitle)
+                                mainUseCase.updateList(text, bookTitle)
                                 changeList(text)
                                 dismissState(false)
                             }
@@ -376,7 +376,7 @@ class FragmentMain : Fragment() {
                         modifier = Modifier
                             .padding(bottom = 8.dp)
                             .fillMaxWidth(),
-                        onClick = { dismissState(false); changeList(DB.currentTable) }
+                        onClick = { dismissState(false); changeList(currentTable) }
                     ) {
                         Text("Cancel")
                     }
@@ -397,7 +397,7 @@ class FragmentMain : Fragment() {
         AlertDialog(
             onDismissRequest = {
                 dismissState(false)
-                changeList(DB.currentTable)
+                changeList(currentTable)
             },
             title = {
                 Text(text = "Add a List")
@@ -419,7 +419,7 @@ class FragmentMain : Fragment() {
                             modifier = Modifier
                                 .fillMaxWidth(),
                             onClick = {
-                                DB.addList(BookList(text))
+                                mainUseCase.addList(BookList(text))
                                 changeList(text)
                                 dismissState(false)
                             }
@@ -432,7 +432,7 @@ class FragmentMain : Fragment() {
                         modifier = Modifier
                             .padding(bottom = 8.dp)
                             .fillMaxWidth(),
-                        onClick = { dismissState(false); changeList(DB.currentTable) }
+                        onClick = { dismissState(false); changeList(currentTable) }
                     ) {
                         Text("Cancel")
                     }

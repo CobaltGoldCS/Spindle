@@ -1,4 +1,4 @@
-package com.cobaltware.webscraper.viewcontrollers
+package com.cobaltware.webscraper.screens.readScreen
 
 import android.content.SharedPreferences
 import android.graphics.Color

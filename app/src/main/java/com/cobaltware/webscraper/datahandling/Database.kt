@@ -15,6 +15,7 @@ abstract class BookDatabase : RoomDatabase() {
 
     abstract fun bookDao(): BookDao
     abstract fun configDao(): ConfigDao
+    abstract fun bookListDao(): BookListDao
 
     companion object {
         @Volatile
