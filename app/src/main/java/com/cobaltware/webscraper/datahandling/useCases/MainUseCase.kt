@@ -28,7 +28,13 @@ class MainUseCase(context: Context) : AndroidViewModel(Application()) {
     }
 
     fun updateList(newName: String, oldName: String) =
-        viewModelScope.launch { bookListRepository.updateList(newName, oldName) }
+        viewModelScope.launch {
+            bookListRepository.updateList(newName, oldName)
+            bookListRepository.readAllFromBookListSync(oldName).forEach { book ->
+                val newbook = book.copy(bookList = newName)
+                bookRepository.updateBook(newbook)
+            }
+        }
 
     fun addList(bookList: BookList) =
         viewModelScope.launch { bookListRepository.addList(bookList) }

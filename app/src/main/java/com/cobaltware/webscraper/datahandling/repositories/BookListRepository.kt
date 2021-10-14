@@ -25,4 +25,8 @@ class BookListRepository(private val bookListDao: BookListDao) {
     fun readAllFromBookList(list: String): LiveData<List<Book>> {
         return bookListDao.readAllFromBookList(list)
     }
+
+    fun readAllFromBookListSync(list: String): List<Book> {
+        return bookListDao.readAllFromBookListSync(list)
+    }
 }

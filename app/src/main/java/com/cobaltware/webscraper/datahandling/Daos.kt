@@ -72,4 +72,7 @@ interface BookListDao {
 
     @Query("SELECT * FROM Books WHERE bookList = :name")
     fun readAllFromBookList(name: String): LiveData<List<Book>>
+
+    @Query("SELECT * FROM Books WHERE bookList = :name")
+    fun readAllFromBookListSync(name: String): List<Book>
 }

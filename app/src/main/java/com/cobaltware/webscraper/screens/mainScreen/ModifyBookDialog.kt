@@ -1,7 +1,6 @@
 package com.cobaltware.webscraper.screens.mainScreen
 
 
-import android.app.Application
 import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
@@ -23,10 +22,13 @@ import kotlin.concurrent.thread
 
 class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragment() {
 
-    private val dataHandler: ModifyBookDialogUseCase by lazy { ModifyBookDialogUseCase(requireContext()) }
+    private val dataHandler: ModifyBookDialogUseCase by lazy {
+        ModifyBookDialogUseCase(requireContext())
+    }
 
 
     private var clickListener: () -> Unit = { }
+    private var tempBookList: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,7 +78,7 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
                 )
             }
             v.bookLists.setOnItemClickListener { _, _, position, _ ->
-                currentTable = adapter.getItem(position)!!
+                tempBookList = adapter.getItem(position)!!
             }
             requireActivity().runOnUiThread {
                 dataHandler.readAllLists().observe(viewLifecycleOwner) { bookLists ->
@@ -103,6 +105,7 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
     ) {
         if (!guaranteeValidInputs(v))
             return
+        currentTable = tempBookList
         if (book == null) {   // Write new line to database
             val newBook = Book(0, titleInput, urlInput, currentTable)
             dataHandler.addBook(newBook)
