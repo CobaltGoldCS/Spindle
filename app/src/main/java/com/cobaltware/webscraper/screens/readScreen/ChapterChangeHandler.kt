@@ -3,7 +3,6 @@ package com.cobaltware.webscraper.screens.readScreen
 import com.cobaltware.webscraper.datahandling.Response
 import kotlinx.coroutines.*
 import java.util.concurrent.CompletableFuture
-import kotlin.coroutines.CoroutineContext
 
 
 /** Handler for handling page changing logistics
@@ -11,12 +10,18 @@ import kotlin.coroutines.CoroutineContext
  */
 class ChapterChangeHandler(private val readFragment: FragmentRead) {
     private lateinit var loadedData: CompletableFuture<Response>
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private var url: String = ""
 
     /** Preloads the url asynchronously
      *  @param url The url to preload*/
     fun prepPageChange(url: String) {
-        loadedData = CompletableFuture.supplyAsync { readFragment.getUrlInfo(url) }
+        this.url = url
+        var tries = 3
+        // Retries the operation if it fails twice
+        do {
+            loadedData = CompletableFuture.supplyAsync { readFragment.getUrlInfo(url) }
+            tries--
+        } while (tries > 0 && completedAndFailed())
     }
 
     /** Handles updating the UI of the fragment from the preloaded [loadedData] defined in [prepPageChange]*/
@@ -30,5 +35,8 @@ class ChapterChangeHandler(private val readFragment: FragmentRead) {
         val (title, content, prevUrl, nextUrl, current) = (data as Response.Success).data
         runBlocking { readFragment.updateUi(title!!, content!!, prevUrl, nextUrl, current) }
     }
+
+    /**Utility function that returns true if the get data operation completed and failed**/
+    private fun completedAndFailed() = loadedData.isDone && loadedData.get() is Response.Failure
 
 }
