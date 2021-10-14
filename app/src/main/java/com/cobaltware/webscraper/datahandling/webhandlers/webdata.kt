@@ -20,12 +20,12 @@ fun webdata(
         .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0")
         .execute()
 
-    // Throw NetworkError if connection was not satisfied
+    // Fail if nothing is found at location
     if (connection.statusCode() != 200)
         return Response.Failure("Connection failed; Error ${connection.statusCode()}")
 
     val document = connection.parse()
-    if (customSyntaxAnalyzer(document, contentPath) != null) {
+    if (isCssPath(document, contentPath)) {
         return Response.Success(csspathReader(document, contentPath, prevPath, nextPath))
     }
     return Response.Failure("This domain / url is not properly supported in the configs; or it may not exist anymore")

@@ -1,7 +1,6 @@
 package com.cobaltware.webscraper.datahandling.webhandlers
 
 import android.util.Log
-import org.jsoup.Connection
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.util.*
@@ -72,17 +71,22 @@ fun processElementIntoUrl(currentUrl: String?, element: Any?): String? {
  * If the syntax is not found, it will return the normal Element type
  */
 fun customSyntaxAnalyzer(document: Document, cssPath: String): Any? {
-    val split = cssPath.split(" ")
-    if (cssPath.trim().startsWith("$")) {
-        val pathOnly = split.drop(1).joinToString(" ")
-        val element = document.select(pathOnly).firstOrNull()
-        Log.d("All Attributes", element?.attributes().toString())
+    if (!cssPath.trim().startsWith("$"))
+        return document.select(cssPath).firstOrNull()
 
-        val attrSelector = split[0].substring(1) // Takes away '$'
+    // Custom syntax analyzer
+    val split = cssPath.trim().split(" ")
 
-        return if (attrSelector.lowercase(Locale.ROOT) == "text") element?.text() else element?.attr(
-            attrSelector
-        )
-    }
-    return document.select(cssPath).firstOrNull()
+    val pathOnly = split.drop(1).joinToString(" ")
+    val element = document.select(pathOnly).firstOrNull()
+
+    Log.d("All Attributes", element?.attributes().toString())
+
+    val attrSelector = split[0].drop(1) // Takes away '$'
+
+    return if (attrSelector.lowercase(Locale.ROOT) == "text") element?.text() else element?.attr(
+        attrSelector
+    )
 }
+
+fun isCssPath(doc: Document, cssPath: String) = customSyntaxAnalyzer(doc, cssPath) != null

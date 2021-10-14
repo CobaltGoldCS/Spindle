@@ -62,18 +62,9 @@ class FragmentRead(private var book: Book) : Fragment() {
             vibrate(100)
             Log.i("data", "Obtaining data")
             runBlocking {
-                val data: Response = getUrlInfo(book.url)
-                if (data is Response.Success) {
-                    updateUi(
-                        data.data[0]!!,
-                        data.data[1]!!,
-                        data.data[2],
-                        data.data[3],
-                        data.data[4]
-                    )
-                } else {
-                    quit((data as Response.Failure).failureMessage)
-                }
+                // The handler used here does not matter, this is just for the initial data obtainment
+                prevHandler.prepPageChange(book.url)
+                prevHandler.changePage()
             }
             vibrate(150)
         }
@@ -148,10 +139,10 @@ class FragmentRead(private var book: Book) : Fragment() {
     fun getUrlInfo(url: String): Response {
         // Integration with Config table and Configurations
         val domain = url.split("/")[2].replace("www.", "")
-        val data = dataHandler.readItemFromConfigs(domain)
-        return if (data != null) {
+        val config = dataHandler.readItemFromConfigs(domain)
+        return if (config != null) {
             // Prefers user inputted configs
-            readBookFromConfig(url, data)
+            readBookFromConfig(url, config)
         } else readBookWithPython(url)
     }
 
@@ -190,6 +181,7 @@ class FragmentRead(private var book: Book) : Fragment() {
                         (millis.toLong(), VibrationEffect.DEFAULT_AMPLITUDE)
                 )
         } catch (e: Exception) {
+            // This just makes sure the vibration utility doesn't inadvertently break the app
         }
     }
 
