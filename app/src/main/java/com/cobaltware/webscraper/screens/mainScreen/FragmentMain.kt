@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -28,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.fragment.app.Fragment
 import com.cobaltware.webscraper.ReaderApplication.Companion.currentTable
 import com.cobaltware.webscraper.datahandling.Book
@@ -113,7 +116,7 @@ class FragmentMain : Fragment() {
                                         expanded = expanded,
                                         onDismissRequest = { expanded = !expanded },
                                         modifier = Modifier
-                                            .width(with(LocalDensity.current) { dropDownSize.width.toDp() })
+                                            .width(with(LocalDensity.current) { dropDownSize.width.toDp() }),
                                     ) {
                                         val coroutine = rememberCoroutineScope()
                                         items.forEach {
@@ -248,7 +251,6 @@ class FragmentMain : Fragment() {
         )
     }
 
-    @SuppressLint("ModifierParameter")
     @ExperimentalMaterialApi
     @Composable
     fun BookItem(
@@ -261,10 +263,8 @@ class FragmentMain : Fragment() {
             modifier = Modifier
                 .padding(5.dp)
                 .clickable { textClickHandler.invoke() },
-            elevation = 10.dp,
+            elevation = if (!isSystemInDarkTheme()) 10.dp else 2.dp,
             shape = RectangleShape,
-            // This color is hardcoded because of a weird bug where android lightens surface color
-            backgroundColor = Color(0xff24282D),
         ) {
             Column(Modifier.fillMaxSize()) {
                 Text(

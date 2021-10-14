@@ -92,7 +92,7 @@ object WebscraperThemeColors {
         onPrimary = platinum,
         background = Color(0xff1e2127),
         onBackground = platinum,
-        surface = Color(0xff24282E),
+        surface = Color(0xff1e2127),
         secondary = darkSecond,
         secondaryVariant = Color(0xFFFFE66D),
         onSecondary = platinum,

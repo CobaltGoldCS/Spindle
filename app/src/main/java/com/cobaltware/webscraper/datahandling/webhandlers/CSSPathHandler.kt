@@ -71,6 +71,7 @@ fun processElementIntoUrl(currentUrl: String?, element: Any?): String? {
  * If the syntax is not found, it will return the normal Element type
  */
 fun customSyntaxAnalyzer(document: Document, cssPath: String): Any? {
+    // Handle normal csspath syntax
     if (!cssPath.trim().startsWith("$"))
         return document.select(cssPath).firstOrNull()
 
@@ -84,9 +85,8 @@ fun customSyntaxAnalyzer(document: Document, cssPath: String): Any? {
 
     val attrSelector = split[0].drop(1) // Takes away '$'
 
-    return if (attrSelector.lowercase(Locale.ROOT) == "text") element?.text() else element?.attr(
-        attrSelector
-    )
+    return if (attrSelector.lowercase(Locale.ROOT) == "text") element?.text()
+    else element?.attr(attrSelector)
 }
 
 fun isCssPath(doc: Document, cssPath: String) = customSyntaxAnalyzer(doc, cssPath) != null

@@ -24,6 +24,7 @@ fun webdata(
     if (connection.statusCode() != 200)
         return Response.Failure("Connection failed; Error ${connection.statusCode()}")
 
+    // Put any syntax analyzers down here
     val document = connection.parse()
     if (isCssPath(document, contentPath)) {
         return Response.Success(csspathReader(document, contentPath, prevPath, nextPath))
