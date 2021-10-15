@@ -82,8 +82,8 @@ fun HidingFAB(visibility: Boolean, modifier: Modifier = Modifier, onClick: () ->
 }
 
 object WebscraperThemeColors {
-    val darkSecond = Color(0xFFFB3640)
-    val platinum = Color(0xFFE2E2E2)
+    private val darkSecond = Color(0xFFFB3640)
+    private val platinum = Color(0xFFE2E2E2)
 
     @SuppressLint("ConflictingOnColor")
     val dark = darkColors(
