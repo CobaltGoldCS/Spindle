@@ -30,7 +30,7 @@ import com.cobaltware.webscraper.general.LiveDropdown
 import com.cobaltware.webscraper.general.LiveRecycler
 import com.cobaltware.webscraper.general.WebscraperTheme
 import com.cobaltware.webscraper.screens.readScreen.FragmentRead
-import com.cobaltware.webscraper.screens.settingsScreen.fragmentTransition
+import com.cobaltware.webscraper.general.fragmentTransition
 import kotlinx.coroutines.launch
 
 

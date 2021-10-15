@@ -22,7 +22,7 @@ import com.cobaltware.webscraper.datahandling.Config
 import com.cobaltware.webscraper.datahandling.Response
 import com.cobaltware.webscraper.datahandling.useCases.ReadUseCase
 import com.cobaltware.webscraper.datahandling.webhandlers.webdata
-import com.cobaltware.webscraper.screens.settingsScreen.fragmentTransition
+import com.cobaltware.webscraper.general.fragmentTransition
 import com.cobaltware.webscraper.screens.mainScreen.FragmentMain
 import kotlinx.coroutines.*
 import kotlin.concurrent.thread

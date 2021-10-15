@@ -15,7 +15,7 @@ import com.cobaltware.webscraper.ReaderApplication.Companion.currentTable
 import com.cobaltware.webscraper.databinding.MenuAddBookBinding
 import com.cobaltware.webscraper.datahandling.Book
 import com.cobaltware.webscraper.datahandling.useCases.ModifyBookDialogUseCase
-import com.cobaltware.webscraper.screens.settingsScreen.fragmentTransition
+import com.cobaltware.webscraper.general.fragmentTransition
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlin.concurrent.thread
 
