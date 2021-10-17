@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [Book::class, Config::class, BookList::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class BookDatabase : RoomDatabase() {

@@ -54,6 +54,7 @@ class FragmentMain : Fragment() {
 
 
                 WebscraperTheme {
+                    // ****
                     ModifyListDialog(
                         modifyListText,
                         changeList = {
@@ -65,6 +66,7 @@ class FragmentMain : Fragment() {
                         dismissState = setModifyListOpen,
                         useCase = mainUseCase
                     )
+                    // **** Dropdown Menu
                     Column {
                         val recyclerState = rememberLazyListState()
                         LiveDropdown(items = mainUseCase.readAllLists()) { items ->
@@ -83,14 +85,14 @@ class FragmentMain : Fragment() {
                                         labelText = "Book Lists",
                                         expanded = expanded,
                                         modifier = Modifier
-                                            .fillMaxWidth(if (items.indexOf(BookList(selectedItem)) > 1) .85f else 1f)
+                                            .fillMaxWidth(if (items.indexOf(BookList(selectedItem)) != 0) .85f else 1f)
                                             .padding(horizontal = 5.dp)
                                             // Workaround to get exact height and width of dropdown at runtime
                                             .onSizeChanged { dropDownSize = it }
                                             .clickable { expanded = !expanded },
                                     )
 
-                                    if (items.indexOf(BookList(selectedItem)) > 1)
+                                    if (items.indexOf(BookList(selectedItem)) != 0)
                                         OutlinedButton(
                                             onClick = { setModifyListOpen(true) },
                                             modifier = Modifier
@@ -115,21 +117,31 @@ class FragmentMain : Fragment() {
                                             .width(with(LocalDensity.current) { dropDownSize.width.toDp() }),
                                     ) {
                                         val coroutine = rememberCoroutineScope()
+                                        // 'Add a BookList' Item
+                                        DropdownMenuItem(
+                                            onClick = {
+                                                coroutine.launch {
+                                                    // This opens the add book list menu
+                                                    modifyListText = null
+                                                    setModifyListOpen(true)
+                                                    expanded = !expanded
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 5.dp)
+                                        ) {
+                                            DropdownItem(BookList("Add a BookList"), selectedItem)
+                                        }
+                                        // All other items
                                         items.forEach {
                                             DropdownMenuItem(
                                                 onClick = {
-                                                    // Handle On Click when dropdown item is pressed
                                                     coroutine.launch {
-                                                        if (items.indexOf(it) == 0) {
-                                                            // This opens the add book list menu
-                                                            modifyListText = null
-                                                            setModifyListOpen(true)
-                                                        } else {
-                                                            selectedItem = it.name
-                                                            modifyListText = selectedItem
-                                                            currentTable = selectedItem
-                                                            recyclerState.scrollToItem(0)
-                                                        }
+                                                        selectedItem = it.name
+                                                        modifyListText = selectedItem
+                                                        currentTable = selectedItem
+                                                        recyclerState.scrollToItem(0)
                                                         expanded = !expanded
                                                     }
                                                 },

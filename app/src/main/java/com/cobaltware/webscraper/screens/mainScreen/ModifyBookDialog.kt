@@ -82,10 +82,7 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
             }
             requireActivity().runOnUiThread {
                 dataHandler.readAllLists().observe(viewLifecycleOwner) { bookLists ->
-                    bookLists.forEach {
-                        if (bookLists.indexOf(it) > 0)
-                            adapter.add(it.name)
-                    }
+                    bookLists.forEach { adapter.add(it.toString()) }
                     adapter.notifyDataSetChanged()
                 }
                 v.bookLists.setAdapter(adapter)

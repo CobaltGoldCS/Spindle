@@ -1,5 +1,6 @@
 package com.cobaltware.webscraper.screens.mainScreen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -16,11 +17,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cobaltware.webscraper.ReaderApplication
+import com.cobaltware.webscraper.ReaderApplication.Companion.currentTable
 import com.cobaltware.webscraper.datahandling.BookList
 import com.cobaltware.webscraper.datahandling.useCases.MainUseCase
 import com.cobaltware.webscraper.general.WebscraperTheme
-import com.cobaltware.webscraper.ReaderApplication.Companion.currentTable
 
 /**Represents a dropdown item in the ui**/
 @Composable
@@ -137,6 +137,7 @@ fun ModifyListDialog(
 }
 
 /** This should not be called outside of ModifyListDialog*/
+@SuppressLint("ComposableNaming")
 @Composable
 private fun _ModifyDialogList(
     bookTitle: String,
@@ -198,7 +199,7 @@ private fun _ModifyDialogList(
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                         .fillMaxWidth(),
-                    onClick = { dismissState(false); changeList(ReaderApplication.currentTable) }
+                    onClick = { dismissState(false); changeList(currentTable) }
                 ) {
                     Text("Cancel")
                 }
@@ -208,6 +209,7 @@ private fun _ModifyDialogList(
 }
 
 /** This should not be called outside of ModifyListDialog */
+@SuppressLint("ComposableNaming")
 @Composable
 private fun _AddDialogList(
     dismissState: (Boolean) -> Unit,
