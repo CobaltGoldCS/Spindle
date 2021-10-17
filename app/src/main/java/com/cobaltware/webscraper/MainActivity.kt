@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         if (!Python.isStarted()) Python.start(AndroidPlatform(this))
         setContentView(view.root)
         setNavTransitions()
-        activityFragmentSwitch(FragmentMain())
+        activityFragmentSwitch(main)
     }
 
     override fun onBackPressed() {

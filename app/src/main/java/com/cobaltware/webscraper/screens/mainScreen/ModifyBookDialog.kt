@@ -28,7 +28,7 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
 
 
     private var clickListener: () -> Unit = { }
-    private var tempBookList: String = ""
+    private var tempBookList: String = currentTable
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -112,7 +112,7 @@ class ModifyBookDialog(private var book: Book? = null) : BottomSheetDialogFragme
             // Add to recyclerView list
         } else {   // Modify database
             dataHandler.updateBook(
-                Book(book!!.row_id, titleInput, urlInput, currentTable)
+                book!!.copy(title = titleInput, url = urlInput, bookList = currentTable)
             )
         }
         this.dismiss()
