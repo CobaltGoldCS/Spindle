@@ -4,41 +4,148 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MenuOpen
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LiveData
 import com.cobaltware.webscraper.ReaderApplication.Companion.currentTable
 import com.cobaltware.webscraper.datahandling.BookList
 import com.cobaltware.webscraper.datahandling.useCases.MainUseCase
+import com.cobaltware.webscraper.general.LiveDropdown
 import com.cobaltware.webscraper.general.WebscraperTheme
+import kotlinx.coroutines.launch
+
+
+@Composable
+fun BookListDropdown(
+    data: LiveData<List<BookList>>,
+    selectedItem: String,
+    setSelectedItem: (String) -> Unit,
+    setModifyListOpen: (Boolean) -> Unit,
+    setModifyListText: (String?) -> Unit,
+    recyclerState: LazyListState,
+) {
+    Column {
+        LiveDropdown(items = data) { items ->
+
+            var expanded by remember { mutableStateOf(false) }
+            var dropDownSize by remember { mutableStateOf(IntSize(0, 0)) }
+
+            Column(Modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+
+                    ClickableOutlinedText(
+                        text = selectedItem,
+                        labelText = "Book Lists",
+                        expanded = expanded,
+                        modifier = Modifier
+                            .fillMaxWidth(if (items.indexOf(BookList(selectedItem)) != 0) .85f else 1f)
+                            .padding(horizontal = 5.dp)
+                            // Workaround to get exact height and width of dropdown at runtime
+                            .onSizeChanged { dropDownSize = it }
+                            .clickable { expanded = !expanded },
+                    )
+
+                    if (items.indexOf(BookList(selectedItem)) != 0)
+                        OutlinedButton(
+                            onClick = { setModifyListOpen(true) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp, end = 5.dp)
+                                .height(with(LocalDensity.current) { dropDownSize.height.toDp() - 8.dp })
+                        ) {
+                            Icon(imageVector = Icons.Filled.MenuOpen, null)
+                        }
+                }
+                Spacer(Modifier.height(10.dp))
+                // Dropdown Menu
+                Box(
+                    Modifier
+                        .padding(horizontal = 5.dp)
+                        .fillMaxWidth(), contentAlignment = Alignment.Center
+                ) {
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = !expanded },
+                        modifier = Modifier
+                            .width(with(LocalDensity.current) { dropDownSize.width.toDp() }),
+                    ) {
+                        val coroutine = rememberCoroutineScope()
+
+                        // 'Add a BookList' Item
+                        DropdownItem(BookList("Add a BookList"), selectedItem) {
+                            coroutine.launch {
+                                // This opens the add book list menu
+                                setModifyListText(null)
+                                setModifyListOpen(true)
+                                expanded = !expanded
+                            }
+                        }
+                        // All other items
+                        items.forEach {
+                            DropdownItem(it, selectedItem) {
+                                coroutine.launch {
+                                    setSelectedItem.invoke(it.name)
+                                    setModifyListText(it.name)
+                                    currentTable = it.name
+                                    recyclerState.scrollToItem(0)
+                                    expanded = !expanded
+                                }
+                            }
+                        }
+
+                    }
+                }
+                // Dropdown Menu
+            }
+        }
+    }
+}
 
 /**Represents a dropdown item in the ui**/
 @Composable
 fun DropdownItem(
     item: BookList,
     selectedItem: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    click: () -> Unit
 ) {
     WebscraperTheme {
-        Text(
-            item.toString(),
-            modifier,
-            if (item.toString() == selectedItem) {
-                MaterialTheme.colors.primary
-            } else {
-                MaterialTheme.colors.onPrimary
-            }
-        )
+        DropdownMenuItem(
+            onClick = click,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 5.dp),
+        ) {
+            Text(
+                item.toString(),
+                modifier,
+                if (item.toString() == selectedItem) {
+                    MaterialTheme.colors.primary
+                } else {
+                    MaterialTheme.colors.onPrimary
+                }
+            )
+        }
     }
 }
 
@@ -112,6 +219,15 @@ fun BookItem(
         }
     }
 }
+/**
+ * =============================
+ * =============================
+ * =============================
+ * END OF DROPDOWN RELATED ITEMS
+ * =============================
+ * =============================
+ * =============================
+ * **/
 
 /** This is the only Modify List Variant that should be called
  * @param bookTitle The initial name of the book List
