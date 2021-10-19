@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Spindle</string>
+    <string name="book_list">Url - Supports\n kisslightnovels.info, readwebnovels.net,\n boxnovel.com, boxnovel.net (Broken),
+        \n readnovelfull.com, royalroad.com,\n scribblehub.com, fanfiction.net,\n wattpad.com, webnovel.com,\n readlightnovel.org \nlightnovelworld.com cloudflare issues</string>
+    <string name="addbook">Add A Book</string>
+    <string name="add_change_info">Add / Change </string>
+    <string name="placeholder">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Amet nisl purus in mollis nunc sed. Praesent semper feugiat nibh sed pulvinar proin gravida. Arcu dui vivamus arcu felis bibendum ut tristique et egestas. Auctor elit sed vulputate mi sit. Enim lobortis scelerisque fermentum dui faucibus in. Faucibus a pellentesque sit amet. Aenean vel elit scelerisque mauris pellentesque pulvinar pellentesque. Nulla facilisi morbi tempus iaculis urna id. Turpis tincidunt id aliquet risus feugiat in ante. Velit dignissim sodales ut eu sem integer vitae. Tristique senectus et netus et malesuada fames. Aenean sed adipiscing diam donec adipiscing.</string>
+    <!-- Preferences Values -->
+    <integer name="textsize" >22</integer>
+    <bool name="overscroll" >true</bool>
+</resources>

@@ -1,0 +1,21 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.WebScraper" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="android:colorBackground">@color/white</item>
+        <item name="android:textColor">@color/dim_gray</item>
+        <item name="colorPrimary">@color/light_second</item>
+        <item name="colorPrimaryVariant">@color/button_lightVar</item>
+        <item name="colorOnPrimary">@color/dim_gray</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/button_light</item>
+        <item name="colorSecondaryVariant">@color/light_secondVar</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+        <item name="android:windowAnimationStyle">@style/FadeTransition</item>
+        <item name="backgroundColor">@color/white</item>
+    </style>
+
+</resources>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="?attr/backgroundColor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style="@style/Dialog.NoTitle">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+        app:title="Add or Change a Book" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:id="@+id/supportDropdown"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:hint="Reading Lists"
+        app:layout_constraintBottom_toTopOf="@+id/textName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        app:startIconDrawable="@drawable/icon_book"
+        tools:ignore="HardcodedText">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/bookLists"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            tools:text="BOOKS" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <EditText
+        android:id="@+id/textName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="Text"
+        android:ems="10"
+        android:hint="Title of Book"
+        android:inputType="textPersonName"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/supportDropdown"
+        tools:ignore="Autofill, HardcodedText" />
+
+    <EditText
+        android:id="@+id/textUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="Url of a supported website"
+        android:hint="Url of Supported Website"
+        android:inputType="textUri"
+        android:scrollHorizontally="false"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintBottom_toTopOf="@+id/AddButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textName"
+        tools:ignore="Autofill,HardcodedText" />
+
+    <Button android:id="@+id/AddButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/button_Def"
+        android:text="Add Book"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/DelButton"
+        tools:ignore="HardcodedText" />
+
+    <Button android:id="@+id/DelButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/button_Def"
+        android:text="Delete Book"
+        android:textSize="18sp"
+        app:iconPadding="0sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/AddButton"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="HardcodedText" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
