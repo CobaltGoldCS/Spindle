@@ -10,7 +10,7 @@ import com.cobaltware.webscraper.datahandling.repositories.BookRepository
 import com.cobaltware.webscraper.datahandling.repositories.ConfigRepository
 import kotlinx.coroutines.launch
 
-class ReadUseCase(context: Context): AndroidViewModel(Application()) {
+class ReadUseCase(context: Context) : AndroidViewModel(Application()) {
     private val configRepository: ConfigRepository
     private val bookRepository: BookRepository
 

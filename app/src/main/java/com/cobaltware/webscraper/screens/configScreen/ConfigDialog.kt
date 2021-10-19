@@ -1,6 +1,5 @@
 package com.cobaltware.webscraper.screens.configScreen
 
-import android.app.Application
 import android.os.Bundle
 import android.view.*
 import com.cobaltware.webscraper.databinding.MenuConfigBinding
@@ -56,9 +55,8 @@ class ConfigDialog(private val config: Config?) :
     /**Deletes the current [config], or dismisses if there is nothing to delete*/
     private fun onDelete() {
         thread {
-            if (config != null) {
+            if (config != null)
                 dataHandler.deleteConfig(config)
-            }
             dismiss()
         }
     }
@@ -68,6 +66,7 @@ class ConfigDialog(private val config: Config?) :
      * @param v The view used to reference the text input boxes*/
     private fun setAllTexts(v: MenuConfigBinding) {
         if (config != null) {
+
             v.domainUrlInput.setText(config.domain)
             v.nextButtonXpathInput.setText(config.nextXPath)
             v.previousButtonXpathInput.setText(config.prevXPath)

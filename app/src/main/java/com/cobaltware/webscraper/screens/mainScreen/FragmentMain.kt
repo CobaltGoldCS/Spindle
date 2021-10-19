@@ -4,12 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.FabPosition
+import androidx.compose.material.Scaffold
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
@@ -20,16 +23,14 @@ import com.cobaltware.webscraper.datahandling.useCases.MainUseCase
 import com.cobaltware.webscraper.general.HidingFAB
 import com.cobaltware.webscraper.general.LiveRecycler
 import com.cobaltware.webscraper.general.WebscraperTheme
-import com.cobaltware.webscraper.screens.readScreen.FragmentRead
 import com.cobaltware.webscraper.general.fragmentTransition
+import com.cobaltware.webscraper.screens.readScreen.FragmentRead
 
 
 class FragmentMain : Fragment() {
 
     private val mainUseCase by lazy { MainUseCase(requireContext()) }
 
-    @ExperimentalAnimationApi
-    @ExperimentalMaterialApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

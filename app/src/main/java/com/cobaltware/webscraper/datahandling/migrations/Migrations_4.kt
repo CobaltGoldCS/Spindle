@@ -5,8 +5,6 @@ import android.util.Log
 import androidx.room.OnConflictStrategy
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.cobaltware.webscraper.datahandling.isFieldExist
-import com.cobaltware.webscraper.datahandling.moveItemsToOtherTable
 
 val MIGRATION_3_4 = object : Migration(3, 4) {
     override fun migrate(database: SupportSQLiteDatabase) {
@@ -75,7 +73,9 @@ val MIGRATION_1_4 = object : Migration(1, 4) {
         database.execSQL("ALTER TABLE `newBooksHash` RENAME TO `Books`")
 
         // Update CONFIG
-        database.execSQL("CREATE TABLE `new_CONFIGS` (row_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, domain TEXT NOT NULL, mainXPath TEXT NOT NULL, prevXPath TEXT NOT NULL, nextXPath TEXT NOT NULL)")
+        database.execSQL(
+            "CREATE TABLE `new_CONFIGS` (row_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, domain TEXT NOT NULL, mainXPath TEXT NOT NULL, prevXPath TEXT NOT NULL, nextXPath TEXT NOT NULL)"
+        )
         moveItemsToOtherTable(
             database,
             "CONFIG",

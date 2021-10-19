@@ -1,14 +1,11 @@
-package com.cobaltware.webscraper.datahandling
+package com.cobaltware.webscraper.datahandling.migrations
 
 import android.content.ContentValues
 import android.util.Log
 import androidx.room.OnConflictStrategy
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.cobaltware.webscraper.datahandling.migrations.MIGRATION_1_3
-import com.cobaltware.webscraper.datahandling.migrations.MIGRATION_1_4
-import com.cobaltware.webscraper.datahandling.migrations.MIGRATION_2_3
-import com.cobaltware.webscraper.datahandling.migrations.MIGRATION_3_4
+
 
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(database: SupportSQLiteDatabase) {
@@ -86,9 +83,16 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
     }
 }
 
-/** Add migrations to this array if you want them to be implemented into the database **/
-val migrations: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_1_3, MIGRATION_2_3, MIGRATION_1_4, MIGRATION_3_4)
 
+/** Add migrations to this array if you want them to be implemented into the database **/
+val migrations: Array<Migration> =
+    arrayOf(
+        MIGRATION_1_2,
+        MIGRATION_1_3,
+        MIGRATION_2_3,
+        MIGRATION_1_4,
+        MIGRATION_3_4
+    )
 
 fun moveItemsToOtherTable(
     database: SupportSQLiteDatabase,

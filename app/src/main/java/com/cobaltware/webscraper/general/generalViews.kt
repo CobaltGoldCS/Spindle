@@ -59,7 +59,7 @@ fun <T> ThemedDropdown(items: List<T>, content: @Composable (List<T>) -> Unit) {
     content.invoke(items)
 }
 
-@ExperimentalAnimationApi
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun HidingFAB(visibility: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
     AnimatedVisibility(

@@ -34,9 +34,6 @@ class FragmentRead(private var book: Book) : Fragment() {
 
     private val dataHandler: ReadUseCase by lazy { ReadUseCase(requireContext()) }
 
-    @ObsoleteCoroutinesApi
-    private val coroutineContext = CoroutineScope(newSingleThreadContext("networkQuery"))
-
     private val nextHandler = ChapterChangeHandler(this)
     private val prevHandler = ChapterChangeHandler(this)
 

@@ -16,7 +16,7 @@ class BookRepository(private val bookDao: BookDao) {
         bookDao.deleteBook(book)
     }
 
-    suspend fun deleteFromBookList(name: String){
+    suspend fun deleteFromBookList(name: String) {
         bookDao.deleteFromBookList(name)
     }
 

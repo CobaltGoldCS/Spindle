@@ -22,7 +22,7 @@ interface BookDao {
     fun fromBookListSync(name: String): List<Book>
 
     @Query("DELETE FROM Books WHERE bookList = :name")
-    fun deleteFromBookList(name: String)
+    suspend fun deleteFromBookList(name: String)
 
     @Query("SELECT * FROM Books WHERE row_id = :row")
     fun readItemFromBooks(row: Int): LiveData<Book>

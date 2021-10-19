@@ -5,8 +5,6 @@ import android.util.Log
 import androidx.room.OnConflictStrategy
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.cobaltware.webscraper.datahandling.isFieldExist
-import com.cobaltware.webscraper.datahandling.moveItemsToOtherTable
 
 val MIGRATION_2_3 = object : Migration(2, 3) {
     override fun migrate(database: SupportSQLiteDatabase) {

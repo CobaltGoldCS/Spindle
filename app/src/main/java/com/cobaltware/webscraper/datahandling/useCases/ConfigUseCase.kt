@@ -1,16 +1,16 @@
 package com.cobaltware.webscraper.datahandling.useCases
 
-import android.app.Application
 import android.content.Context
 import androidx.lifecycle.LiveData
-import com.cobaltware.webscraper.datahandling.*
+import com.cobaltware.webscraper.datahandling.BookDatabase
+import com.cobaltware.webscraper.datahandling.Config
 import com.cobaltware.webscraper.datahandling.repositories.ConfigRepository
 
 class ConfigUseCase(context: Context) {
     private val repository: ConfigRepository
     val readAllConfigs: LiveData<List<Config>>
 
-    init{
+    init {
         val database = BookDatabase.getDatabase(context)
 
         repository = ConfigRepository(database.configDao())
