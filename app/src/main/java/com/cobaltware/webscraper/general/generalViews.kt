@@ -102,12 +102,14 @@ object WebscraperThemeColors {
 
     private val dimGray = Color(0xFF222222)
     private val secondVar = Color(0xFFE94957)
+
+    @SuppressLint("ConflictingOnColor")
     val light = lightColors(
         primary = Color(0xFF79ADDC),
         primaryVariant = Color(0xFFCD700A),
         onPrimary = dimGray,
         background = Color.White,
-        surface = platinum,
+        surface = Color.White,
         secondary = Color(0xFFEE901A),
         secondaryVariant = secondVar,
         onSecondary = Color.White,

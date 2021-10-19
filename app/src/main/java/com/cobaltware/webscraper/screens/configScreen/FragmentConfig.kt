@@ -17,6 +17,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,38 +50,35 @@ class FragmentConfig : Fragment() {
             setContent {
                 WebscraperTheme {
                     val recyclerState = rememberLazyListState()
-                    Column(Modifier.fillMaxSize()) {
-                        Text(
-                            text = "Add or Change Configurations",
-                            style = MaterialTheme.typography.h6,
-                            color = MaterialTheme.colors.onPrimary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.CenterHorizontally)
-                                .padding(horizontal = 5.dp, vertical = 2.dp),
-                        )
-                        Spacer(Modifier.padding(vertical = 5.dp))
-                        Scaffold(
-                            floatingActionButtonPosition = FabPosition.Center,
-                            content = {
-                                LiveRecycler(
-                                    dataHandler.readAllConfigs,
-                                    recyclerState
-                                ) { list: List<Config> ->
-                                    items(items = list) { item -> ConfigItem(item = item) }
-                                }
-                            },
-
-                            floatingActionButton = {
-                                HidingFAB(
-                                    visibility = recyclerState.firstVisibleItemIndex == 0,
-                                    onClick = { addOrChangeConfigDialog(null) })
+                    Scaffold(
+                        floatingActionButtonPosition = FabPosition.Center,
+                        topBar = {
+                            Text(
+                                text = "Add or Change Configurations",
+                                style = MaterialTheme.typography.h6,
+                                color = MaterialTheme.colors.onPrimary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 5.dp, vertical = 2.dp),
+                            )
+                        },
+                        content = {
+                            LiveRecycler(
+                                dataHandler.readAllConfigs,
+                                recyclerState
+                            ) { list: List<Config> ->
+                                items(items = list) { item -> ConfigItem(item = item) }
                             }
+                        },
 
-                        )
-                        // End of Column
-                    }
+                        floatingActionButton = {
+                            HidingFAB(
+                                visibility = recyclerState.firstVisibleItemIndex == 0,
+                                onClick = { addOrChangeConfigDialog(null) })
+                        }
+
+                    )
                 }
                 // End of set content
             }

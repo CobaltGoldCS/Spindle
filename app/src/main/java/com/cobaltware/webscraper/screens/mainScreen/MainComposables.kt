@@ -190,8 +190,9 @@ fun BookItem(
         modifier = Modifier
             .padding(5.dp)
             .clickable { textClickHandler.invoke() },
-        elevation = if (!isSystemInDarkTheme()) 10.dp else 2.dp,
-        shape = RectangleShape,
+        elevation = 2.dp,
+        backgroundColor = MaterialTheme.colors.surface,
+        shape = RoundedCornerShape(5.dp),
     ) {
         Column(Modifier.fillMaxSize()) {
             Text(
@@ -200,7 +201,7 @@ fun BookItem(
                 fontSize = 20.sp,
                 color = MaterialTheme.colors.onPrimary,
             )
-            Divider(color = MaterialTheme.colors.onPrimary.copy(1f, 0.7f, 0.7f, 0.7f))
+            Divider(color = MaterialTheme.colors.onPrimary)
             Button(
                 modifier = Modifier
                     .size(60.dp, 40.dp)
