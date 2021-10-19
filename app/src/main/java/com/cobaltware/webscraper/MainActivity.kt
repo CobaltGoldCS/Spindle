@@ -52,7 +52,6 @@ class MainActivity : AppCompatActivity() {
     /**Switches to another [fragment] with an animation
      * @param fragment The fragment to switch to*/
     private fun activityFragmentSwitch(fragment: Fragment) {
-
         val currentFragment =
             supportFragmentManager.findFragmentByTag("Clicked Fragment")?.let { it::class }
         if (currentFragment == fragment::class)
