@@ -32,7 +32,7 @@ class ChapterChangeHandler(private val readFragment: FragmentRead) {
             readFragment.quit(data.failureMessage)
             return
         }
-        val (title, content, prevUrl, nextUrl, current) = (data as Response.Success).data
+        val (title, content, prevUrl, nextUrl, current) = (data as Response.Success<List<String?>>).data
         runBlocking { readFragment.updateUi(title!!, content!!, prevUrl, nextUrl, current) }
     }
 

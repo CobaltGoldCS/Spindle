@@ -24,7 +24,7 @@ fun csspathReader(
     if (content is Element) {
         try {
             if (content.tagName() == "div")
-                content.children().forEach { text += "\n     " + it.text() }
+                content.children().forEach { text += "\n\n     " + it.text() }
             else
                 text = content.text()
         } catch (e: NullPointerException) {
@@ -57,9 +57,8 @@ fun processElementIntoUrl(currentUrl: String?, element: Any?): String? {
     ) {
         element.absUrl("href")
     } else {
-        element as String?
+        if (element is Element) element.toString() else element as String?
     }
-
     return if (url != currentUrl) url else null
 }
 
