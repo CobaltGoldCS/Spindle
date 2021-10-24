@@ -27,7 +27,7 @@ android {
                 install "requests"
                 install "lxml"
                 install "beautifulsoup4"
-                install "cfscrape"
+                install "cloudscraper"
             }
         }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

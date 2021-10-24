@@ -5,6 +5,7 @@ import org.w3c.dom.Document
 import org.xml.sax.InputSource
 import java.io.StringReader
 import java.net.URL
+import java.util.regex.Pattern
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathExpression
@@ -16,7 +17,7 @@ fun xPathReader(
     text: String,
     contentPath: String,
     prevPath: String,
-    nextPath: String
+    nextPath: String,
 ): Response {
     val doc: Document = DocumentBuilderFactory.newInstance()
         .newDocumentBuilder().parse(InputSource(StringReader(text)))
@@ -43,16 +44,17 @@ fun getValuesFromXPath(factory: XPathFactory, path: String, doc: Document): Stri
     }
 }
 
-fun getUrlFromXPath(url: String, factory: XPathFactory, path: String, doc: Document): String? {
-    var element = getValuesFromXPath(factory, path, doc)
-    if (!path.contains("/@")) {
-        val newPath = if (!path.endsWith("/")) "$path/@href" else "$path@href"
-        try {
-            element = getValuesFromXPath(factory, newPath, doc)
-        } catch (e: XPathExpressionException) {
-            return "INVALID"
-        }
+fun getUrlFromXPath(url: String, factory: XPathFactory, path: String, doc: Document): String {
+    var element: String? = getValuesFromXPath(factory, path, doc)
+    if (!element.isNullOrBlank()) {
+        val urlMatcher =
+            Pattern.compile("((http|https|ftp)://([\\w-\\d]+\\.)+[\\w-\\d]+){0,1}(/[\\w~,;\\-\\./?%&+#=]*)" + ")")
+                .matcher(element)
+        val substring = urlMatcher.group()
+        element = if (!substring.isNullOrEmpty()) substring else "INVALID"
+        if (element == "INVALID") return element
     }
-    val domain = URL(url).host.toString()
-    return if (element?.startsWith("/") == true) domain + element else element
+
+    val baseURL = URL(url)
+    return URL(baseURL, element).toString()
 }

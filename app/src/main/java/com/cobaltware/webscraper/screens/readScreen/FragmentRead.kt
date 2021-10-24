@@ -27,6 +27,7 @@ import com.cobaltware.webscraper.screens.mainScreen.FragmentMain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.net.URL
 import kotlin.concurrent.thread
 
 
@@ -137,7 +138,7 @@ class FragmentRead(private var book: Book) : Fragment() {
      * @return Either an [emptyList] if invalid, or a list in the order [title, content, prevUrl, nextUrl, currentUrl]*/
     fun getUrlInfo(url: String): Response {
         // Integration with Config table and Configurations
-        val domain = url.split("/")[2].replace("www.", "")
+        val domain = URL(url).host
         val config = dataHandler.readItemFromConfigs(domain)
         return if (config != null) {
             // Prefers user inputted configs

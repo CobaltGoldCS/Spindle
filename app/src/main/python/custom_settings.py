@@ -2,7 +2,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 import lxml
-import cfscrape
+import cloudscraper
 
 # Decorators / Support Functions
 def completeUrls(function: callable) -> list:
@@ -41,7 +41,7 @@ def errorHandler(function: callable):
 
 # Use this session for getting data from URLs
 # Its preset to bypass websites that ask for a valid user agent
-SESSION = cfscrape.create_scraper()
+SESSION = cloudscraper.CloudScraper()
 retry   = Retry(connect=3, backoff_factor=0.5)
 adapter = HTTPAdapter(max_retries=retry)
 SESSION.mount('http://', adapter)
@@ -197,6 +197,7 @@ def webnovel(url: str) -> list:
 @ completeUrls
 def fanfnet(url: str) -> list:
     """Function to allow access to fanfiction.net content with a chapter url
+    WARNING: LIKELY WILL NOT WORK DUE TO CLOUDFLARE ISSUES
 
     Args:
         url (str): The url of the target chapter of the story
@@ -225,4 +226,3 @@ def fanfnet(url: str) -> list:
     next_url = next_url["onclick"][14:]  if next_url != None else None
 
     return content, title, prev_url, next_url
-

@@ -99,9 +99,7 @@ def testForCommonTemplates(url : str):
         return lambda website: madara(website, soup)
     elif soup.find(class_ = "entry-content"): 
         # Common (default) tl website template
-        return lambda website: generalWebsite(website, 'entry-content',
-        lambda tag: tag.name == 'a' and "prev" in tag.text.lower(), 
-        lambda tag: tag.name == 'a' and "next" in tag.text.lower(), soup = soup)
+        return lambda website: wordpress(website, soup)
     raise LookupError("No Templates", "No templates or builtin lookup support available for this url")
 
 # Template for Madara
@@ -109,6 +107,12 @@ def madara(url : str, soup) -> list:
     return generalWebsite(url,'text-left',
     lambda tag: tag.get('class') == ['btn', 'prev_page'],
     lambda tag: tag.get('class') == ['btn', 'next_page'], soup = soup)
+
+# Template for Normal Wordpress websites
+def wordpress(url: str, soup) -> list:
+    return generalWebsite(website, 'entry-content',
+            lambda tag: tag.name == 'a' and "prev" in tag.text.lower(),
+            lambda tag: tag.name == 'a' and "next" in tag.text.lower(), soup = soup)
 
 
 @ errorHandler

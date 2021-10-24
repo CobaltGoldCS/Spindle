@@ -20,7 +20,8 @@ fun webdata(
 ): Response {
     return try {
         val connection: Connection.Response = Jsoup.connect(url)
-            .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0")
+            .userAgent(" Mozilla/5.0 (Android 7.0; Mobile; rv:62.0)")
+            .referrer("http://www.google.com")
             .execute()
         analyzeSyntax(connection, url, contentPath, prevPath, nextPath)
     } catch (e: HttpStatusException) {
