@@ -1,5 +1,5 @@
 # Spindle
-An app to simplify web scraping for books
+An app to simplify web scraping for books and other 'written' media
 
 ## Configurations
 Add configurations to the configuration screen to inform the app what to scrape.
