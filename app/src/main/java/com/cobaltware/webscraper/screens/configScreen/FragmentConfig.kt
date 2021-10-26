@@ -4,6 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +22,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.style.TextAlign
@@ -26,6 +34,7 @@ import androidx.fragment.app.Fragment
 import com.cobaltware.webscraper.databinding.FragmentConfigBinding
 import com.cobaltware.webscraper.datahandling.Config
 import com.cobaltware.webscraper.datahandling.useCases.ConfigUseCase
+import com.cobaltware.webscraper.general.AnimationContainer
 import com.cobaltware.webscraper.general.HidingFAB
 import com.cobaltware.webscraper.general.LiveRecycler
 import com.cobaltware.webscraper.general.WebscraperTheme
@@ -38,9 +47,10 @@ import com.cobaltware.webscraper.general.WebscraperTheme
 class FragmentConfig : Fragment() {
     private val dataHandler: ConfigUseCase by lazy { ConfigUseCase(requireContext()) }
 
+    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         // Inflate the layout for this fragment
         val viewer = FragmentConfigBinding.inflate(inflater)
@@ -49,6 +59,11 @@ class FragmentConfig : Fragment() {
             setContent {
                 WebscraperTheme {
                     val recyclerState = rememberLazyListState()
+                    val buttonVisibility by remember {
+                        derivedStateOf {
+                            recyclerState.firstVisibleItemScrollOffset <= 3
+                        }
+                    }
                     Scaffold(
                         floatingActionButtonPosition = FabPosition.Center,
                         topBar = {
@@ -72,9 +87,15 @@ class FragmentConfig : Fragment() {
                         },
 
                         floatingActionButton = {
-                            HidingFAB(
-                                visibility = recyclerState.firstVisibleItemIndex == 0,
-                                onClick = { addOrChangeConfigDialog(null) })
+                            val animations = AnimationContainer(
+                                slideInVertically(),
+                                slideOutVertically(
+                                    animationSpec = TweenSpec(200, easing = FastOutSlowInEasing),
+                                )
+                            )
+                            HidingFAB(visibility = buttonVisibility, animations = animations) {
+                                addOrChangeConfigDialog(null)
+                            }
                         }
 
                     )

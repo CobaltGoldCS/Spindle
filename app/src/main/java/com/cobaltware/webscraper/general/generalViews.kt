@@ -3,9 +3,9 @@ package com.cobaltware.webscraper.general
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -21,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
+
+@OptIn(ExperimentalAnimationApi::class)
+data class AnimationContainer(val enter: EnterTransition, val exit: ExitTransition)
 
 @Composable
 fun <T> LiveRecycler(
@@ -38,7 +41,7 @@ fun <T> LiveRecycler(
 private fun <T> BaseRecycler(
     data: List<T>,
     content: LazyListScope.(List<T>) -> Unit,
-    state: LazyListState
+    state: LazyListState,
 ) {
     LazyColumn(
         state = state,
@@ -64,11 +67,16 @@ fun <T> ThemedDropdown(items: List<T>, content: @Composable (List<T>) -> Unit) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun HidingFAB(visibility: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun HidingFAB(
+    visibility: Boolean,
+    modifier: Modifier = Modifier,
+    animations: AnimationContainer,
+    onClick: () -> Unit,
+) {
     AnimatedVisibility(
         visible = visibility,
-        enter = slideInHorizontally(),
-        exit = slideOutHorizontally()
+        enter = animations.enter,
+        exit = animations.exit
     ) {
         FloatingActionButton(
             onClick = onClick,
