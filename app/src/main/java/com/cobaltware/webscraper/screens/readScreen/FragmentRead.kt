@@ -43,7 +43,7 @@ class FragmentRead(private var book: Book) : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         // Inflate the layout for this fragment
         val view = FragmentReadBinding.inflate(layoutInflater)
@@ -97,12 +97,11 @@ class FragmentRead(private var book: Book) : Fragment() {
      * @param url The url to obtain data from
      * @param data The configuration information for data collection
      * @return A list containing (title, main text content, previous url, next url, current url) */
-    private fun readBookFromConfig(url: String, data: Config): Response {
+    private fun readBookFromConfig(url: String, data: Config): Response<List<String?>> {
         return try {
             // Error handling in case of networking error of some sort
             webdata(url, data.mainXPath, data.prevXPath, data.nextXPath)
         } catch (e: NetworkErrorException) {
-            quit(e.message)
             Response.Failure("Could not get data from url")
         }
     }
@@ -110,7 +109,7 @@ class FragmentRead(private var book: Book) : Fragment() {
     /** Reads a book using "UrlReading" defined in python/webdata.py
      * @param url The url to obtain data from
      * @return A list containing (title, main text content, previous url, next url, current url) */
-    private fun readBookWithPython(url: String): Response {
+    private fun readBookWithPython(url: String): Response<List<String?>> {
         // Set up python stuff, and call UrlReading Class with a Url
         val inst = Python.getInstance()
         val webpack = inst.getModule("webdata")
@@ -136,9 +135,9 @@ class FragmentRead(private var book: Book) : Fragment() {
     /** Returns data required to change pages from a sample Url, using either the configs or python bindings
      * @param url The url to obtain data from
      * @return Either an [emptyList] if invalid, or a list in the order [title, content, prevUrl, nextUrl, currentUrl]*/
-    fun getUrlInfo(url: String): Response {
+    fun getUrlInfo(url: String): Response<List<String?>> {
         // Integration with Config table and Configurations
-        val domain = URL(url).host
+        val domain = URL(url).host.replace("www.", "")
         val config = dataHandler.readItemFromConfigs(domain)
         return if (config != null) {
             // Prefers user inputted configs
@@ -156,7 +155,7 @@ class FragmentRead(private var book: Book) : Fragment() {
         content: String,
         prevUrl: String?,
         nextUrl: String?,
-        current: String?
+        current: String?,
     ) = withContext(Dispatchers.Main) {
         viewController.updateUi(title, content, prevUrl, nextUrl)
 
@@ -190,7 +189,6 @@ class FragmentRead(private var book: Book) : Fragment() {
      * @return Returns to the [FragmentMain] where the book lists are using [fragmentTransition], doesn't return anything*/
     fun quit(error: String? = null) {
         try {
-
             if (error != null) requireActivity().runOnUiThread {
                 Toast.makeText(
                     activity,
@@ -199,8 +197,8 @@ class FragmentRead(private var book: Book) : Fragment() {
                 ).show()
             }
             fragmentTransition(requireContext(), FragmentMain(), View.VISIBLE)
-
         } catch (e: Exception) {
+            // Just ignore the exception because we are going back to the main fragment
         }
     }
 }

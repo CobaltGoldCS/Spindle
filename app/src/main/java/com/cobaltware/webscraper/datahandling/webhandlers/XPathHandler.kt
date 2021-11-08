@@ -18,7 +18,7 @@ fun xPathReader(
     contentPath: String,
     prevPath: String,
     nextPath: String,
-): Response {
+): Response<List<String?>> {
     val doc: Document = DocumentBuilderFactory.newInstance()
         .newDocumentBuilder().parse(InputSource(StringReader(text)))
     val factory = XPathFactory.newInstance()

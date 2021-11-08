@@ -17,7 +17,7 @@ import java.io.IOException
 fun webdata(
     url: String, contentPath: String,
     prevPath: String, nextPath: String
-): Response {
+): Response<List<String?>> {
     return try {
         val connection: Connection.Response = Jsoup.connect(url)
             .userAgent(" Mozilla/5.0 (Android 7.0; Mobile; rv:62.0)")
@@ -34,13 +34,13 @@ fun webdata(
 fun analyzeSyntax(
     connection: Connection.Response, url: String, contentPath: String,
     prevPath: String, nextPath: String
-): Response {
+): Response<List<String?>> {
     val document = connection.parse()
     if (isCssPath(document, contentPath)) {
         return Response.Success(csspathReader(document, contentPath, prevPath, nextPath))
     }
     if (contentPath.startsWith("/"))
-        return Response.Success(xPathReader(url, document.html(), contentPath, prevPath, nextPath))
+        return xPathReader(url, document.html(), contentPath, prevPath, nextPath)
 
     return Response.Failure("This domain / url is not properly supported in the configs")
 }

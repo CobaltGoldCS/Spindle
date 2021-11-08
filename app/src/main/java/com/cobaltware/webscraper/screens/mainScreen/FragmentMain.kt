@@ -13,14 +13,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.FabPosition
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.cobaltware.webscraper.ReaderApplication.Companion.currentTable
 import com.cobaltware.webscraper.datahandling.Book
+import com.cobaltware.webscraper.datahandling.BookList
 import com.cobaltware.webscraper.datahandling.useCases.MainUseCase
 import com.cobaltware.webscraper.general.*
 import com.cobaltware.webscraper.screens.readScreen.FragmentRead
@@ -36,12 +43,24 @@ class FragmentMain : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View = ComposeView(requireContext()).apply {
-        setContent { ListScreen() }
+        setContent {
+            val preference = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            WebscraperTheme {
+                when (preference.getString("list screen", "dropdown")!!) {
+                    Routes.DropdownRoute.route -> {
+                        DropdownScreen()
+                    }
+                    Routes.ListRoute.route -> {
+                        ListsScreen(view = this)
+                    }
+                }
+            }
+        }
     }
 
     @OptIn(ExperimentalAnimationApi::class)
     @Composable
-    private fun ListScreen() = WebscraperTheme {
+    private fun DropdownScreen() = WebscraperTheme {
         var (selectedItem, setSelectedItem) = remember { mutableStateOf(currentTable) }
         // Modify list open items
         val (modifyListOpen, setModifyListOpen) = remember { mutableStateOf(false) }
@@ -108,6 +127,80 @@ class FragmentMain : Fragment() {
             },
         )
     }
+
+
+    @Composable
+    private fun ListsScreen(view: ComposeView) {
+        val (modifyListOpen, setModifyListOpen) = remember { mutableStateOf(false) }
+        var (modifyListText, setModifyListText) = remember {
+            mutableStateOf<String?>("No item selected")
+        }
+        ModifyListDialog(
+            modifyListText,
+            changeList = {
+                currentTable = it
+                modifyListText = it
+            },
+            open = modifyListOpen,
+            dismissState = setModifyListOpen,
+            useCase = mainUseCase
+        )
+        ListScreen("Current Available Lists",
+            content = {
+                LiveRecycler(mainUseCase.readAllLists()) { lists: List<BookList> ->
+                    items(lists) { list ->
+                        ListScreenItem(
+                            text = "Book Lists",
+                            click = { view.setContent { BookScreen(list.name, view) } }
+                        ) {
+                            if (lists.indexOf(list) != 0)
+                                IconButton(onClick = {
+                                    setModifyListText(list.name)
+                                    setModifyListOpen(true)
+                                }) {
+                                    Icon(Icons.Filled.Menu, "modify the item")
+                                }
+                        }
+                    }
+                }
+            },
+            action = {
+                IconButton(onClick = {
+                    setModifyListText(null)
+                    setModifyListOpen(true)
+                }) {
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = "Add a List")
+                }
+            }
+        )
+    }
+
+    @Composable
+    fun BookScreen(
+        bookList: String,
+        view: ComposeView
+    ) {
+        ListScreen(title = bookList,
+            content = {
+                LiveRecycler(
+                    mainUseCase.readAllFromBookList(bookList),
+                ) { list: List<Book> ->
+                    items(list) { book ->
+                        BookItem(
+                            book.title,
+                            { initReadFragment(book) },
+                            { initAddFragment(book) },
+                        )
+                    }
+                }
+            },
+            action = { initAddFragment(null) },
+            navigation = {
+                view.setContent { ListsScreen(view = view) }
+            }
+        )
+    }
+
 
     private fun initAddFragment(book: Book?): ModifyBookDialog {
         val dialog = ModifyBookDialog(book)

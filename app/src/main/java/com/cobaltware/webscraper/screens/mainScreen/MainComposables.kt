@@ -7,10 +7,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MenuOpen
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -124,7 +121,7 @@ fun DropdownItem(
     item: BookList,
     selectedItem: String,
     modifier: Modifier = Modifier,
-    click: () -> Unit
+    click: () -> Unit,
 ) {
     WebscraperTheme {
         DropdownMenuItem(
@@ -152,7 +149,7 @@ fun ClickableOutlinedText(
     text: String,
     labelText: String,
     expanded: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     OutlinedTextField(value = text,
         onValueChange = {},
@@ -217,6 +214,7 @@ fun BookItem(
         }
     }
 }
+
 /**
  * =============================
  * =============================
@@ -226,6 +224,48 @@ fun BookItem(
  * =============================
  * =============================
  * **/
+
+
+@Composable
+fun ListScreen(
+    title: String,
+    content: @Composable (PaddingValues) -> Unit,
+    action: @Composable RowScope.() -> Unit,
+    navigation: (() -> Unit)? = null
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(title)
+                },
+                navigationIcon = {
+                    if (navigation != null)
+                        IconButton(onClick = navigation) {
+                            Icon(Icons.Filled.ArrowBack, "go back")
+                        }
+                },
+                actions = action
+            )
+        },
+        content = content
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ListScreenItem(text: String, click: () -> Unit, iconClick: @Composable () -> Unit) {
+    ListItem(
+        modifier = Modifier.clickable { click.invoke() },
+        text = {
+            Text(text)
+        },
+        trailing = {
+            iconClick.invoke()
+        }
+    )
+}
+
 
 /** This is the only Modify List Variant that should be called
  * @param bookTitle The initial name of the book List
@@ -257,7 +297,7 @@ private fun _ModifyDialogList(
     bookTitle: String,
     dismissState: (Boolean) -> Unit,
     changeList: (String) -> Unit,
-    useCase: MainUseCase
+    useCase: MainUseCase,
 ) {
     /** Actual text that gets updated */
     var text by remember { mutableStateOf(bookTitle) }
@@ -328,7 +368,7 @@ private fun _ModifyDialogList(
 private fun _AddDialogList(
     dismissState: (Boolean) -> Unit,
     changeList: (String) -> Unit,
-    useCase: MainUseCase
+    useCase: MainUseCase,
 ) {
     /** Actual text that gets updated */
     var text by remember { mutableStateOf("") }

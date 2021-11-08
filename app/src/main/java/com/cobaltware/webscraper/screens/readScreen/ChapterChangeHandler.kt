@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture
  * @param readFragment The readFragment, which this uses the methods from
  */
 class ChapterChangeHandler(private val readFragment: FragmentRead) {
-    private lateinit var loadedData: CompletableFuture<Response>
+    private lateinit var loadedData: CompletableFuture<Response<List<String?>>>
     private var url: String = ""
 
     /** Preloads the url asynchronously
@@ -27,13 +27,15 @@ class ChapterChangeHandler(private val readFragment: FragmentRead) {
     /** Handles updating the UI of the fragment from the preloaded [loadedData] defined in [prepPageChange]*/
     fun changePage() {
         readFragment.vibrate(100)
-        val data = loadedData.get()
-        if (data is Response.Failure) {   // Error Handling in event of url break
-            readFragment.quit(data.failureMessage)
-            return
+        when (val data = loadedData.get()) {
+            is Response.Success<*> -> {
+                val (title, content, prevUrl, nextUrl, current) = data.confirmSuccess().data
+                runBlocking { readFragment.updateUi(title!!, content!!, prevUrl, nextUrl, current) }
+            }
+            is Response.Failure -> {
+                readFragment.quit(data.failureMessage)
+            }
         }
-        val (title, content, prevUrl, nextUrl, current) = (data as Response.Success<List<String?>>).data
-        runBlocking { readFragment.updateUi(title!!, content!!, prevUrl, nextUrl, current) }
     }
 
     /**Utility function that returns true if the get data operation completed and failed**/
