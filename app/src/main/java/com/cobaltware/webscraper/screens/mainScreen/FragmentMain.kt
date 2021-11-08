@@ -46,7 +46,7 @@ class FragmentMain : Fragment() {
         setContent {
             val preference = PreferenceManager.getDefaultSharedPreferences(requireContext())
             WebscraperTheme {
-                when (preference.getString("list screen", "dropdown")!!) {
+                when (preference.getString("list_screen_values", "dropdown")!!) {
                     Routes.DropdownRoute.route -> {
                         DropdownScreen()
                     }
@@ -130,7 +130,7 @@ class FragmentMain : Fragment() {
 
 
     @Composable
-    private fun ListsScreen(view: ComposeView) {
+    private fun ListsScreen(view: ComposeView) = WebscraperTheme {
         val (modifyListOpen, setModifyListOpen) = remember { mutableStateOf(false) }
         var (modifyListText, setModifyListText) = remember {
             mutableStateOf<String?>("No item selected")
@@ -150,7 +150,7 @@ class FragmentMain : Fragment() {
                 LiveRecycler(mainUseCase.readAllLists()) { lists: List<BookList> ->
                     items(lists) { list ->
                         ListScreenItem(
-                            text = "Book Lists",
+                            text = list.name,
                             click = { view.setContent { BookScreen(list.name, view) } }
                         ) {
                             if (lists.indexOf(list) != 0)
@@ -178,7 +178,7 @@ class FragmentMain : Fragment() {
     @Composable
     fun BookScreen(
         bookList: String,
-        view: ComposeView
+        view: ComposeView,
     ) {
         ListScreen(title = bookList,
             content = {
@@ -194,7 +194,13 @@ class FragmentMain : Fragment() {
                     }
                 }
             },
-            action = { initAddFragment(null) },
+            action = {
+                IconButton(onClick = {
+                    initAddFragment(null)
+                }) {
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = "Add a List")
+                }
+            },
             navigation = {
                 view.setContent { ListsScreen(view = view) }
             }

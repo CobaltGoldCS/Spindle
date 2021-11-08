@@ -233,23 +233,25 @@ fun ListScreen(
     action: @Composable RowScope.() -> Unit,
     navigation: (() -> Unit)? = null
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(title)
-                },
-                navigationIcon = {
-                    if (navigation != null)
-                        IconButton(onClick = navigation) {
-                            Icon(Icons.Filled.ArrowBack, "go back")
-                        }
-                },
-                actions = action
-            )
-        },
-        content = content
-    )
+    WebscraperTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(title)
+                    },
+                    navigationIcon = {
+                        if (navigation != null)
+                            IconButton(onClick = navigation) {
+                                Icon(Icons.Filled.ArrowBack, "go back")
+                            }
+                    },
+                    actions = action
+                )
+            },
+            content = content
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)

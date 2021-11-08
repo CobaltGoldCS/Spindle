@@ -9,4 +9,13 @@
         <item>reply</item>
         <item>reply_all</item>
     </string-array>
+
+    <array name="list_screen_titles">
+        <item>List</item>
+        <item>Dropdown</item>
+    </array>
+    <array name="list_screen_values">
+        <item>list</item>
+        <item>dropdown</item>
+    </array>
 </resources>

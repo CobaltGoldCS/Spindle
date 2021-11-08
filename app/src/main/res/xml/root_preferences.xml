@@ -1,6 +1,14 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <PreferenceCategory app:title="Main Screen">
+        <ListPreference
+            android:key="list_screen_values"
+            android:title="List Screen"
+            android:summary="Choose how you want to view books"
+            android:entries="@array/list_screen_titles"
+            app:entryValues="@array/list_screen_values"
+            android:dialogTitle="Choose how you want to view books" />
+    </PreferenceCategory>
     <PreferenceCategory app:title="Reader">
         <EditTextPreference
             app:key="textsize"
