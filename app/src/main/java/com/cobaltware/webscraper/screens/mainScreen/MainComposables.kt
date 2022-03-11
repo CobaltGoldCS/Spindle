@@ -196,19 +196,16 @@ fun BookItem(
                 color = MaterialTheme.colors.onPrimary,
             )
             Divider(color = MaterialTheme.colors.onPrimary)
-            Button(
-                modifier = Modifier
-                    .size(60.dp, 40.dp)
-                    .align(Alignment.End)
-                    .padding(5.dp)
-                    .clip(RoundedCornerShape(10.dp)),
-                onClick = { buttonClickHandler.invoke() }
-            ) {
+            IconButton(modifier = Modifier
+                .size(60.dp, 40.dp)
+                .align(Alignment.End)
+                .padding(5.dp)
+                .clip(RoundedCornerShape(10.dp)),
+                onClick = { buttonClickHandler.invoke() }) {
                 Icon(
-                    imageVector = Icons.Filled.Menu,
+                    imageVector = Icons.Filled.MoreHoriz,
                     "Modify the book",
                     tint = MaterialTheme.colors.onPrimary,
-                    modifier = Modifier.fillMaxSize(0.9f)
                 )
             }
         }
@@ -231,7 +228,7 @@ fun ListScreen(
     title: String,
     content: @Composable (PaddingValues) -> Unit,
     action: @Composable RowScope.() -> Unit,
-    navigation: (() -> Unit)? = null
+    navigation: (() -> Unit)? = null,
 ) {
     WebscraperTheme {
         Scaffold(
@@ -246,7 +243,8 @@ fun ListScreen(
                                 Icon(Icons.Filled.ArrowBack, "go back")
                             }
                     },
-                    actions = action
+                    actions = action,
+                    modifier = Modifier.padding(bottom = 5.dp)
                 )
             },
             content = content
@@ -257,15 +255,22 @@ fun ListScreen(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ListScreenItem(text: String, click: () -> Unit, iconClick: @Composable () -> Unit) {
-    ListItem(
-        modifier = Modifier.clickable { click.invoke() },
-        text = {
-            Text(text)
-        },
-        trailing = {
-            iconClick.invoke()
-        }
-    )
+    Card(
+        modifier = Modifier
+            .padding(5.dp),
+        elevation = 2.dp,
+        backgroundColor = MaterialTheme.colors.surface,
+    ) {
+        ListItem(
+            modifier = Modifier.clickable { click.invoke() },
+            text = {
+                Text(text)
+            },
+            trailing = {
+                iconClick.invoke()
+            }
+        )
+    }
 }
 
 

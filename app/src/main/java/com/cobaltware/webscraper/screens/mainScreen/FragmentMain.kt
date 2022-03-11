@@ -18,7 +18,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -100,7 +100,7 @@ class FragmentMain : Fragment() {
             content = {
                 LiveRecycler(
                     mainUseCase.readAllFromBookList(selectedItem),
-                    recyclerState
+                    state = recyclerState
                 ) { list: List<Book> ->
                     items(list) { book ->
                         BookItem(
@@ -158,7 +158,7 @@ class FragmentMain : Fragment() {
                                     setModifyListText(list.name)
                                     setModifyListOpen(true)
                                 }) {
-                                    Icon(Icons.Filled.Menu, "modify the item")
+                                    Icon(Icons.Filled.MoreVert, "modify the item")
                                 }
                         }
                     }
