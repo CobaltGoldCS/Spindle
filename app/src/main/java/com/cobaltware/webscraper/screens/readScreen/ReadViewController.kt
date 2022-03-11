@@ -2,11 +2,15 @@ package com.cobaltware.webscraper.screens.readScreen
 
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.webkit.WebView
 import androidx.core.view.isVisible
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.databinding.FragmentReadBinding
 
 class ReadViewController(val view: FragmentReadBinding) {
+
+
+    public val browser: WebView = view.browser
 
     /** Handles updates to the ui that have to do with preferences
      * @param preferences The preferences reference to base the ui off of
