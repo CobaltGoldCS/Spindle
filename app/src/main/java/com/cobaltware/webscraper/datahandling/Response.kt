@@ -6,5 +6,10 @@ sealed class Response<S> {
 
     /**Always check for a successful response before calling this please
      * @return The response as a success object**/
-    fun confirmSuccess(): Success<S> = this as Success<S>
+    fun confirmSuccess(): Success<S> {
+        if (this is Success<S>) {
+            return this
+        }
+        throw TypeCastException((this as Failure).failureMessage)
+    }
 }
