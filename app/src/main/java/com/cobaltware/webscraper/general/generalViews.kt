@@ -28,12 +28,13 @@ data class AnimationContainer(val enter: EnterTransition, val exit: ExitTransiti
 @Composable
 fun <T> LiveRecycler(
     data: LiveData<List<T>>,
+    modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
     content: LazyListScope.(List<T>) -> Unit,
 ) {
     val columnData by data.observeAsState()
     columnData?.let { list ->
-        BaseRecycler(list, content, state)
+        BaseRecycler(list, content, state, modifier)
     }
 }
 
@@ -42,8 +43,10 @@ private fun <T> BaseRecycler(
     data: List<T>,
     content: LazyListScope.(List<T>) -> Unit,
     state: LazyListState,
+    modifier: Modifier
 ) {
     LazyColumn(
+        modifier = modifier,
         state = state,
         content = {
             content.invoke(this, data)

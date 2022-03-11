@@ -80,7 +80,7 @@ class FragmentConfig : Fragment() {
                         content = {
                             LiveRecycler(
                                 dataHandler.readAllConfigs,
-                                recyclerState
+                                state = recyclerState
                             ) { list: List<Config> ->
                                 items(items = list) { item -> ConfigItem(item = item) }
                             }
