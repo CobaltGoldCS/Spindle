@@ -14,7 +14,6 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
-import com.chaquo.python.Python
 import com.cobaltware.webscraper.R
 import com.cobaltware.webscraper.databinding.FragmentReadBinding
 import com.cobaltware.webscraper.datahandling.Book
@@ -106,32 +105,6 @@ class FragmentRead(private var book: Book) : Fragment() {
         }
     }
 
-    /** Reads a book using "UrlReading" defined in python/webdata.py
-     * @param url The url to obtain data from
-     * @return A list containing (title, main text content, previous url, next url, current url) */
-    private fun readBookWithPython(url: String): Response<List<String?>> {
-        // Set up python stuff, and call UrlReading Class with a Url
-        val inst = Python.getInstance()
-        val webpack = inst.getModule("webdata")
-
-        return try {
-            val instance = webpack.callAttr("UrlReading", url)
-            val returnList = mutableListOf<String>()
-            // Get data from UrlReading Instance
-            returnList.apply {
-                this.add(instance["title"].toString())
-                this.add(instance["content"].toString())
-                this.add(instance["prev"].toString())
-                this.add(instance["next"].toString())
-                this.add(url)
-            }
-            Response.Success(returnList)
-
-        } catch (e: Exception) {
-            Response.Failure("There is no configuration to access this url")
-        }
-    }
-
     /** Returns data required to change pages from a sample Url, using either the configs or python bindings
      * @param url The url to obtain data from
      * @return Either an [emptyList] if invalid, or a list in the order [title, content, prevUrl, nextUrl, currentUrl]*/
@@ -142,7 +115,7 @@ class FragmentRead(private var book: Book) : Fragment() {
         return if (config != null) {
             // Prefers user inputted configs
             readBookFromConfig(url, config)
-        } else readBookWithPython(url)
+        } else Response.Failure("There is no config present for this url")
     }
 
     /** Updates UI using values obtained from [getUrlInfo] usually
