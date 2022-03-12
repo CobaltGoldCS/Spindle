@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.chaquo.python.Python
-import com.chaquo.python.android.AndroidPlatform
 import com.cobaltware.webscraper.databinding.ActivityMainBinding
 import com.cobaltware.webscraper.general.fragmentTransition
 import com.cobaltware.webscraper.screens.configScreen.FragmentConfig
@@ -22,7 +20,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Create and setup various background processes
-        if (!Python.isStarted()) Python.start(AndroidPlatform(this))
         setContentView(view.root)
         setNavTransitions()
         activityFragmentSwitch(FragmentMain())
