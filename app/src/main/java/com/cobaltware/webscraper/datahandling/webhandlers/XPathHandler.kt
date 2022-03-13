@@ -48,7 +48,7 @@ fun getUrlFromXPath(url: String, factory: XPathFactory, path: String, doc: Docum
     var element: String? = getValuesFromXPath(factory, path, doc)
     if (!element.isNullOrBlank()) {
         val urlMatcher =
-            Pattern.compile("((http|https|ftp)://([\\w-\\d]+\\.)+[\\w-\\d]+)?(/[\\w~,;\\-\\./?%&+#=]*)" + ")")
+            Pattern.compile("((http|https|ftp)://([\\w-\\d]+\\.)+[\\w-\\d]+)?(/[\\w~,;\\-\\./?%&+#=]*)")
                 .matcher(element)
         val substring = urlMatcher.group()
         element = if (!substring.isNullOrEmpty()) substring else "INVALID"
