@@ -70,7 +70,7 @@
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/button_color_selector"
+                    android:background="?attr/colorPrimary"
                     android:text="Previous"
                     android:textSize="18sp"
                     android:visibility="gone"
@@ -104,7 +104,7 @@
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/button_color_selector"
+                    android:background="?attr/colorPrimary"
 
                     android:text="Next"
                     android:padding="30dp"
