@@ -111,11 +111,9 @@ class FragmentRead(private var book: Book) : Fragment() {
     fun getUrlInfo(url: String): Response<List<String?>> {
         // Integration with Config table and Configurations
         val domain = URL(url).host.replace("www.", "")
-        val config = dataHandler.readItemFromConfigs(domain)
-        return if (config != null) {
-            // Prefers user inputted configs
-            readBookFromConfig(url, config)
-        } else Response.Failure("There is no config present for this url")
+        return dataHandler.readItemFromConfigs(domain)
+            .map { config -> readBookFromConfig(url, config) }
+            .orElse(Response.Failure("There is no config present for this url"))
     }
 
     /** Updates UI using values obtained from [getUrlInfo] usually

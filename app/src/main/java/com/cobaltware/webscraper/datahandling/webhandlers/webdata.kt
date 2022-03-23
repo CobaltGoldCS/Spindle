@@ -37,7 +37,7 @@ fun analyzeSyntax(
 ): Response<List<String?>> {
     val document = connection.parse()
     if (isCssPath(document, contentPath)) {
-        return Response.Success(csspathReader(document, contentPath, prevPath, nextPath))
+        return csspathReader(document, contentPath, prevPath, nextPath)
     }
     if (contentPath.startsWith("/"))
         return xPathReader(url, document.html(), contentPath, prevPath, nextPath)

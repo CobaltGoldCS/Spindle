@@ -9,6 +9,7 @@ import com.cobaltware.webscraper.datahandling.BookDatabase
 import com.cobaltware.webscraper.datahandling.repositories.BookRepository
 import com.cobaltware.webscraper.datahandling.repositories.ConfigRepository
 import kotlinx.coroutines.launch
+import java.util.*
 
 class ReadUseCase(context: Context) : AndroidViewModel(Application()) {
     private val configRepository: ConfigRepository
@@ -21,6 +22,8 @@ class ReadUseCase(context: Context) : AndroidViewModel(Application()) {
         bookRepository = BookRepository(database.bookDao())
     }
 
-    fun readItemFromConfigs(domain: String) = configRepository.readItemFromConfigs(domain)
+    fun readItemFromConfigs(domain: String) =
+        Optional.ofNullable(configRepository.readItemFromConfigs(domain))
+
     fun updateBook(book: Book) = viewModelScope.launch { bookRepository.updateBook(book) }
 }

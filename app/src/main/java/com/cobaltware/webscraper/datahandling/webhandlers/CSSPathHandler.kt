@@ -1,6 +1,6 @@
 package com.cobaltware.webscraper.datahandling.webhandlers
 
-import android.util.Log
+import com.cobaltware.webscraper.datahandling.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.util.*
@@ -15,11 +15,11 @@ import java.util.*
  */
 fun csspathReader(
     document: Document, contentPath: String,
-    prevPath: String, nextPath: String
-): List<String?> {
+    prevPath: String, nextPath: String,
+): Response<List<String?>> {
 
     val title = document.title()
-    val content = customSyntaxAnalyzer(document, contentPath)
+    val content = customSyntaxAnalyzer(document, contentPath).orElse(null)
     var text = ""
     if (content is Element) {
         try {
@@ -28,7 +28,7 @@ fun csspathReader(
             else
                 text = content.text()
         } catch (e: NullPointerException) {
-            text = "Invalid Content Selector"
+            return Response.Failure("The content path given is invalid for ${document.location()}")
         }
     } else if (content is String) // Added because customSyntaxAnalyzer requires it to be explicit
         text = content
@@ -38,10 +38,10 @@ fun csspathReader(
 
     val currentUrl = document.location()
     // Check a bunch of conditions and make sure that it is correct
-    val prevUrl: String? = processElementIntoUrl(currentUrl, prevElement)
-    val nextUrl: String? = processElementIntoUrl(currentUrl, nextElement)
+    val prevUrl: String? = processElementIntoUrl(currentUrl, prevElement).orElse(null)
+    val nextUrl: String? = processElementIntoUrl(currentUrl, nextElement).orElse(null)
 
-    return listOf(title, text, prevUrl, nextUrl, currentUrl)
+    return Response.Success(listOf(title, text, prevUrl, nextUrl, currentUrl))
 }
 
 /** Changes a given element into a url/null
@@ -49,17 +49,21 @@ fun csspathReader(
  * @param element The element to translate into a url
  * @return The url, or null if the url was invalid
  * **/
-fun processElementIntoUrl(currentUrl: String?, element: Any?): String? {
+fun processElementIntoUrl(currentUrl: String?, element: Any?): Optional<String> {
     // Make sure that the href is an existing location
-    val url: String? = if (
-        element is Element &&
-        element.absUrl("href") !in listOf("#", "")
-    ) {
-        element.absUrl("href")
-    } else {
-        if (element is Element) element.toString() else element as String?
-    }
-    return if (url != currentUrl) url else null
+    val url =
+        if (element is Element) {
+            if (element.hasAttr("href"))
+                element.attr("abs:href")
+
+            element.attributes().asIterable()
+                .filter { attr -> attr.value.startsWith("http") }
+                .map { attr -> attr.value }
+                .getOrElse(0) { null }
+        } else {
+            element as String?
+        }
+    return if (url != currentUrl) Optional.ofNullable(url) else Optional.ofNullable(null)
 }
 
 /** Analyzes custom syntax defined to get attributes for processing if needed
@@ -69,23 +73,24 @@ fun processElementIntoUrl(currentUrl: String?, element: Any?): String? {
  * @return The string from the attribute selected; or null if the attribute is not found in the css path.
  * If the syntax is not found, it will return the normal Element type
  */
-fun customSyntaxAnalyzer(document: Document, cssPath: String): Any? {
+fun customSyntaxAnalyzer(document: Document, cssPath: String): Optional<Any> {
     // Handle normal csspath syntax
     if (!cssPath.trim().startsWith("$"))
-        return document.select(cssPath).firstOrNull()
+        return Optional.ofNullable(document.select(cssPath).firstOrNull())
 
-    // Custom syntax analyzer
+
     val split = cssPath.trim().split(" ")
 
+    // Remove custom syntax and evaluate with path only
     val pathOnly = split.drop(1).joinToString(" ")
     val element = document.select(pathOnly).firstOrNull()
 
-    Log.d("All Attributes", element?.attributes().toString())
+    //Log.d("All Attributes", element?.attributes().toString())
 
     val attrSelector = split[0].drop(1) // Takes away '$'
 
-    return if (attrSelector.lowercase(Locale.ROOT) == "text") element?.text()
-    else element?.attr(attrSelector)
+    return if (attrSelector.lowercase(Locale.ROOT) == "text") Optional.ofNullable(element?.text())
+    else Optional.ofNullable(element?.attr(attrSelector))
 }
 
-fun isCssPath(doc: Document, cssPath: String) = customSyntaxAnalyzer(doc, cssPath) != null
+fun isCssPath(doc: Document, cssPath: String) = customSyntaxAnalyzer(doc, cssPath).isPresent
