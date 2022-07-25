@@ -1,4 +1,4 @@
-# Spindle
+# Spindle (Deprecated in favor of [Spindler](https://github.com/CobaltGoldCS/Spindler))
 An app to simplify web scraping for books and other 'written' media
 
 ## Configurations
